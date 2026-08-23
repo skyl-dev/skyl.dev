@@ -63,5 +63,13 @@ jobs:
           fi
         working-directory: skyl.dev/packages/cli
 
+      # npm does not rewrite the workspace protocol the way pnpm does, so the published
+      # manifest would carry `workspace:*`, a range nothing outside this repository can
+      # parse. Core is bundled into the tarball, so the version named here is the version
+      # actually inside it. The edit lives on the runner and never reaches the repository.
+      - name: Name the core version the tarball contains
+        run: npm pkg set "dependencies.@skyl/core=$(node -p "require('../core/package.json').version")"
+        working-directory: skyl.dev/packages/cli
+
       - run: npm publish
         working-directory: skyl.dev/packages/cli

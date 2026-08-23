@@ -26,7 +26,7 @@
     "prepack": "tsc -b && node ../../scripts/build-bundle.mjs"
   },
   "dependencies": {
-    "@skyl/core": "0.1.1"
+    "@skyl/core": "workspace:*"
   },
   "engines": {
     "node": ">=20"

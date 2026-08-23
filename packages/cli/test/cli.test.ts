@@ -93,14 +93,15 @@ test('the version the CLI prints is the version that is published', async () => 
   assert.match(source, new RegExp(`const VERSION = '${manifest.version}'`));
 });
 
-test('the pinned core version is the core that ships beside it', async () => {
+test('core and the CLI are released as one version', async () => {
   const cli = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as
-    { dependencies: Record<string, string> };
+    { version: string; dependencies: Record<string, string> };
   const core = JSON.parse(await readFile(new URL('../../core/package.json', import.meta.url), 'utf8')) as
     { version: string };
-  // core is bundled into the tarball, so a mismatch here is a manifest that describes
-  // something other than what is inside it
-  assert.equal(cli.dependencies['@skyl/core'], core.version);
+  // core is bundled into the tarball rather than resolved, so the two move together and
+  // the release workflow writes this version into the published manifest
+  assert.equal(cli.version, core.version);
+  assert.equal(cli.dependencies['@skyl/core'], 'workspace:*');
 });
 
 test('--version prints a version, not the help text', async () => {
