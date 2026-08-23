@@ -1,6 +1,6 @@
 {
   "name": "skyl.dev",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Install curated AI agent skills for what your project actually uses",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "skyl": "dist/bin.js"
   },
   "files": [
-    "dist",
+    "dist/bin.js",
     "bundle.json",
     "README.md"
   ],
@@ -23,22 +23,19 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --force",
-    "prepack": "tsc -b && node ../../scripts/build-bundle.mjs"
-  },
-  "dependencies": {
-    "@skyl/core": "workspace:*"
+    "prepack": "tsc -b && node ../../scripts/build-bundle.mjs && node ../../scripts/bundle-js.mjs"
   },
   "engines": {
     "node": ">=20"
   },
-  "bundleDependencies": [
-    "@skyl/core"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/skyl-dev/skyl.dev.git",
     "directory": "packages/cli"
   },
   "homepage": "https://skyl.dev",
-  "author": "ahmmedrejowan"
+  "author": "ahmmedrejowan",
+  "devDependencies": {
+    "@skyl/core": "workspace:*"
+  }
 }

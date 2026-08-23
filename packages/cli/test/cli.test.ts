@@ -93,15 +93,17 @@ test('the version the CLI prints is the version that is published', async () => 
   assert.match(source, new RegExp(`const VERSION = '${manifest.version}'`));
 });
 
-test('core and the CLI are released as one version', async () => {
+test('the published package declares no runtime dependencies', async () => {
   const cli = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as
-    { version: string; dependencies: Record<string, string> };
+    { version: string; dependencies?: Record<string, string> };
   const core = JSON.parse(await readFile(new URL('../../core/package.json', import.meta.url), 'utf8')) as
     { version: string };
-  // core is bundled into the tarball rather than resolved, so the two move together and
-  // the release workflow writes this version into the published manifest
+
+  // core is compiled into dist/bin.js. Declaring it instead put a workspace package on the
+  // npm page as a dependency that resolves to nothing, and broke `npm audit signatures`
+  // for anyone who ran it.
+  assert.equal(cli.dependencies, undefined);
   assert.equal(cli.version, core.version);
-  assert.equal(cli.dependencies['@skyl/core'], 'workspace:*');
 });
 
 test('--version prints a version, not the help text', async () => {
