@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --force",
-    "prepack": "node ../../scripts/build-bundle.mjs"
+    "prepack": "tsc -b && node ../../scripts/build-bundle.mjs"
   },
   "dependencies": {
     "@skyl/core": "workspace:*"
