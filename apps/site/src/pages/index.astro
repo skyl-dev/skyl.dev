@@ -57,11 +57,30 @@ const demoCost = tokens(
       </p>
     </div>
 
-    <div class="terminal" aria-hidden="true">
-      <div class="terminal-bar"><i></i><i></i><i></i><span>skyl scan</span></div>
-      <pre><code><span class="t-dim">$</span> npx skyl.dev scan
+    <div class="launch">
+      <div class="launch-step">
+        <span class="launch-num">1</span>
+        <div class="launch-body">
+          <p class="launch-say">Install it, or skip this and prefix everything with <code>npx</code>.</p>
+          <Command text="npm i -g skyl.dev" tone="primary" />
+        </div>
+      </div>
 
-  <span class="t-strong">Detected</span>
+      <div class="launch-step">
+        <span class="launch-num">2</span>
+        <div class="launch-body">
+          <p class="launch-say">Run it in the root of your project, next to the build file.</p>
+          <Command text="skyl scan" />
+        </div>
+      </div>
+
+      <div class="launch-step">
+        <span class="launch-num">3</span>
+        <div class="launch-body">
+          <p class="launch-say">It reads the build files and proposes. Nothing is written yet.</p>
+          <div class="console" aria-label="example output">
+            <div class="console-bar"><i></i><i></i><i></i><span>~/acme-pay</span></div>
+            <pre><code>  <span class="t-strong">Detected</span>
 {demo.map((d) => (
   <>{'    '}<span class="t-ok">{d.name.padEnd(20)}</span><span class="t-dim">{d.on}</span>{'\n'}</>
 ))}
@@ -69,7 +88,12 @@ const demoCost = tokens(
     <span class="t-dim">android/java   android/xml   android/mvvm</span>
 
   {demo.length} to install, ~{demoCost.toLocaleString()} tokens <span class="t-dim">into .claude/skills</span>
+
+  <span class="t-dim">Install them? [y/N]</span>
 </code></pre>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -138,8 +162,9 @@ const demoCost = tokens(
 <style is:global>
   .hero {
     display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 4rem; align-items: center; padding: 5.5rem 0 5rem;
+    gap: 4rem; align-items: start; padding: 4rem 0 4.5rem;
   }
+  .hero > div:first-child { padding-top: 0.4rem; }
   .hero h1 {
     font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.05; letter-spacing: -0.045em;
     margin: 1.1rem 0 1.4rem; font-weight: 700;
@@ -165,18 +190,32 @@ const demoCost = tokens(
   .button.ghost:hover { border-color: var(--accent-line); filter: none; }
   .button.small { font-size: 13px; padding: 0.45rem 0.8rem; }
 
-  .terminal {
-    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
+  /* three steps, not one panel: install, run, and what comes back are different things
+     and reading them as one block is what made it look like a folder of text */
+  .launch { display: grid; gap: 1.25rem; min-width: 0; }
+  .launch-step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: 0.9rem; align-items: start; }
+  .launch-num {
+    width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center;
+    background: var(--sunken); border: 1px solid var(--rule); color: var(--ink-soft);
+    font-size: 12px; font-weight: 700; margin-top: 0.15rem;
+  }
+  .launch-step:first-child .launch-num { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .launch-body { min-width: 0; }
+  .launch-say { margin: 0 0 0.55rem; font-size: 13.5px; color: var(--ink-soft); }
+  .launch-say code { color: var(--ink); }
+
+  .console {
+    border: 1px solid var(--rule); border-radius: 11px; background: var(--raised);
     box-shadow: var(--shadow); overflow: hidden; min-width: 0;
   }
-  .terminal-bar {
-    display: flex; align-items: center; gap: 0.4rem; padding: 0.7rem 0.9rem;
+  .console-bar {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 0.85rem;
     border-bottom: 1px solid var(--rule); background: var(--sunken);
   }
-  .terminal-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--rule-strong); }
-  .terminal-bar span { margin-left: 0.6rem; font-size: 12px; color: var(--ink-faint); }
-  .terminal pre { margin: 0; padding: 1.1rem; font-size: 12.5px; line-height: 1.75; overflow-x: auto; }
-  .terminal code { font-family: var(--mono); white-space: pre; }
+  .console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
+  .console-bar span { margin-left: 0.6rem; font-size: 12px; color: var(--ink-faint); }
+  .console pre { margin: 0; padding: 1rem 1.1rem; font-size: 12.5px; line-height: 1.7; overflow-x: auto; }
+  .console code { font-family: var(--mono); white-space: pre; }
   .t-dim { color: var(--ink-faint); }
   .t-strong { color: var(--ink); font-weight: 600; }
   .t-ok { color: var(--accent-line); }

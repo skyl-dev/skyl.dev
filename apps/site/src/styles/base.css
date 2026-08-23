@@ -193,6 +193,15 @@ footer.site .spacer { margin-left: auto; }
 }
 .command button:hover { color: var(--ink); border-color: var(--accent-line); }
 
+/* the one command someone actually has to run first */
+.command-primary {
+  background: color-mix(in srgb, var(--accent) 12%, var(--ground));
+  border-color: var(--accent-line); font-size: 15px; padding: 0.9rem 1rem;
+}
+.command-primary .sigil { color: var(--accent-line); }
+.command-primary code { font-weight: 600; }
+.command-primary button { border-color: var(--accent-line); color: var(--ink); }
+
 .lede { font-family: var(--prose); font-size: 1.42rem; font-weight: 420; line-height: 1.5; color: var(--ink-soft); max-width: 48ch; }
 
 @media (max-width: 860px) {

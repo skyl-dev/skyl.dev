@@ -1,8 +1,8 @@
 ---
-interface Props { text: string; label?: string }
-const { text, label = 'copy' } = Astro.props;
+interface Props { text: string; label?: string; tone?: 'plain' | 'primary' }
+const { text, label = 'copy', tone = 'plain' } = Astro.props;
 ---
-<div class="command">
+<div class={tone === 'primary' ? 'command command-primary' : 'command'}>
   <span class="sigil">$</span>
   <code data-command>{text}</code>
   <button type="button" data-copy={text} aria-label={`copy ${text}`}>{label}</button>
