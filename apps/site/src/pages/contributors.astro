@@ -13,49 +13,80 @@ for (const skill of skills) {
 const authors = [...byAuthor].sort((a, b) => b[1].length - a[1].length);
 ---
 
-<Base
-  title="contributors"
-  section="contributors"
-  description="Who wrote which skill, and what it takes to add one."
->
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">credit</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Contributors</h1>
-    <p class="lede">
-      A skill carries the name of whoever is accountable for it, on the file and here.
-    </p>
-  </section>
-
-  <div class="grid">
-    {authors.map(([author, written]) => (
-      <div class="card" style="cursor: default;">
-        <div style="display: flex; align-items: baseline; gap: var(--sp-2);">
-          <strong>{author}</strong>
-          <span style="margin-left: auto; color: var(--ink-faint); font-size: var(--fs-micro);">{written.length} skills</span>
+<Base title="contributors" section="contributors" description="Who wrote which skill, and what it takes to add one.">
+  <div class="docs">
+    <nav class="docs-rail" aria-label="contributors">
+      <div class="rail-inner">
+        <a class="rail-back" href="/skills">← Skills</a>
+        <div class="rail-group">
+          <p class="rail-title">People</p>
+          <ul>
+            {authors.map(([author]) => <li><a href={`#${author}`} data-rail={author}>{author}</a></li>)}
+          </ul>
         </div>
-        <p style="margin: 0.7rem 0 0; font-size: var(--fs-meta); color: var(--ink-soft);">
-          {written.map((s, i) => (
-            <>
-              {i > 0 && ', '}
-              <a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a>
-            </>
-          ))}
-        </p>
+        <div class="rail-group">
+          <p class="rail-title">Contributing</p>
+          <ul><li><a href="#adding" data-rail="adding">The bar</a></li></ul>
+        </div>
       </div>
-    ))}
-  </div>
+    </nav>
 
-  <section style="margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 2.5rem; max-width: var(--measure);">
-    <h2 style="font-size: var(--fs-h3); margin-bottom: 1rem;">Adding one</h2>
-    <p style="color: var(--ink-soft); font-size: var(--fs-ui);">
-      The bar is deliberately high, and it is about evidence rather than writing. A rule has to be
-      something a model gets wrong unprompted, that no linter catches, that most projects in its
-      domain hit, and that a reader can check at any point in a file. Most candidate rules fail one
-      of those, and the ones that fail are more interesting than the ones that pass.
-    </p>
-    <p style="color: var(--ink-soft); font-size: var(--fs-ui);">
-      <a href="https://github.com/skyl-dev/skyl/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> has the
-      full process, and <a href="/spec">the spec</a> has the format.
-    </p>
-  </section>
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">credit</p>
+        <h1>Contributors</h1>
+        <p class="docs-lede">A skill carries the name of whoever is accountable for it, on the file and here.</p>
+      </header>
+
+      <section class="con-people">
+        <h2 class="group-rule"><span>who wrote what</span></h2>
+        <div class="con-grid">
+          {authors.map(([author, written]) => (
+            <div class="con-card" id={author}>
+              <div class="con-head">
+                <strong>{author}</strong>
+                <span>{written.length} skills</span>
+              </div>
+              <p>
+                {written.map((s, i) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a>
+                  </>
+                ))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="adding" class="con-adding">
+        <h2 class="group-rule"><span>adding one</span></h2>
+        <p>
+          The bar is deliberately high, and it is about evidence rather than writing. A rule has to
+          be something a model gets wrong unprompted, that no linter catches, that most projects in
+          its domain hit, and that a reader can check at any point in a file.
+        </p>
+        <p>
+          Most candidates fail one of those, and the ones that fail are more interesting than the
+          ones that pass. <a href="https://github.com/skyl-dev/skyl/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>
+          has the full process, and <a href="/spec">the spec</a> has the format.
+        </p>
+      </section>
+    </div>
+  </div>
 </Base>
+
+<style is:global>
+  .con-people, .con-adding { padding-top: var(--sp-6); }
+  .con-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--sp-3); }
+  .con-card {
+    border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised);
+    padding: var(--sp-4); scroll-margin-top: 5rem;
+  }
+  .con-head { display: flex; align-items: baseline; gap: var(--sp-2); }
+  .con-head span { margin-left: auto; font-size: var(--fs-micro); color: var(--ink-faint); }
+  .con-card p { margin: var(--sp-2) 0 0; font-size: var(--fs-meta); color: var(--ink-soft); }
+  .con-adding { max-width: var(--measure); scroll-margin-top: 5rem; }
+  .con-adding p { font-size: var(--fs-ui); color: var(--ink-soft); margin: 0 0 var(--sp-3); }
+</style>

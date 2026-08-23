@@ -12,31 +12,57 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
   section="skills"
   description="Every published skill, by family and axis. What each one is for, and what it costs in context."
 >
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">the registry</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">{total} skills, {rules} rules</h1>
-    <p class="lede">
-      Each one is a layer. Install the intersection that matches your project, and nothing else.
-    </p>
-  </section>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="the registry">
+      <div class="rail-inner">
+        <a class="rail-back" href="/#pick">← Compose a stack</a>
 
-  <div style="display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; padding-bottom: 1.5rem;">
-    <input
-      id="filter"
-      type="search"
-      placeholder="filter by name, axis or dependency"
-      autocomplete="off"
-      style="flex: 1 1 18rem; font: inherit; font-size: var(--fs-meta); padding: 0.55rem 0.8rem; border-radius: var(--r-md); border: 1px solid var(--rule); background: var(--raised); color: var(--ink);"
-    />
-    <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap;">
-      {AXIS_ORDER.map((axis) => (
-        <button class="chip" type="button" data-axis={axis} style="cursor: pointer; background: none;">{axis}</button>
-      ))}
-    </div>
-  </div>
+        <div class="rail-group">
+          <p class="rail-title">Axis</p>
+          <ul>
+            <li><button class="axis-pick" type="button" data-axis="" data-on>all</button></li>
+            {AXIS_ORDER.map((axis) => (
+              <li><button class="axis-pick" type="button" data-axis={axis}>{axis}</button></li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="rail-group">
+          <p class="rail-title">Family</p>
+          <ul>
+            {families.map((family) => (
+              <li><a href={`#${family.name}`}>{family.name} · {family.skills.length}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="rail-group">
+          <p class="rail-title">Reading it</p>
+          <ul>
+            <li><a href="/spec">The format</a></li>
+            <li><a href="/evidence">The evidence</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">the registry</p>
+        <h1>{total} skills, {rules} rules</h1>
+        <p class="docs-lede">
+          Each one is a layer. Install the intersection that matches your project, and nothing else.
+        </p>
+        <input
+          id="filter"
+          type="search"
+          placeholder="filter by name, axis or dependency"
+          autocomplete="off"
+        />
+      </header>
 
   {families.map((family) => (
-    <section style="margin-bottom: 3rem;" data-family={family.name}>
+    <section id={family.name} style="padding-top: var(--sp-6); scroll-margin-top: 5rem;" data-family={family.name}>
       <h2 style="font-size: var(--fs-ui); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: 0.9rem;">
         {family.name} <span style="color: var(--rule-strong);">/</span> {family.skills.length}
       </h2>
@@ -73,8 +99,27 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
     </section>
   ))}
 
-  <p id="empty" hidden style="color: var(--ink-faint); font-size: var(--fs-meta);">Nothing matches that.</p>
+      <p id="empty" hidden style="color: var(--ink-faint); font-size: var(--fs-meta);">Nothing matches that.</p>
+    </div>
+  </div>
 </Base>
+
+<style is:global>
+  #filter {
+    margin-top: var(--sp-4); width: 100%; max-width: 26rem;
+    font: inherit; font-size: var(--fs-ui); padding: 0.55rem 0.8rem;
+    border-radius: var(--r-sm); border: 1px solid var(--rule);
+    background: var(--raised); color: var(--ink);
+  }
+  #filter:focus { outline: none; border-color: var(--accent); }
+  .axis-pick {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: var(--fs-ui);
+    background: none; border: 0; border-left: 2px solid var(--rule); cursor: pointer;
+    color: var(--ink-soft); padding: 0.22rem 0 0.22rem 0.7rem; transition: color 160ms, border-color 160ms;
+  }
+  .axis-pick:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .axis-pick[data-on] { color: var(--accent); border-color: var(--accent); }
+</style>
 
 <script>
   // Filtering happens here because the whole registry is already on the page: with a few
@@ -82,7 +127,7 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
   const input = document.querySelector<HTMLInputElement>('#filter')!;
   const cards = [...document.querySelectorAll<HTMLElement>('.card[data-name]')];
   const families = [...document.querySelectorAll<HTMLElement>('[data-family]')];
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('button[data-axis]')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.axis-pick')];
   const empty = document.querySelector<HTMLElement>('#empty')!;
   let axis: string | null = null;
 
@@ -104,8 +149,9 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
   input.addEventListener('input', apply);
   for (const chip of chips) {
     chip.addEventListener('click', () => {
-      axis = axis === chip.dataset.axis ? null : chip.dataset.axis!;
-      for (const c of chips) c.classList.toggle('solid', c.dataset.axis === axis);
+      // an empty value is the "all" row, which clears rather than filters
+      axis = chip.dataset.axis === '' ? null : chip.dataset.axis!;
+      for (const c of chips) c.toggleAttribute('data-on', (c.dataset.axis || '') === (axis ?? ''));
       apply();
     });
   }

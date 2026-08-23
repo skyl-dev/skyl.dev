@@ -31,6 +31,30 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
   section="evidence"
   description="What was measured, on which models, and what did not work. None of it is sent to your agent."
 >
+  <div class="docs">
+    <nav class="docs-rail" aria-label="evidence">
+      <div class="rail-inner">
+        <a class="rail-back" href="/skills">← Skills</a>
+        <div class="rail-group">
+          <p class="rail-title">On this page</p>
+          <ul>
+            <li><a href="#read" data-rail="read">How to read this</a></li>
+            <li><a href="#per-skill" data-rail="per-skill">Per skill</a></li>
+            <li><a href="#matrix" data-rail="matrix">Model matrix</a></li>
+          </ul>
+        </div>
+        <div class="rail-group">
+          <p class="rail-title">Skills</p>
+          <ul>
+            {measured.map((skill) => (
+              <li><a href={`/skills/${skill.meta.family}/${skill.meta.skill}#evidence`}>{skill.meta.skill}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
   <header class="ev-head">
     <p class="eyebrow" data-enter style="--i: 0">what was measured</p>
     <h1 data-enter style="--i: 1">Evidence</h1>
@@ -58,14 +82,14 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
   </section>
 
   {readme && (
-    <section class="ev-read">
+    <section class="ev-read" id="read">
       <h2 class="group-rule"><span>how to read this</span></h2>
       <div class="prose scroller" set:html={readme} />
     </section>
   )}
 
   {measured.length > 0 && (
-    <section class="ev-skills">
+    <section class="ev-skills" id="per-skill">
       <h2 class="group-rule"><span>per skill</span></h2>
       <div class="ev-grid">
         {measured.map((skill) => (
@@ -85,16 +109,19 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
   )}
 
   {matrix && (
-    <section class="ev-matrix">
+    <section class="ev-matrix" id="matrix">
       <h2 class="group-rule"><span>model matrix</span></h2>
       <p class="ev-note">The same task across models, harnesses and providers.</p>
       <div class="prose scroller ev-table" set:html={matrix} />
     </section>
   )}
+    </div>
+  </div>
 </Base>
 
 <style is:global>
   .ev-head { padding: var(--sp-7) 0 var(--sp-5); }
+  .ev-head h1, .ev-lede { max-width: 52ch; }
   .ev-head h1 { font-size: var(--fs-title); margin: var(--sp-2) 0 var(--sp-3); }
   .ev-lede { font-family: var(--prose); font-size: var(--fs-serif); color: var(--ink-soft); margin: 0; max-width: 52ch; }
 
@@ -111,7 +138,7 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
   .ev-stat span { font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); }
   .ev-stat code { font-size: var(--fs-meta); }
 
-  .ev-read, .ev-skills, .ev-matrix { padding-top: var(--sp-6); }
+  .ev-read, .ev-skills, .ev-matrix { padding-top: var(--sp-6); scroll-margin-top: 5rem; }
   .ev-note { margin: 0 0 var(--sp-4); font-size: var(--fs-ui); color: var(--ink-faint); }
 
   .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--sp-3); }

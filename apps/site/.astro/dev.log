@@ -1,70 +1,71 @@
 {"message":"connected.","label":"vite","level":"info"}
 {"message":"Generated 0ms","label":"types","level":"info"}
 {"message":"connected.","label":"vite","level":"info"}
-{"message":" astro  v7.1.6 ready in 872 ms\n┃ Local    http://localhost:4321/\n┃ Network  http://192.168.0.188:4321/","label":"SKIP_FORMAT","level":"info"}
+{"message":" astro  v7.1.6 ready in 626 ms\n┃ Local    http://localhost:4321/\n┃ Network  http://192.168.0.188:4321/","label":"SKIP_FORMAT","level":"info"}
 {"message":"watching for file changes...","label":null,"level":"info"}
 {"message":"\n update  ▶ New version of Astro available: 7.2.4\n  Run pnpm dlx @astrojs/upgrade to update\n","label":"SKIP_FORMAT","level":"warn"}
-{"message":"[200] / 84ms","label":null,"level":"info"}
-{"message":"[200] / 3ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"[200] / 3ms","label":null,"level":"info"}
-{"message":"[200] /skills 6ms","label":null,"level":"info"}
+{"message":"[200] / 58ms","label":null,"level":"info"}
+{"message":"[200] /skills 5ms","label":null,"level":"info"}
 {"message":"[200] /docs 5ms","label":null,"level":"info"}
-{"message":"[200] /install 5ms","label":null,"level":"info"}
-{"message":"[200] /starters 5ms","label":null,"level":"info"}
-{"message":"[200] /spec 7ms","label":null,"level":"info"}
+{"message":"[200] /spec 5ms","label":null,"level":"info"}
 {"message":"[200] /evidence 5ms","label":null,"level":"info"}
+{"message":"[200] /install 4ms","label":null,"level":"info"}
+{"message":"[200] /starters 3ms","label":null,"level":"info"}
 {"message":"[200] /contributors 4ms","label":null,"level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/components/RuleAnatomy.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] /skills/android/compose 4ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] /evidence 1ms","label":null,"level":"info"}
+{"message":"[200] / 1ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] /evidence 2ms","label":null,"level":"info"}
+{"message":"[200] / 1ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] /evidence 1ms","label":null,"level":"info"}
+{"message":"[200] / 1ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] /evidence 1ms","label":null,"level":"info"}
+{"message":"[200] / 1ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] /evidence 1ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] /docs 1ms","label":null,"level":"info"}
+{"message":"[200] / 29ms","label":null,"level":"info"}
 {"message":"[200] / 3ms","label":null,"level":"info"}
 {"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 13ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/components/RuleAnatomy.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 9ms","label":null,"level":"info"}
-{"message":"[200] / 6ms","label":null,"level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 9ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"[200] / 37ms","label":null,"level":"info"}
-{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
-{"message":"[200] / 7ms","label":null,"level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 6ms","label":null,"level":"info"}
-{"message":"/src/components/RuleAnatomy.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 24ms","label":null,"level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 7ms","label":null,"level":"info"}
-{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
-{"message":"[200] / 9ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"[200] / 2ms","label":null,"level":"info"}
-{"message":"[200] / 13ms","label":null,"level":"info"}
-{"message":"[200] / 5ms","label":null,"level":"info"}
-{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"[200] /install 8ms","label":null,"level":"info"}
+{"message":"[200] /skills 5ms","label":null,"level":"info"}
+{"message":"[200] /docs 5ms","label":null,"level":"info"}
+{"message":"[200] /starters 4ms","label":null,"level":"info"}
+{"message":"[200] /evidence 11ms","label":null,"level":"info"}
+{"message":"[200] /spec 5ms","label":null,"level":"info"}
+{"message":"[200] /install 2ms","label":null,"level":"info"}
 {"message":"[200] / 8ms","label":null,"level":"info"}
-{"message":"[200] / 3ms","label":null,"level":"info"}
-{"message":"[200] / 3ms","label":null,"level":"info"}
-{"message":"[200] / 83ms","label":null,"level":"info"}
-{"message":"[200] / 37ms","label":null,"level":"info"}
-{"message":"[200] / 1ms","label":null,"level":"info"}
-{"message":"[200] / 37ms","label":null,"level":"info"}
-{"message":"[200] / 1ms","label":null,"level":"info"}
-{"message":"[200] / 4ms","label":null,"level":"info"}
-{"message":"[200] / 32ms","label":null,"level":"info"}
+{"message":"[200] /spec 3ms","label":null,"level":"info"}
+{"message":"[200] /spec 4ms","label":null,"level":"info"}
+{"message":"[200] /spec 3ms","label":null,"level":"info"}
+{"message":"[200] /spec 4ms","label":null,"level":"info"}
+{"message":"[200] /spec 4ms","label":null,"level":"info"}
+{"message":"src/pages/install.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 6ms","label":null,"level":"info"}
+{"message":"src/pages/install.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 6ms","label":null,"level":"info"}
+{"message":"src/pages/install.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 5ms","label":null,"level":"info"}
+{"message":"src/pages/skills/index.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 4ms","label":null,"level":"info"}
+{"message":"src/pages/skills/index.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 4ms","label":null,"level":"info"}
+{"message":"/src/pages/evidence.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] /spec 6ms","label":null,"level":"info"}
+{"message":"[200] /spec 5ms","label":null,"level":"info"}
+{"message":"[200] /spec 5ms","label":null,"level":"info"}
+{"message":"[200] / 7ms","label":null,"level":"info"}
+{"message":"[200] /skills 4ms","label":null,"level":"info"}
+{"message":"[200] /docs 3ms","label":null,"level":"info"}
+{"message":"[200] /spec 2ms","label":null,"level":"info"}
+{"message":"[200] /evidence 5ms","label":null,"level":"info"}
+{"message":"[200] /install 4ms","label":null,"level":"info"}
+{"message":"[200] /starters 3ms","label":null,"level":"info"}
+{"message":"[200] /contributors 3ms","label":null,"level":"info"}
+{"message":"[200] /skills/android/compose 4ms","label":null,"level":"info"}

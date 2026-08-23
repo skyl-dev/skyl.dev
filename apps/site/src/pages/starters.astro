@@ -62,20 +62,36 @@ const command = (picks: string[]) =>
   section="starters"
   description="Presets for the shapes a project actually arrives in, with what each one costs."
 >
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">known shapes</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Starters</h1>
-    <p class="lede">
-      If your project looks like one of these, take the line and move on. If it does not,
-      <a href="/#builder">compose it</a> or let <code>scan</code> read the build files and propose.
-    </p>
-  </section>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="starters">
+      <div class="rail-inner">
+        <a class="rail-back" href="/#pick">← Compose your own</a>
+        <div class="rail-group">
+          <p class="rail-title">Shapes</p>
+          <ul>
+            {STARTERS.map((starter) => (
+              <li><a href={`#${starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} data-rail={starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>{starter.title}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">known shapes</p>
+        <h1>Starters</h1>
+        <p class="docs-lede">
+          If your project looks like one of these, take the line and move on. If it does not,
+          <a href="/#pick">compose it</a> or let <code>scan</code> read the build files and propose.
+        </p>
+      </header>
 
   <div style="display: grid; gap: var(--sp-3);">
     {STARTERS.map((starter) => {
       const stat = summarise(starter.picks);
       return (
-        <article style="border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;">
+        <article id={starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')} style="scroll-margin-top: 5rem; border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;">
           <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
             <h2 style="font-size: var(--fs-h3);">{starter.title}</h2>
             <span class="chip">{starter.picks.length} skills</span>
@@ -91,6 +107,8 @@ const command = (picks: string[]) =>
 
   <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-top: 2rem;">
     One family so far. A preset for a stack whose skills do not exist yet would be a list of things
-    you cannot install, so there is not one.
-  </p>
+      you cannot install, so there is not one.
+      </p>
+    </div>
+  </div>
 </Base>

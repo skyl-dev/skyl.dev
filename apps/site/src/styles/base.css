@@ -16,14 +16,16 @@
    * saturation, so nothing on the page is actually grey and the green has something to
    * sit against. Neutral greys under a green accent read as a template.
    */
+  /* the steps between these are deliberately small: at 5 / 8 / 11 a card read as a lit
+     panel dropped on the page rather than a part of it */
   --ground: hsl(48 8% 5%);
-  --raised: hsl(45 7% 8%);
-  --sunken: hsl(45 6% 11%);
+  --raised: hsl(46 7% 6.5%);
+  --sunken: hsl(45 6% 8.5%);
   --ink: hsl(48 22% 94%);
   --ink-soft: hsl(45 8% 74%);
   --ink-faint: hsl(45 6% 55%);
-  --rule: hsl(45 6% 17%);
-  --rule-strong: hsl(45 6% 27%);
+  --rule: hsl(45 6% 14%);
+  --rule-strong: hsl(45 6% 24%);
 
   --accent: #3ddc84;
   --accent-ink: #06210f;
