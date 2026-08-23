@@ -1,6 +1,6 @@
 # skyl.dev
 
-The website and CLI for [Skyl](https://github.com/skyl-dev/skyl) — a composable registry of AI
+The website and CLI for [Skyl](https://github.com/skyl-dev/skyl), a composable registry of AI
 agent skills.
 
 A workspace holding two things that share a frontmatter schema and a section splitter:
