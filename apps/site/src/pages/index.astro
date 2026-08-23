@@ -21,15 +21,21 @@ const totalRules = skills.reduce((n, s) => n + s.meta.rules.length, 0);
 const everything = tokens(skills.reduce((n, s) => n + s.meta.installableWords, 0));
 
 // the terminal is generated from the registry, so it cannot drift from what scan prints
-const demo = skills
-  .filter((s) => ['core', 'compose', 'db', 'di', 'networking'].includes(s.meta.skill))
-  .map((s) => ({
-    name: s.meta.name,
-    on: Object.values(s.meta.detect).flat()[0] ?? '',
-  }));
-const demoCost = tokens(
-  skills.filter((s) => demo.some((d) => d.name === s.meta.name)).reduce((n, s) => n + s.meta.installableWords, 0),
-);
+// a plausible project: every axis contributes except service, which is the one that is
+// genuinely empty today. An axis reading "not this project" where most projects do have one
+// looks like a gap rather than a choice.
+const demo = skills.filter((s) =>
+  ['core', 'kotlin', 'compose', 'db', 'di', 'networking'].includes(s.meta.skill));
+
+// the five axes, and how much of each a typical project actually takes. This is the whole
+// idea in one picture, and it says it without naming a family
+const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
+const axisRows = AXES.map((axis) => ({
+  axis,
+  total: skills.filter((s) => s.meta.axis === axis).length,
+  matched: demo.filter((s) => s.meta.axis === axis).length,
+}));
+const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 ---
 
 <Base
@@ -58,19 +64,37 @@ const demoCost = tokens(
     </div>
 
     <div class="launch">
-      <div class="launch-card">
+      <div class="launch-head">
         <p class="launch-label">install</p>
-        <Command text="npm i -g skyl.dev" tone="primary" />
+        <Command text="npm i skyl.dev" tone="primary" />
         <p class="launch-label">then, in any project</p>
         <Command text="skyl scan" />
       </div>
 
-      <div class="launch-result">
-        <div class="stat"><b>{demo.length}</b><span>layers matched</span></div>
-        <div class="stat"><b>{skills.length - demo.length}</b><span>ruled out</span></div>
-        <div class="stat"><b>~{(demoCost / 1000).toFixed(1)}k</b><span>tokens</span></div>
+      <div class="launch-body">
+        <p class="launch-label">what it loads</p>
+        <ul class="axes">
+          {axisRows.map((row) => (
+            <li class="axis" data-empty={row.total === 0 ? '' : undefined}>
+              <span class="axis-name">{row.axis}</span>
+              <span class="axis-cells">
+                {Array.from({ length: Math.max(row.total, 1) }, (_, i) => (
+                  <i data-on={i < row.matched ? '' : undefined}></i>
+                ))}
+              </span>
+              <span class="axis-say">
+                {row.total === 0 ? 'none yet' : row.matched === 0 ? 'not this project' : `${row.matched} of ${row.total}`}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <p class="launch-foot">Reads your build files. Writes nothing until you say yes.</p>
+
+      <div class="launch-foot">
+        <span><b>{demo.length}</b> layers</span>
+        <span><b>~{(demoCost / 1000).toFixed(1)}k</b> tokens</span>
+        <span class="quiet">nothing written until you say yes</span>
+      </div>
     </div>
   </section>
 
@@ -167,31 +191,38 @@ const demoCost = tokens(
   .button.ghost:hover { border-color: var(--accent-line); filter: none; }
   .button.small { font-size: 13px; padding: 0.45rem 0.8rem; }
 
-  /* one card, not a walkthrough: the two commands are the hero, and what comes back is a
-     result rather than a transcript. A real console dump is more to read than a first
-     glance can carry, and it drags the whole section taller than the headline beside it. */
-  .launch { display: grid; gap: 0.9rem; min-width: 0; align-content: start; }
-  .launch-card {
-    border: 1px solid var(--rule); border-radius: 13px; background: var(--raised);
-    box-shadow: var(--shadow); padding: 1.3rem; display: grid; gap: 0.5rem;
+  /* one card holding the whole idea: the command, then which axes a project actually
+     draws from. A transcript said the same thing in far more words and named a family in a
+     section that has to speak to every project. */
+  .launch {
+    border: 1px solid var(--rule); border-radius: 14px; background: var(--raised);
+    box-shadow: var(--shadow); overflow: hidden; min-width: 0; align-self: start;
   }
+  .launch-head { padding: 1.3rem 1.3rem 1.4rem; display: grid; gap: 0.5rem; }
+  .launch-body { padding: 1.2rem 1.3rem; border-top: 1px solid var(--rule); background: var(--sunken); }
   .launch-label {
     margin: 0; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.11em; color: var(--ink-faint);
   }
-  .launch-label + * { margin-bottom: 0.55rem; }
+  .launch-head .launch-label + * { margin-bottom: 0.5rem; }
+  .launch-body .launch-label { margin-bottom: 0.9rem; }
 
-  .launch-result {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
+  .axes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+  .axis { display: grid; grid-template-columns: 5.5rem 1fr auto; align-items: center; gap: 0.8rem; }
+  .axis-name { font-size: 13px; color: var(--ink); }
+  .axis[data-empty] .axis-name, .axis[data-empty] .axis-say { color: var(--ink-faint); }
+  .axis-cells { display: flex; gap: 3px; }
+  .axis-cells i { width: 100%; max-width: 22px; height: 7px; border-radius: 2px; background: var(--rule); }
+  .axis-cells i[data-on] { background: var(--accent); }
+  .axis[data-empty] .axis-cells i { background: none; border: 1px dashed var(--rule-strong); height: 7px; }
+  .axis-say { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+  .launch-foot {
+    display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: baseline;
+    padding: 0.9rem 1.3rem; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-soft);
   }
-  .stat {
-    border: 1px solid var(--rule); border-radius: 11px; background: var(--sunken);
-    padding: 0.85rem 0.9rem; display: grid; gap: 0.15rem;
-  }
-  .stat b { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
-  .stat:first-child b { color: var(--accent-line); }
-  .stat span { font-size: 12px; color: var(--ink-faint); }
-  .launch-foot { margin: 0.15rem 0 0; font-size: 13px; color: var(--ink-faint); }
+  .launch-foot b { color: var(--ink); font-size: 15px; font-weight: 600; }
+  .launch-foot .quiet { color: var(--ink-faint); margin-left: auto; }
 
   .picker { border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
   .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }
