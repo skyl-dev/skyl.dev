@@ -59,7 +59,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
     <div style="display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: var(--sp-7); padding-top: 2.5rem; align-items: start;">
       <div>
         {agentParts.map((part) => (
-          <section style="margin-bottom: 3rem;">
+          <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
             <div style="display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 1.2rem;">
               <h2 style="font-size: var(--fs-lead);">{part.heading}</h2>
               <span class="chip solid">installed</span>
@@ -74,7 +74,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
               below this line is for you, and is never sent to a model
             </p>
             {humanParts.map((part) => (
-              <section style="margin-bottom: 3rem;">
+              <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
                 <h2 style="font-size: var(--fs-lead); margin-bottom: 1.2rem;">{part.heading}</h2>
                 <div class="prose scroller" set:html={part.html} />
               </section>
@@ -83,7 +83,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
         )}
 
         {skill.references.length > 0 && (
-          <div style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
+          <div id="references" style="border-top: 1px solid var(--rule); padding-top: 2.5rem; scroll-margin-top: 5rem;">
             <h2 style="font-size: var(--fs-lead); margin-bottom: 0.5rem;">References</h2>
             <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-bottom: 1.5rem;">
               Depth a rule points at, loaded only when the agent asks for it.
@@ -106,6 +106,16 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
       </div>
 
       <aside style="position: sticky; top: 5rem; font-size: var(--fs-meta); display: grid; gap: var(--sp-5);">
+        <div>
+          <p class="eyebrow" style="margin-bottom: var(--sp-2);">on this page</p>
+          <ul class="jump">
+            {skill.parts.map((part) => (
+              <li><a href={`#${part.heading.toLowerCase()}`}>{part.heading}</a></li>
+            ))}
+            {skill.references.length > 0 && <li><a href="#references">References</a></li>}
+            {skill.evidence && <li><a href="#evidence">Evidence</a></li>}
+          </ul>
+        </div>
         {detect.length > 0 && (
           <div>
             <p class="eyebrow" style="margin-bottom: 0.7rem;">detected by</p>
@@ -113,7 +123,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
               <div style="margin-bottom: 0.8rem;">
                 <p style="margin: 0 0 0.3rem; color: var(--ink-faint); font-size: var(--fs-micro);">{key.replace(/_/g, ' ')}</p>
                 <ul style="margin: 0; padding: 0; list-style: none; color: var(--ink-soft);">
-                  {values.map((v) => <li style="overflow-wrap: anywhere; margin-bottom: 0.15rem;">{v}</li>)}
+                  {values.map((v) => <li class="detect-item">{v}</li>)}
                 </ul>
               </div>
             ))}
@@ -151,7 +161,20 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
   </article>
 </Base>
 
-<style>
+<style is:global>
+  .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+  .jump a {
+    display: block; text-decoration: none; color: var(--ink-soft); font-size: var(--fs-ui);
+    padding: 0.2rem 0 0.2rem 0.7rem; border-left: 2px solid var(--rule); transition: color 160ms, border-color 160ms;
+  }
+  .jump a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* a coordinate breaks at its own separators or scrolls, never mid-word */
+  .detect-item {
+    margin-bottom: 0.15rem; font-size: var(--fs-meta); line-height: 1.5;
+    word-break: normal; overflow-wrap: break-word; hyphens: none;
+  }
+
   @media (max-width: 900px) {
     article > div { grid-template-columns: minmax(0, 1fr) !important; gap: 2.5rem !important; }
     aside { position: static !important; }
