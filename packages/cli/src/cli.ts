@@ -11,7 +11,8 @@ import { scan } from './commands/scan.ts';
 import { update } from './commands/update.ts';
 import { bold, cyan, dim, err, out, red } from './ui.ts';
 
-const VERSION = '0.0.0';
+// kept in step with package.json by a test, rather than read at startup
+const VERSION = '0.1.0';
 
 const HELP = `
   ${bold('skyl')} ${dim('curated agent skills for what your project actually uses')}

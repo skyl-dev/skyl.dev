@@ -87,6 +87,12 @@ test('an unknown command fails rather than doing something', async () => {
   assert.equal(await quiet(() => run(['wat'])), 1);
 });
 
+test('the version the CLI prints is the version that is published', async () => {
+  const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
+  const source = await readFile(new URL('../src/cli.ts', import.meta.url), 'utf8');
+  assert.match(source, new RegExp(`const VERSION = '${manifest.version}'`));
+});
+
 test('--version prints a version, not the help text', async () => {
   let printed = '';
   const write = process.stdout.write.bind(process.stdout);

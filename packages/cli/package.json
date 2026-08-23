@@ -1,6 +1,6 @@
 {
   "name": "skyl.dev",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Install curated AI agent skills for what your project actually uses",
   "type": "module",
   "license": "MIT",
@@ -38,5 +38,6 @@
     "url": "git+https://github.com/skyl-dev/skyl.dev.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://skyl.dev"
+  "homepage": "https://skyl.dev",
+  "author": "ahmmedrejowan"
 }

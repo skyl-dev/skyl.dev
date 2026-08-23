@@ -1,6 +1,6 @@
 {
   "name": "@skyl/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared parsing, detection and resolution for the Skyl CLI and site",
   "type": "module",
   "license": "MIT",
