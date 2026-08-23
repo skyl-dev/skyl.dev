@@ -12,7 +12,7 @@ import { update } from './commands/update.ts';
 import { bold, cyan, dim, err, out, red } from './ui.ts';
 
 // kept in step with package.json by a test, rather than read at startup
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 const HELP = `
   ${bold('skyl')} ${dim('curated agent skills for what your project actually uses')}

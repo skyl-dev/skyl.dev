@@ -93,6 +93,16 @@ test('the version the CLI prints is the version that is published', async () => 
   assert.match(source, new RegExp(`const VERSION = '${manifest.version}'`));
 });
 
+test('the pinned core version is the core that ships beside it', async () => {
+  const cli = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')) as
+    { dependencies: Record<string, string> };
+  const core = JSON.parse(await readFile(new URL('../../core/package.json', import.meta.url), 'utf8')) as
+    { version: string };
+  // core is bundled into the tarball, so a mismatch here is a manifest that describes
+  // something other than what is inside it
+  assert.equal(cli.dependencies['@skyl/core'], core.version);
+});
+
 test('--version prints a version, not the help text', async () => {
   let printed = '';
   const write = process.stdout.write.bind(process.stdout);
