@@ -6,17 +6,19 @@ skills.
 ## The CLI
 
 ```
-npx skyl scan            read the project and propose an install
-npx skyl add <skill>     install skills and what they require
-npx skyl remove <skill>  take them back out
-npx skyl list            what is installed, and what has moved since
-npx skyl diff            what changed here, and what changed upstream
-npx skyl update          apply the upstream side, keeping local edits
-npx skyl audit           read a hand-written CLAUDE.md and say what is in it
-npx skyl context         emit what a model needs to describe this project
-npx skyl learn           derive a project knowledge skill from this repository
-npx skyl lint            check skills against the spec
+skyl scan            read the project and propose an install
+skyl add <skill>     install skills and what they require
+skyl remove <skill>  take them back out
+skyl list            what is installed, and what has moved since
+skyl diff            what changed here, and what changed upstream
+skyl update          apply the upstream side, keeping local edits
+skyl audit           read a hand-written CLAUDE.md and say what is in it
+skyl context         emit what a model needs to describe this project
+skyl learn           derive a project knowledge skill from this repository
+skyl lint            check skills against the spec
 ```
+
+Nothing is written without asking, and every command prints what it would write first.
 
 `scan` reads build files as text rather than invoking a build, so it is instant, works on a project
 that does not currently compile, and needs no toolchain. It proposes and never installs on its own.
@@ -68,7 +70,10 @@ pnpm build
 
 ## Status
 
-Pre-alpha. The site is not started.
+Pre-alpha. The site is not started, and nothing is published to npm yet.
+
+The bare name `skyl` on npm has been taken since 2021, so the package is scoped. The command is
+still `skyl`; only where it comes from is different.
 
 ## License
 

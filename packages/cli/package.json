@@ -1,5 +1,5 @@
 {
-  "name": "skyl",
+  "name": "@skyl/cli",
   "version": "0.0.0",
   "description": "Install curated AI agent skills for what your project actually uses",
   "type": "module",
@@ -29,5 +29,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

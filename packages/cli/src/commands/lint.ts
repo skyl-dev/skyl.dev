@@ -53,24 +53,23 @@ export async function lint(opts: LintOptions): Promise<number> {
   let warnings = 0;
   const parsed: Skill[] = [];
   const perFile = new Map<string, Finding[]>();
+  const fileOf = new Map<string, string>();
 
   for (const file of files) {
     const text = await readFile(file, 'utf8');
-    const found = lintSkill(text, file);
-    perFile.set(file, found);
+    perFile.set(file, lintSkill(text, file));
     try {
-      parsed.push(parseSkill(text));
+      const skill = parseSkill(text);
+      parsed.push(skill);
+      fileOf.set(skill.name, file);
     } catch {
       // already reported by lintSkill
     }
   }
 
   // requires and cross-references can only be judged against the whole set
-  const registry = lintRegistry(parsed);
-  const byName = new Map(parsed.map((s) => [s.name, s]));
-  for (const [name, found] of registry) {
-    const skill = byName.get(name);
-    const file = files.find((f) => skill && f.includes(skill.name.replace('/', '/')));
+  for (const [name, found] of lintRegistry(parsed)) {
+    const file = fileOf.get(name);
     if (!file) continue;
     perFile.set(file, [...(perFile.get(file) ?? []), ...found]);
   }

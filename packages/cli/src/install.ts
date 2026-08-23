@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import {
-  DEFAULT_TARGET, LOCKFILE_NAME, emptyLockfile, entryFor, formatLockfile, parseLockfile,
+  DEFAULT_TARGET, LOCKFILE_NAME, entryFor, formatLockfile, parseLockfile,
   targetById, type Lockfile, type Skill, type Target,
 } from '@skyl/core';
 

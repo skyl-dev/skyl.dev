@@ -1,7 +1,7 @@
 import { drift, type DriftKind } from '@skyl/core';
 import { loadRegistry } from '../registry.ts';
 import { readInstalled, readLockfile, resolveTarget } from '../install.ts';
-import { bold, cyan, dim, green, out, tokens, yellow } from '../ui.ts';
+import { bold, cyan, dim, out, tokens, yellow } from '../ui.ts';
 
 const LABEL: Record<DriftKind, (s: string) => string> = {
   unchanged: dim,

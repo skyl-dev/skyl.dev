@@ -3,9 +3,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildContext } from '../context.ts';
 import { readLockfile, resolveTarget } from '../install.ts';
-import { extractMarkdown, learnPrompt, preserved, withCaution, LEARNED_NAME } from '../learn.ts';
+import { extractMarkdown, learnPrompt, preserved, reattach, withCaution, LEARNED_NAME } from '../learn.ts';
 import { bold, confirm, cyan, dim, err, green, out, red, tokens, yellow } from '../ui.ts';
-import { reattach } from '../learn.ts';
 
 export interface LearnOptions {
   root: string;

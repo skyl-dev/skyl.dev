@@ -22,7 +22,6 @@ export async function scan(opts: ScanOptions): Promise<number> {
     return 0;
   }
 
-  const byName = new Map(skills.map((s) => [s.name, s]));
   const chosen = resolve(skills, matched.map((m) => m.skill));
   const lock = await readLockfile(opts.root);
   const target = resolveTarget(undefined, lock);
