@@ -32,33 +32,29 @@ const demo = skills.filter((s) =>
 const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
 const facts = await evidenceFacts(families[0]?.name ?? 'android');
 
-// examples rather than inventory: the axis is the idea, and naming the skills inside it
-// made a model of everything read like a list of one family
+// a tree, because that is what resolution actually is: a project, the axes it draws from,
+// and what each axis covers. Leaves are concerns rather than skill names, so the shape
+// holds for any project rather than describing one family
 const AXIS_SAYS = [
   {
-    n: '01', id: 'core', holds: 'the platform you ship on',
-    owns: 'What the system can take away from you. Where state has to survive, what work leaves the main thread, what happens when the process is killed.',
-    like: 'Android · iOS · the browser · a server',
+    id: 'core', holds: 'the platform you ship on', like: 'Android, iOS, the browser',
+    covers: ['lifecycle and process death', 'work that leaves the main thread', 'who owns which data', 'what the system can reclaim'],
   },
   {
-    n: '02', id: 'language', holds: 'the language you write',
-    owns: 'How that language expresses the decision, and only where it expresses it in a way that goes wrong. Scope, cancellation, nullability, equality.',
-    like: 'Kotlin · Swift · TypeScript · Python',
+    id: 'language', holds: 'the language you write', like: 'Kotlin, Swift, TypeScript',
+    covers: ['scope and cancellation', 'nullability and equality', 'what reads fine and behaves badly'],
   },
   {
-    n: '03', id: 'framework', holds: 'what draws the screen, or serves the request',
-    owns: 'The mechanics of one toolkit, where they are particular to it. A rule that would read the same without the framework belongs to core.',
-    like: 'Compose · SwiftUI · React · Django',
+    id: 'framework', holds: 'what draws the screen', like: 'Compose, SwiftUI, React',
+    covers: ['effects and state', 'lists and identity', 'rendering that repeats'],
   },
   {
-    n: '04', id: 'service', holds: 'a third party you depend on',
-    owns: 'Somebody else\'s API and its own failure modes: what it does under retry, what it charges for, what it silently truncates.',
-    like: 'Stripe · Firebase · Supabase · Appwrite',
+    id: 'service', holds: 'a third party you depend on', like: 'Stripe, Firebase, Supabase',
+    covers: ['retries and idempotency', 'quotas and truncation'], empty: true,
   },
   {
-    n: '05', id: 'topic', holds: 'a concern that cuts across the rest',
-    owns: 'Present in most projects and owned by none of the layers above, so it composes with all of them rather than sitting under one.',
-    like: 'data · network · permissions · media · tests',
+    id: 'topic', holds: 'a concern that cuts across', like: 'data, media, tests',
+    covers: ['storage and network', 'permissions and secrets', 'images and media', 'tests and the seams they need'],
   },
 ];
 
@@ -173,21 +169,27 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       </p>
     </div>
 
-    <ol class="stack">
-      {AXIS_SAYS.map((axis) => (
-        <li class="slab">
-          <span class="slab-n">{axis.n}</span>
-          <div class="slab-body">
-            <div class="slab-title">
-              <h3>{axis.id}</h3>
-              <span class="slab-holds">{axis.holds}</span>
+    <div class="tree">
+      <div class="tree-root">
+        <span class="root-node">your project</span>
+      </div>
+
+      <ul class="tree-axes">
+        {AXIS_SAYS.map((axis) => (
+          <li class="branch" data-empty={axis.empty ? '' : undefined}>
+            <div class="branch-node">
+              <span class="branch-name">{axis.id}</span>
+              <span class="branch-holds">{axis.holds}</span>
+              <span class="branch-like">{axis.like}</span>
             </div>
-            <p class="slab-owns">{axis.owns}</p>
-          </div>
-          <p class="slab-like">{axis.like}</p>
-        </li>
-      ))}
-    </ol>
+            <ul class="leaves">
+              {axis.covers.map((leaf) => <li>{leaf}</li>)}
+              {axis.empty && <li class="leaf-empty">nothing published yet</li>}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
   </section>
 
   <section class="admission">
@@ -419,50 +421,69 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   .axes-band { padding: 6rem 0 0; }
 
-  /* a stack of slabs rather than a table: the shape should carry the idea before the words
-     do, so each one is a layer sitting on a spine, and the accent runs down the middle of it */
-  .stack { list-style: none; margin: 0; padding: 0 0 0 3.5rem; position: relative; }
-  .stack::before {
-    content: ""; position: absolute; left: 1.1rem; top: 0.8rem; bottom: 0.8rem; width: 1px;
-    background: linear-gradient(var(--rule), var(--rule-strong), var(--rule));
+  /* the tree is the resolution model drawn: a project, the axes it draws from, and what
+     each one covers. Lines are borders on the nodes rather than glyphs, so they stay crisp
+     and reflow on a narrow screen. */
+  .tree { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 0; align-items: center; }
+
+  .tree-root { position: relative; display: flex; justify-content: flex-start; }
+  .root-node {
+    border: 1px solid var(--accent); border-radius: 9px; padding: 0.5rem 0.9rem;
+    background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent);
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+  }
+  /* the trunk: out of the root, then down the full height of the branches */
+  .tree-root::after {
+    content: ""; position: absolute; left: 100%; top: 50%; width: 1.6rem; height: 1px; background: var(--rule-strong);
   }
 
-  .slab {
-    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 2rem;
-    padding: 1.35rem 1.4rem; margin-bottom: 0.5rem; align-items: center;
-    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
-    transition: border-color 140ms, transform 140ms, background 140ms;
-  }
-  .slab::before {
-    content: ""; position: absolute; left: -2.42rem; top: 50%; width: 9px; height: 9px;
-    border-radius: 50%; background: var(--ground); border: 2px solid var(--rule-strong);
-    transform: translateY(-50%); transition: border-color 140ms, background 140ms;
-  }
-  .slab:hover { border-color: var(--rule-strong); transform: translateX(3px); }
-  .slab:hover::before { border-color: var(--accent); background: var(--accent); }
-
-  .slab-n {
-    position: absolute; left: -3.5rem; top: 50%; transform: translateY(-50%);
-    font-size: 11px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.05em;
-  }
-  .slab-body { min-width: 0; }
-  .slab-title { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
-  .slab-title h3 { font-size: 1.15rem; letter-spacing: -0.02em; }
-  .slab-holds { font-size: 13px; color: var(--accent); }
-  .slab-owns { margin: 0; color: var(--ink-soft); font-size: 14.5px; max-width: 62ch; }
-  .slab-like {
-    margin: 0; font-size: 12.5px; color: var(--ink-faint); text-align: right;
-    border-left: 1px solid var(--rule); padding-left: 1.4rem; align-self: stretch;
-    display: flex; align-items: center; justify-content: flex-end;
+  .tree-axes { list-style: none; margin: 0; padding: 0; position: relative; }
+  .tree-axes::before {
+    content: ""; position: absolute; left: -1.6rem; top: 2.1rem; bottom: 2.1rem; width: 1px;
+    background: var(--rule-strong);
   }
 
-  @media (max-width: 860px) {
-    .stack { padding-left: 2.6rem; }
-    .stack::before { left: 0.65rem; }
-    .slab { grid-template-columns: minmax(0, 1fr); gap: 0.8rem; }
-    .slab::before { left: -2rem; }
-    .slab-n { left: -2.9rem; }
-    .slab-like { text-align: left; border-left: 0; border-top: 1px solid var(--rule); padding: 0.7rem 0 0; justify-content: flex-start; }
+  .branch {
+    position: relative; display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1.5rem;
+    align-items: center; padding: 0.85rem 0;
+  }
+  /* the elbow into each branch */
+  .branch::before {
+    content: ""; position: absolute; left: -1.6rem; top: 50%; width: 1.6rem; height: 1px;
+    background: var(--rule-strong);
+  }
+
+  .branch-node {
+    position: relative; display: grid; gap: 0.15rem;
+    border: 1px solid var(--rule); border-radius: 10px; background: var(--raised);
+    padding: 0.7rem 0.95rem; transition: border-color 140ms;
+  }
+  .branch:hover .branch-node { border-color: var(--accent); }
+  .branch-name { font-size: 15px; font-weight: 600; }
+  .branch-holds { font-size: 12.5px; color: var(--ink-soft); }
+  .branch-like { font-size: 11.5px; color: var(--ink-faint); }
+  .branch[data-empty] .branch-name, .branch[data-empty] .branch-holds { color: var(--ink-faint); }
+
+  /* the twigs out to the leaves */
+  .leaves {
+    list-style: none; margin: 0; padding: 0; position: relative;
+    display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+  }
+  .leaves::before {
+    content: ""; position: absolute; left: -1.5rem; top: 50%; width: 1.5rem; height: 1px;
+    background: var(--rule); 
+  }
+  .leaves li {
+    font-size: 12.5px; color: var(--ink-soft);
+    border: 1px solid var(--rule); border-radius: 6px; padding: 0.25rem 0.6rem; background: var(--ground);
+  }
+  .branch:hover .leaves li { border-color: var(--rule-strong); }
+  .leaves .leaf-empty { color: var(--ink-faint); border-style: dashed; }
+
+  @media (max-width: 900px) {
+    .tree { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
+    .tree-root::after, .tree-axes::before, .branch::before, .leaves::before { display: none; }
+    .branch { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; padding: 0.7rem 0; border-bottom: 1px solid var(--rule); }
   }
 
   .admission { padding: 6rem 0 0; }
