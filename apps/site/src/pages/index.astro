@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Command from '../components/Command.astro';
 import { evidenceFacts, loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
 import { QUESTIONS, START } from '../lib/wizard.ts';
+import AxisGallery from '../components/AxisGallery.astro';
 
 const skills = await loadSkills();
 const families = await loadFamilies();
@@ -162,34 +163,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   <section class="axes-band">
     <div class="band-head">
       <p class="eyebrow">the model</p>
-      <h2>Five axes, and a project draws from the ones that apply</h2>
-      <p class="band-say">
-        A rule belongs to exactly one. That is what stops two layers restating each other, and what
-        lets a project drop the ones it does not use instead of carrying them.
-      </p>
+      <h2>Five axes</h2>
+      <p class="band-say">A rule belongs to exactly one, so no two layers restate each other.</p>
     </div>
 
-    <div class="tree">
-      <div class="tree-root">
-        <span class="root-node">your project</span>
-      </div>
-
-      <ul class="tree-axes">
-        {AXIS_SAYS.map((axis) => (
-          <li class="branch" data-empty={axis.empty ? '' : undefined}>
-            <div class="branch-node">
-              <span class="branch-name">{axis.id}</span>
-              <span class="branch-holds">{axis.holds}</span>
-              <span class="branch-like">{axis.like}</span>
-            </div>
-            <ul class="leaves">
-              {axis.covers.map((leaf) => <li>{leaf}</li>)}
-              {axis.empty && <li class="leaf-empty">nothing published yet</li>}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <AxisGallery />
   </section>
 
   <section class="admission">
@@ -420,71 +398,6 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .band-say { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
 
   .axes-band { padding: 6rem 0 0; }
-
-  /* the tree is the resolution model drawn: a project, the axes it draws from, and what
-     each one covers. Lines are borders on the nodes rather than glyphs, so they stay crisp
-     and reflow on a narrow screen. */
-  .tree { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 0; align-items: center; }
-
-  .tree-root { position: relative; display: flex; justify-content: flex-start; }
-  .root-node {
-    border: 1px solid var(--accent); border-radius: 9px; padding: 0.5rem 0.9rem;
-    background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent);
-    font-size: 13px; font-weight: 600; white-space: nowrap;
-  }
-  /* the trunk: out of the root, then down the full height of the branches */
-  .tree-root::after {
-    content: ""; position: absolute; left: 100%; top: 50%; width: 1.6rem; height: 1px; background: var(--rule-strong);
-  }
-
-  .tree-axes { list-style: none; margin: 0; padding: 0; position: relative; }
-  .tree-axes::before {
-    content: ""; position: absolute; left: -1.6rem; top: 2.1rem; bottom: 2.1rem; width: 1px;
-    background: var(--rule-strong);
-  }
-
-  .branch {
-    position: relative; display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1.5rem;
-    align-items: center; padding: 0.85rem 0;
-  }
-  /* the elbow into each branch */
-  .branch::before {
-    content: ""; position: absolute; left: -1.6rem; top: 50%; width: 1.6rem; height: 1px;
-    background: var(--rule-strong);
-  }
-
-  .branch-node {
-    position: relative; display: grid; gap: 0.15rem;
-    border: 1px solid var(--rule); border-radius: 10px; background: var(--raised);
-    padding: 0.7rem 0.95rem; transition: border-color 140ms;
-  }
-  .branch:hover .branch-node { border-color: var(--accent); }
-  .branch-name { font-size: 15px; font-weight: 600; }
-  .branch-holds { font-size: 12.5px; color: var(--ink-soft); }
-  .branch-like { font-size: 11.5px; color: var(--ink-faint); }
-  .branch[data-empty] .branch-name, .branch[data-empty] .branch-holds { color: var(--ink-faint); }
-
-  /* the twigs out to the leaves */
-  .leaves {
-    list-style: none; margin: 0; padding: 0; position: relative;
-    display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
-  }
-  .leaves::before {
-    content: ""; position: absolute; left: -1.5rem; top: 50%; width: 1.5rem; height: 1px;
-    background: var(--rule); 
-  }
-  .leaves li {
-    font-size: 12.5px; color: var(--ink-soft);
-    border: 1px solid var(--rule); border-radius: 6px; padding: 0.25rem 0.6rem; background: var(--ground);
-  }
-  .branch:hover .leaves li { border-color: var(--rule-strong); }
-  .leaves .leaf-empty { color: var(--ink-faint); border-style: dashed; }
-
-  @media (max-width: 900px) {
-    .tree { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
-    .tree-root::after, .tree-axes::before, .branch::before, .leaves::before { display: none; }
-    .branch { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; padding: 0.7rem 0; border-bottom: 1px solid var(--rule); }
-  }
 
   .admission { padding: 6rem 0 0; }
   .tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }

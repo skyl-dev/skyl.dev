@@ -1,0 +1,167 @@
+---
+/**
+ * The axes, as a map you interrogate rather than a paragraph you read.
+ *
+ * Two rules hold this together. At rest there are almost no words: five names and a root.
+ * Detail arrives only when a node is asked about, and lands in one place instead of being
+ * scattered across the picture as labels.
+ *
+ * And nothing here knows what is currently published. This explains the model, which does
+ * not change when a skill is added, so no axis is drawn as empty, dashed, or lesser. The
+ * day a service skill lands, this file should not need an edit.
+ */
+const AXES = [
+  {
+    id: 'core', holds: 'the platform you ship on', say: 'What the system can take away from you.',
+    covers: ['lifecycle', 'process death', 'threading', 'data ownership'],
+    like: 'Android · iOS · the browser',
+  },
+  {
+    id: 'language', holds: 'the language you write', say: 'Where the language reads fine and behaves badly.',
+    covers: ['scope', 'cancellation', 'nullability', 'equality'],
+    like: 'Kotlin · Swift · TypeScript',
+  },
+  {
+    id: 'framework', holds: 'what draws the screen', say: 'Mechanics particular to one toolkit, and nothing more.',
+    covers: ['effects', 'state', 'lists', 'rendering'],
+    like: 'Compose · SwiftUI · React',
+  },
+  {
+    id: 'service', holds: 'a third party you depend on', say: 'Somebody else\'s API, and its own failure modes.',
+    covers: ['retries', 'idempotency', 'quotas'],
+    like: 'Stripe · Firebase · Supabase',
+  },
+  {
+    id: 'topic', holds: 'a concern that cuts across', say: 'Present in most projects, owned by none of the layers.',
+    covers: ['storage', 'network', 'permissions', 'media', 'tests'],
+    like: 'data · media · tests',
+  },
+];
+
+// Hand-placed, and deliberately uneven: five circles on one line reads as a chart, five at
+// different heights and sizes reads as a map. Each radius holds its own name.
+const PLACED = [
+  { id: 'core', x: 58, y: 212, r: 56 },
+  { id: 'language', x: 196, y: 156, r: 48 },
+  { id: 'framework', x: 330, y: 220, r: 54 },
+  { id: 'service', x: 452, y: 150, r: 44 },
+  { id: 'topic', x: 566, y: 224, r: 50 },
+];
+
+const data = { AXES };
+---
+
+<div class="axis-map">
+  <svg class="nodes" viewBox="0 0 620 288" role="img" aria-label="skyl and the five axes a project draws from">
+    <g class="edges">
+      {PLACED.map((place) => (
+        <path
+          d={`M310 56 C310 ${(56 + place.y) / 2}, ${place.x} ${place.y - place.r - 44}, ${place.x} ${place.y - place.r - 5}`}
+          data-edge={place.id}
+        />
+      ))}
+    </g>
+
+    <rect x="236" y="16" width="148" height="40" rx="10" class="hub-box" />
+    <text x="310" y="42" class="hub-text">skyl</text>
+
+    {PLACED.map((place) => (
+      <g class="node" data-node={place.id} tabindex="0">
+        <circle cx={place.x} cy={place.y} r={place.r} />
+        <text x={place.x} y={place.y + 4} class="node-text">{place.id}</text>
+      </g>
+    ))}
+  </svg>
+
+  <aside class="readout" data-readout></aside>
+</div>
+
+<script define:vars={{ data }}>
+  const byId = new Map(data.AXES.map((a) => [a.id, a]));
+  const scope = document.querySelector('.axis-map');
+  const panel = scope.querySelector('[data-readout]');
+
+  // core is what is on screen before anyone touches it, not a state to fall back into:
+  // once a node has been looked at, leaving keeps that one rather than reverting and
+  // making core look permanently chosen
+  let touched = false;
+
+  function show(id, dim = true) {
+    const axis = byId.get(id);
+    if (!axis) return;
+    panel.innerHTML = `
+      <p class="readout-name">${axis.id}</p>
+      <p class="readout-holds">${axis.holds}</p>
+      <p class="readout-say">${axis.say}</p>
+      <div class="readout-chips">${axis.covers.map((c) => `<span>${c}</span>`).join('')}</div>
+      <p class="readout-like">${axis.like}</p>`;
+
+    for (const node of scope.querySelectorAll('[data-node]')) {
+      // the script drives the lit state as well as the dimmed one, so hovering, clicking
+      // and tabbing all look the same rather than one relying on CSS :hover
+      node.toggleAttribute('data-on', node.dataset.node === id);
+      node.toggleAttribute('data-dim', dim && node.dataset.node !== id);
+    }
+    for (const edge of scope.querySelectorAll('[data-edge]')) {
+      edge.toggleAttribute('data-lit', edge.dataset.edge === id);
+    }
+  }
+
+  for (const node of scope.querySelectorAll('[data-node]')) {
+    const pick = () => { touched = true; show(node.dataset.node); };
+    node.addEventListener('mouseenter', pick);
+    node.addEventListener('focus', pick);
+  }
+
+  // leaving undims the map and leaves the last answer standing
+  scope.addEventListener('mouseleave', () => {
+    for (const node of scope.querySelectorAll('[data-node]')) node.removeAttribute('data-dim');
+    if (!touched) show('core', false);
+  });
+
+  show('core', false);
+</script>
+
+<style is:global>
+  .axis-map {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 2.25rem;
+    align-items: center; min-width: 0;
+  }
+  .nodes { width: 100%; height: auto; }
+
+  .edges path { fill: none; stroke: var(--rule); stroke-width: 1.5; transition: stroke 160ms, stroke-width 160ms; }
+  .edges path[data-lit] { stroke: var(--accent); stroke-width: 2.5; }
+
+  /* the root is not a choice, so it does not wear the colour that means one */
+  .hub-box { fill: var(--sunken); stroke: var(--ink-faint); stroke-width: 1.5; }
+  .hub-text { fill: var(--ink); font-size: 13.5px; font-weight: 700; text-anchor: middle; font-family: var(--mono); }
+
+  .node { cursor: pointer; outline: none; transition: opacity 160ms; }
+  .node circle { fill: var(--sunken); stroke: var(--rule-strong); stroke-width: 1.5; transition: stroke 160ms, fill 160ms; }
+  .node-text { fill: var(--ink-soft); font-size: 13px; font-weight: 600; text-anchor: middle; font-family: var(--mono); transition: fill 160ms; }
+
+  /* :focus-visible rather than :focus, or a clicked node keeps its highlight while the
+     pointer is somewhere else and two nodes look chosen */
+  .node:hover circle, .node:focus-visible circle, .node[data-on] circle {
+    stroke: var(--accent); fill: color-mix(in srgb, var(--accent) 15%, var(--sunken));
+  }
+  .node:hover .node-text, .node:focus-visible .node-text, .node[data-on] .node-text { fill: var(--accent); }
+  .node:focus-visible circle { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .node[data-dim] { opacity: 0.45; }
+
+  /* the one place words appear, and only about the thing being asked about */
+  .readout { display: grid; align-content: center; gap: 0.1rem; }
+  .readout-name { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+  .readout-holds { margin: 0.15rem 0 0.9rem; font-size: 14px; color: var(--accent); }
+  .readout-say { margin: 0 0 1.2rem; font-size: 15px; color: var(--ink-soft); }
+  .readout-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.1rem; }
+  .readout-chips span {
+    font-size: 12px; color: var(--ink-soft); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 0.22rem 0.55rem; background: var(--ground);
+  }
+  .readout-like { margin: 0; font-size: 12px; color: var(--ink-faint); }
+
+  @media (max-width: 900px) {
+    .axis-map { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  }
+</style>
