@@ -9,7 +9,9 @@
   "scripts": {
     "build": "tsc -b packages/core packages/cli",
     "test": "node --test --experimental-strip-types packages/*/test/*.test.ts",
-    "typecheck": "tsc -b packages/core packages/cli --force"
+    "typecheck": "tsc -b packages/core packages/cli --force",
+    "bundle": "node scripts/build-bundle.mjs",
+    "lint:registry": "node packages/cli/dist/bin.js lint ../skyl/skills --strict"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

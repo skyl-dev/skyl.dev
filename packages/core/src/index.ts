@@ -18,3 +18,6 @@ export {
   type Lockfile, type LockEntry, type DriftKind,
 } from './lockfile.ts';
 export { normalise } from './names.ts';
+export { diffLines, hunks, stat, type Hunk } from './diff.ts';
+export { lintSkill, lintRegistry, type Finding } from './lint.ts';
+export { audit, scanSecrets, type AuditReport, type SectionReport } from './audit.ts';

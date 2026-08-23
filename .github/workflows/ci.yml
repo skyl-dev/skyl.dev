@@ -25,3 +25,10 @@ jobs:
         working-directory: skyl.dev
       - run: pnpm test
         working-directory: skyl.dev
+      # the bundle ships inside the package, so a registry it cannot build is a broken release
+      - run: pnpm bundle
+        working-directory: skyl.dev
+      # the registry has its own validator in Python; this is an independent reading of the
+      # same spec, and a disagreement between them should fail rather than pass quietly
+      - run: pnpm lint:registry
+        working-directory: skyl.dev
