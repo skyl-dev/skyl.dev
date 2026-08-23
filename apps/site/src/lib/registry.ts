@@ -113,6 +113,20 @@ async function loadReferences(meta: Skill): Promise<Reference[]> {
 const readIfPresent = (path: string): Promise<string | undefined> =>
   readFile(path, 'utf8').then((t) => render(t), () => undefined);
 
+/**
+ * Registry markdown links to its neighbours by relative path, which resolves to nothing on
+ * a site that renders those files at different URLs. They are rewritten to the file on
+ * GitHub, which is where that content actually lives.
+ */
+const REPO = 'https://github.com/skyl-dev/skyl/blob/main';
+
+function absolutise(html: string, dir: string): string {
+  return html.replace(/href="(\.\/[^"]+|[^":/][^":]*\.md)"/g, (_all, href: string) => {
+    const clean = String(href).replace(/^\.\//, '');
+    return `href="${REPO}/${dir}/${clean}"`;
+  });
+}
+
 /** Families, in the order a reader meets them: the one with the most skills first. */
 export async function loadFamilies(): Promise<{ name: string; skills: SkillPage[] }[]> {
   const skills = await loadSkills();
@@ -126,7 +140,10 @@ export async function loadFamilies(): Promise<{ name: string; skills: SkillPage[
 }
 
 export async function loadDoc(...path: string[]): Promise<string | undefined> {
-  return readIfPresent(join(REGISTRY_ROOT, ...path));
+  const html = await readIfPresent(join(REGISTRY_ROOT, ...path));
+  if (!html) return undefined;
+  // the file's own H1 repeats the heading the page already shows above it
+  return absolutise(html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/, ''), path.slice(0, -1).join('/'));
 }
 
 /**

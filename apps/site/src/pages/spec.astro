@@ -10,8 +10,7 @@ const docs = [
 
 const rendered = await Promise.all(
   docs.map(async (doc) => {
-    // the file's own H1 repeats the group label above it, three times over per document
-    const html = (await loadDoc('spec', doc.file))?.replace(/<h1[^>]*>.*?<\/h1>/, '');
+    const html = await loadDoc('spec', doc.file);
     // pull the h2s out for the rail, so a reader can see the shape before reading it
     const headings = [...(html ?? '').matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map((m) => {
       const text = m[1]!.replace(/<[^>]+>/g, '').trim();
