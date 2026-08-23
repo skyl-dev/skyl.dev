@@ -58,42 +58,19 @@ const demoCost = tokens(
     </div>
 
     <div class="launch">
-      <div class="launch-step">
-        <span class="launch-num">1</span>
-        <div class="launch-body">
-          <p class="launch-say">Install it, or skip this and prefix everything with <code>npx</code>.</p>
-          <Command text="npm i -g skyl.dev" tone="primary" />
-        </div>
+      <div class="launch-card">
+        <p class="launch-label">install</p>
+        <Command text="npm i -g skyl.dev" tone="primary" />
+        <p class="launch-label">then, in any project</p>
+        <Command text="skyl scan" />
       </div>
 
-      <div class="launch-step">
-        <span class="launch-num">2</span>
-        <div class="launch-body">
-          <p class="launch-say">Run it in the root of your project, next to the build file.</p>
-          <Command text="skyl scan" />
-        </div>
+      <div class="launch-result">
+        <div class="stat"><b>{demo.length}</b><span>layers matched</span></div>
+        <div class="stat"><b>{skills.length - demo.length}</b><span>ruled out</span></div>
+        <div class="stat"><b>~{(demoCost / 1000).toFixed(1)}k</b><span>tokens</span></div>
       </div>
-
-      <div class="launch-step">
-        <span class="launch-num">3</span>
-        <div class="launch-body">
-          <p class="launch-say">It reads the build files and proposes. Nothing is written yet.</p>
-          <div class="console" aria-label="example output">
-            <div class="console-bar"><i></i><i></i><i></i><span>~/acme-pay</span></div>
-            <pre><code>  <span class="t-strong">Detected</span>
-{demo.map((d) => (
-  <>{'    '}<span class="t-ok">{d.name.padEnd(20)}</span><span class="t-dim">{d.on}</span>{'\n'}</>
-))}
-  <span class="t-strong">Considered and not detected</span>
-    <span class="t-dim">android/java   android/xml   android/mvvm</span>
-
-  {demo.length} to install, ~{demoCost.toLocaleString()} tokens <span class="t-dim">into .claude/skills</span>
-
-  <span class="t-dim">Install them? [y/N]</span>
-</code></pre>
-          </div>
-        </div>
-      </div>
+      <p class="launch-foot">Reads your build files. Writes nothing until you say yes.</p>
     </div>
   </section>
 
@@ -190,35 +167,31 @@ const demoCost = tokens(
   .button.ghost:hover { border-color: var(--accent-line); filter: none; }
   .button.small { font-size: 13px; padding: 0.45rem 0.8rem; }
 
-  /* three steps, not one panel: install, run, and what comes back are different things
-     and reading them as one block is what made it look like a folder of text */
-  .launch { display: grid; gap: 1.25rem; min-width: 0; }
-  .launch-step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: 0.9rem; align-items: start; }
-  .launch-num {
-    width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center;
-    background: var(--sunken); border: 1px solid var(--rule); color: var(--ink-soft);
-    font-size: 12px; font-weight: 700; margin-top: 0.15rem;
+  /* one card, not a walkthrough: the two commands are the hero, and what comes back is a
+     result rather than a transcript. A real console dump is more to read than a first
+     glance can carry, and it drags the whole section taller than the headline beside it. */
+  .launch { display: grid; gap: 0.9rem; min-width: 0; align-content: start; }
+  .launch-card {
+    border: 1px solid var(--rule); border-radius: 13px; background: var(--raised);
+    box-shadow: var(--shadow); padding: 1.3rem; display: grid; gap: 0.5rem;
   }
-  .launch-step:first-child .launch-num { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .launch-body { min-width: 0; }
-  .launch-say { margin: 0 0 0.55rem; font-size: 13.5px; color: var(--ink-soft); }
-  .launch-say code { color: var(--ink); }
+  .launch-label {
+    margin: 0; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.11em; color: var(--ink-faint);
+  }
+  .launch-label + * { margin-bottom: 0.55rem; }
 
-  .console {
-    border: 1px solid var(--rule); border-radius: 11px; background: var(--raised);
-    box-shadow: var(--shadow); overflow: hidden; min-width: 0;
+  .launch-result {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
   }
-  .console-bar {
-    display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 0.85rem;
-    border-bottom: 1px solid var(--rule); background: var(--sunken);
+  .stat {
+    border: 1px solid var(--rule); border-radius: 11px; background: var(--sunken);
+    padding: 0.85rem 0.9rem; display: grid; gap: 0.15rem;
   }
-  .console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
-  .console-bar span { margin-left: 0.6rem; font-size: 12px; color: var(--ink-faint); }
-  .console pre { margin: 0; padding: 1rem 1.1rem; font-size: 12.5px; line-height: 1.7; overflow-x: auto; }
-  .console code { font-family: var(--mono); white-space: pre; }
-  .t-dim { color: var(--ink-faint); }
-  .t-strong { color: var(--ink); font-weight: 600; }
-  .t-ok { color: var(--accent-line); }
+  .stat b { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+  .stat:first-child b { color: var(--accent-line); }
+  .stat span { font-size: 12px; color: var(--ink-faint); }
+  .launch-foot { margin: 0.15rem 0 0; font-size: 13px; color: var(--ink-faint); }
 
   .picker { border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
   .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }
