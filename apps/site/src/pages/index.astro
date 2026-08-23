@@ -94,7 +94,6 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
         <p class="eyebrow">the composer</p>
         <h2>Tell it about the project</h2>
       </div>
-      <button type="button" id="restart" class="button ghost small" hidden>Start over</button>
     </div>
 
     <div class="picker-body">
@@ -219,7 +218,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
   /* sized to the longest step, so answering one does not resize the card under the cursor */
-  .picker-body > #stage { padding: 1.8rem; min-height: 37.5rem; }
+  .picker-body > #stage { position: relative; padding: 1.8rem 1.8rem 6rem; min-height: 40rem; }
   .steps { grid-column: 1 / -1; display: flex; gap: 0.4rem; padding: 1rem 1.8rem 0; }
   .step { height: 3px; border-radius: 2px; background: var(--rule); flex: 1; transition: background 200ms; }
   .step[data-done] { background: var(--accent); }
@@ -276,9 +275,21 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   }
   .q-option b { font-weight: 600; display: block; }
   .q-option small { color: var(--ink-faint); font-size: 13px; }
-  .q-actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; align-items: center; }
-  .q-back { background: none; border: 0; font: inherit; font-size: 14px; color: var(--ink-faint); cursor: pointer; padding: 0; }
-  .q-back:hover { color: var(--ink); }
+  /* pinned to the bottom of the stage: the answers above it change length every step, and
+     a control that moves is a control you have to look for */
+  .q-actions {
+    position: absolute; left: 1.8rem; right: 1.8rem; bottom: 1.8rem;
+    display: flex; gap: 0.6rem; align-items: center;
+    padding-top: 1.2rem; border-top: 1px solid var(--rule);
+  }
+  .q-actions [data-forward] { margin-left: auto; }
+  .q-actions [data-forward]:not(:disabled) { color: var(--ink); border-color: var(--rule-strong); }
+  .q-btn {
+    font: inherit; font-size: 13.5px; cursor: pointer; color: var(--ink-soft);
+    background: none; border: 1px solid var(--rule); border-radius: 8px; padding: 0.45rem 0.9rem;
+  }
+  .q-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--rule-strong); }
+  .q-btn:disabled, .button:disabled { opacity: 0.38; cursor: not-allowed; }
 
   .soon { border: 1px dashed var(--rule-strong); border-radius: 10px; padding: 1.2rem 1.3rem; background: var(--ground); }
   .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
@@ -308,7 +319,6 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   const stage = document.querySelector('#stage');
   const steps = document.querySelector('#steps');
-  const restart = document.querySelector('#restart');
   const els = {
     count: document.querySelector('#count'),
     breakdown: document.querySelector('#breakdown'),
@@ -394,6 +404,18 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     return `<div class="crumbs">${crumbs.join('<span class="crumb-sep">/</span>')}</div>`;
   }
 
+  function actionsMarkup(forward) {
+    const ahead = forward.label
+      ? `<button class="q-btn" type="button" data-forward>${forward.label}</button>`
+      : '';
+    return `
+      <div class="q-actions">
+        <button class="q-btn" type="button" data-back${path.length === 0 ? ' disabled' : ''}>Back</button>
+        <button class="q-btn" type="button" data-reset${answers.size === 0 ? ' disabled' : ''}>Reset</button>
+        ${ahead}
+      </div>`;
+  }
+
   function optionMarkup(option, chosen) {
     const on = chosen.includes(option.id) ? ' data-on' : '';
     return `
@@ -432,7 +454,6 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   function render() {
     renderSteps();
     const { all, list, words, rules } = renderTally();
-    restart.hidden = path.length === 0 && !answers.size;
 
     if (stalled) {
       stage.innerHTML = `
@@ -445,7 +466,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
           <p>${stalled.soon.replace(/`([^`]+)`/g, '<code>$1</code>')}</p>
           <p>The registry says what it covers rather than pretending to cover everything.</p>
         </div>
-        <div class="q-actions"><button class="q-back" type="button" data-back>Back</button></div>`;
+        ${actionsMarkup({})}`;
       wire(null);
       return;
     }
@@ -472,7 +493,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
           <code data-command>${command}</code>
           <button type="button" data-copy="${command}">copy</button>
         </div>
-        <div class="q-actions"><button class="q-back" type="button" data-back>Back</button></div>`;
+        ${actionsMarkup({})}`;
       wire(null);
       return;
     }
@@ -489,11 +510,28 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       <div class="q-options"${question.multi ? ' data-multi' : ''}>
         ${question.options.map((o) => optionMarkup(o, chosen)).join('')}
       </div>
-      <div class="q-actions">
-        ${question.multi ? `<button class="button small" type="button" data-done>${chosen.length === 0 ? 'Nothing extra' : 'Done'}</button>` : ''}
-        ${path.length > 0 ? '<button class="q-back" type="button" data-back>Back</button>' : ''}
-      </div>`;
+      ${actionsMarkup(question.multi
+        ? { label: chosen.length === 0 ? 'Nothing extra' : 'Done' }
+        : { label: chosen.length > 0 ? 'Next' : '' })}`;
     wire(question);
+  }
+
+  /**
+   * Forward retraces the route already answered, which only works because the answers
+   * outlive the path: going back four steps and forward four lands where you were.
+   */
+  function forward() {
+    const question = questions.get(current);
+    const chosen = answerFor(current);
+    if (!question) return;
+    if (!question.multi && chosen.length === 0) return;
+    if (!path.includes(question.id)) path.push(question.id);
+
+    if (question.multi) { current = null; render(); return; }
+    const option = question.options.find((o) => o.id === chosen[0]);
+    stalled = option?.soon ? option : null;
+    current = option?.soon ? null : (option?.next ?? null);
+    render();
   }
 
   function wire(question) {
@@ -501,17 +539,13 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       for (const button of stage.querySelectorAll('[data-option]')) {
         button.addEventListener('click', () => choose(question, button.dataset.option));
       }
-      const done = stage.querySelector('[data-done]');
-      if (done) {
-        done.addEventListener('click', () => {
-          if (!path.includes(question.id)) path.push(question.id);
-          current = null;
-          render();
-        });
-      }
     }
     const backButton = stage.querySelector('[data-back]');
-    if (backButton) backButton.addEventListener('click', back);
+    if (backButton && !backButton.disabled) backButton.addEventListener('click', back);
+    const forwardButton = stage.querySelector('[data-forward]');
+    if (forwardButton && !forwardButton.disabled) forwardButton.addEventListener('click', forward);
+    const resetButton = stage.querySelector('[data-reset]');
+    if (resetButton && !resetButton.disabled) resetButton.addEventListener('click', reset);
 
     for (const crumb of stage.querySelectorAll('[data-crumb]')) {
       crumb.addEventListener('click', () => {
@@ -524,12 +558,13 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     }
   }
 
-  restart.addEventListener('click', () => {
+  function reset() {
     answers.clear();
     path = [];
     current = START;
     stalled = null;
     render();
-  });
+  }
+
   render();
 </script>
