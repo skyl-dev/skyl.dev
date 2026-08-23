@@ -6,6 +6,8 @@ skills.
 ## The CLI
 
 ```
+npx skyl.dev scan    no install, reads the project and proposes
+
 skyl scan            read the project and propose an install
 skyl add <skill>     install skills and what they require
 skyl remove <skill>  take them back out
@@ -72,8 +74,8 @@ pnpm build
 
 Pre-alpha. The site is not started, and nothing is published to npm yet.
 
-The bare name `skyl` on npm has been taken since 2021, so the package is scoped. The command is
-still `skyl`; only where it comes from is different.
+The bare name `skyl` on npm has been taken since 2021, so the package is `skyl.dev`, matching the
+domain. The command it installs is still `skyl`.
 
 ## License
 

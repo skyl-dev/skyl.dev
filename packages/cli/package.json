@@ -1,5 +1,5 @@
 {
-  "name": "@skyl/cli",
+  "name": "skyl.dev",
   "version": "0.0.0",
   "description": "Install curated AI agent skills for what your project actually uses",
   "type": "module",
@@ -30,7 +30,13 @@
   "engines": {
     "node": ">=20"
   },
-  "publishConfig": {
-    "access": "public"
-  }
+  "bundleDependencies": [
+    "@skyl/core"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skyl-dev/skyl.dev.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://skyl.dev"
 }
