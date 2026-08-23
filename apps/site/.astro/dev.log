@@ -52,3 +52,11 @@
 {"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
 {"message":"[200] / 7ms","label":null,"level":"info"}
 {"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 9ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] / 13ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"[200] / 8ms","label":null,"level":"info"}
+{"message":"[200] / 3ms","label":null,"level":"info"}

@@ -11,73 +11,81 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
 ---
 
 <Base title="docs" section="docs" description="Every skyl command, what it does, and why it behaves the way it does.">
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">the cli</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Commands</h1>
-    <p class="lede">Ten commands. Nothing is written without asking, and every one prints what it would do first.</p>
-    <div style="margin-top: 1.8rem; max-width: 30rem;"><Command text="npm i -g skyl.dev" /></div>
-    <p style="color: var(--ink-faint); font-size: var(--fs-ui); margin-top: 0.8rem;">
-      Or prefix any command with <code>npx skyl.dev</code> and install nothing.
-    </p>
-  </section>
-
-  <div style="display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--sp-7); align-items: start;" class="docs-grid">
-    <nav style="position: sticky; top: 5.5rem; font-size: var(--fs-ui); display: grid; gap: var(--sp-4);" class="docs-nav">
-      {groups.map((group) => (
-        <div>
-          <p class="eyebrow" style="margin-bottom: 0.55rem;">{group.title}</p>
-          <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-1);">
-            {group.commands.map((c) => (
-              <li><a href={`#${c.name}`} style="text-decoration: none; color: var(--ink-soft);">{c.name}</a></li>
-            ))}
-          </ul>
-        </div>
-      ))}
+  <div class="docs">
+    <nav class="docs-rail" aria-label="commands">
+      <div class="rail-inner">
+        <a class="rail-back" href="/install">← Install</a>
+        {groups.map((group) => (
+          <div class="rail-group">
+            <p class="rail-title">{group.title}</p>
+            <ul>
+              {group.commands.map((c) => (
+                <li><a href={`#${c.name}`} data-rail={c.name}>{c.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     </nav>
 
-    <div>
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">the cli</p>
+        <h1>Commands</h1>
+        <p class="docs-lede">
+          Ten of them. Nothing is written without asking, and every one prints what it would do first.
+        </p>
+        <div class="docs-install">
+          <Command text="npm i skyl.dev" tone="primary" />
+          <p>Or prefix any command with <code>npx skyl.dev</code> and install nothing.</p>
+        </div>
+      </header>
+
       {groups.map((group) => (
-        <section>
-          <h2 style="font-size: var(--fs-ui); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin: 2.5rem 0 1.2rem;">
-            {group.title}
-          </h2>
+        <section class="docs-group">
+          <h2 class="group-rule"><span>{group.title}</span></h2>
+
           {group.commands.map((command) => (
-            <article id={command.name} style="border-top: 1px solid var(--rule); padding: 2rem 0; scroll-margin-top: 5rem;">
-              <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
-                <h3 style="font-size: var(--fs-serif);">{command.name}</h3>
-                <code style="color: var(--ink-faint); font-size: var(--fs-ui);">{command.usage}</code>
+            <article class="doc" id={command.name}>
+              <div class="doc-head">
+                <h3><a href={`#${command.name}`}>{command.name}</a></h3>
+                <code class="doc-usage">{command.usage}</code>
               </div>
-              <p style="font-size: var(--fs-h3); color: var(--ink); margin: 0.7rem 0 1.2rem; font-weight: 500;">{command.summary}</p>
+              <p class="doc-summary">{command.summary}</p>
 
-              {command.body.map((paragraph) => (
-                <p style="color: var(--ink-soft); font-size: var(--fs-body); max-width: 62ch; margin: 0 0 1rem;">{paragraph}</p>
-              ))}
-
-              {command.flags && (
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: var(--fs-ui); max-width: 62ch;">
-                  <tbody>
-                    {command.flags.map((flag) => (
-                      <tr>
-                        <td style="padding: 0.45rem 1rem 0.45rem 0; border-bottom: 1px solid var(--rule); white-space: nowrap; vertical-align: top;">
-                          <code>{flag.flag}</code>
-                        </td>
-                        <td style="padding: 0.45rem 0; border-bottom: 1px solid var(--rule); color: var(--ink-soft);">{flag.says}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-
-              {command.examples && (
-                <div style="display: grid; gap: var(--sp-2); margin-top: 1.4rem; max-width: 62ch;">
-                  {command.examples.map((example) => (
-                    <div>
-                      <Command text={example.run} />
-                      <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin: 0.4rem 0 0 0.2rem;">{example.does}</p>
-                    </div>
-                  ))}
+              <div class="doc-body">
+                <div class="doc-prose">
+                  {command.body.map((paragraph) => <p>{paragraph}</p>)}
                 </div>
-              )}
+
+                <div class="doc-side">
+                  {command.flags && (
+                    <div class="doc-flags">
+                      <p class="doc-side-title">flags</p>
+                      <dl>
+                        {command.flags.map((flag) => (
+                          <>
+                            <dt><code>{flag.flag}</code></dt>
+                            <dd>{flag.says}</dd>
+                          </>
+                        ))}
+                      </dl>
+                    </div>
+                  )}
+
+                  {command.examples && (
+                    <div class="doc-examples">
+                      <p class="doc-side-title">examples</p>
+                      {command.examples.map((example) => (
+                        <div class="doc-example">
+                          <Command text={example.run} />
+                          <p>{example.does}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </article>
           ))}
         </section>
@@ -86,9 +94,58 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
   </div>
 </Base>
 
-<style>
-  @media (max-width: 900px) {
-    .docs-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 1.5rem !important; }
-    .docs-nav { position: static !important; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); display: grid !important; }
+<style is:global>
+  .doc { padding: var(--sp-5) 0 var(--sp-6); border-top: 1px solid var(--rule); scroll-margin-top: 5rem; }
+  .doc:first-of-type { border-top: 0; padding-top: 0; }
+  .doc-head { display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; }
+  .doc-head h3 { font-size: var(--fs-strong); }
+  .doc-head a { text-decoration: none; }
+  .doc-head a:hover { color: var(--accent); }
+  .doc-usage {
+    font-size: var(--fs-ui); color: var(--ink-faint);
+    border: 1px solid var(--rule); border-radius: var(--r-xs); padding: 0.15rem 0.5rem; background: var(--raised);
+  }
+  .doc-summary { margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-lead); color: var(--ink); }
+
+  /* prose beside the reference material, rather than a column of everything */
+  .doc-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr); gap: var(--sp-6); align-items: start; }
+  .doc-prose p { margin: 0 0 var(--sp-3); font-size: var(--fs-ui); color: var(--ink-soft); max-width: 58ch; line-height: 1.65; }
+  .doc-side { display: grid; gap: var(--sp-5); }
+  .doc-side-title {
+    margin: 0 0 var(--sp-2); font-size: var(--fs-micro); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
+  }
+  .doc-flags dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.4rem var(--sp-3); align-items: baseline; }
+  .doc-flags dt { margin: 0; }
+  .doc-flags dt code { font-size: var(--fs-meta); color: var(--ink); white-space: nowrap; }
+  .doc-flags dd { margin: 0; font-size: var(--fs-meta); color: var(--ink-soft); }
+  .doc-example { margin-bottom: var(--sp-3); }
+  .doc-example p { margin: var(--sp-1) 0 0; font-size: var(--fs-meta); color: var(--ink-faint); }
+
+  @media (max-width: 1000px) {
+    .doc-body { grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); }
   }
 </style>
+
+<script>
+  // the rail follows the reader: whichever command is highest in view is the marked one
+  const links = new Map<string, HTMLElement>();
+  for (const link of document.querySelectorAll<HTMLElement>('[data-rail]')) {
+    links.set(link.dataset.rail!, link);
+  }
+  const articles = [...document.querySelectorAll<HTMLElement>('.doc')];
+
+  if (articles.length && 'IntersectionObserver' in window) {
+    const seen = new Set<string>();
+    const watcher = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) seen.add(entry.target.id);
+        else seen.delete(entry.target.id);
+      }
+      const first = articles.find((a) => seen.has(a.id))?.id;
+      for (const [name, link] of links) link.toggleAttribute('data-on', name === first);
+    }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+
+    for (const article of articles) watcher.observe(article);
+  }
+</script>

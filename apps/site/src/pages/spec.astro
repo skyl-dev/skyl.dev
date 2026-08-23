@@ -9,29 +9,95 @@ const docs = [
 ];
 
 const rendered = await Promise.all(
-  docs.map(async (doc) => ({ ...doc, html: await loadDoc('spec', doc.file) })),
+  docs.map(async (doc) => {
+    // the file's own H1 repeats the group label above it, three times over per document
+    const html = (await loadDoc('spec', doc.file))?.replace(/<h1[^>]*>.*?<\/h1>/, '');
+    // pull the h2s out for the rail, so a reader can see the shape before reading it
+    const headings = [...(html ?? '').matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map((m) => {
+      const text = m[1]!.replace(/<[^>]+>/g, '').trim();
+      return { text, id: `${doc.slug}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` };
+    });
+    return { ...doc, html, headings };
+  }),
 );
-const present = rendered.filter((d) => d.html);
+
+// give every h2 the id the rail points at
+const present = rendered
+  .filter((d) => d.html)
+  .map((doc) => {
+    let i = 0;
+    const html = doc.html!.replace(/<h2([^>]*)>/g, () => `<h2 id="${doc.headings[i++]?.id ?? ''}">`);
+    return { ...doc, html };
+  });
 ---
 
 <Base title="spec" section="spec" description="The skill format, the axis vocabulary, and the four tests a rule has to pass.">
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">the standard</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Spec</h1>
-    <p class="lede">
-      A registry is only as good as what it refuses. This is what a skill has to be, and what a rule
-      has to survive.
-    </p>
-  </section>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="the spec">
+      <div class="rail-inner">
+        <a class="rail-back" href="/skills">← Skills</a>
+        {present.map((doc) => (
+          <div class="rail-group">
+            <p class="rail-title"><a href={`#${doc.slug}`} style="text-decoration: none; color: inherit;">{doc.title}</a></p>
+            <ul>
+              {doc.headings.map((h) => <li><a href={`#${h.id}`} data-rail={h.id}>{h.text}</a></li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </nav>
 
-  <nav style="display: flex; gap: var(--sp-2); flex-wrap: wrap; padding-bottom: 2.5rem; border-bottom: 1px solid var(--rule);">
-    {present.map((doc) => <a class="chip" href={`#${doc.slug}`} style="text-decoration: none;">{doc.title}</a>)}
-  </nav>
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">the standard</p>
+        <h1>Spec</h1>
+        <p class="docs-lede">
+          A registry is only as good as what it refuses. This is what a skill has to be, and what a
+          rule has to survive.
+        </p>
+      </header>
 
-  {present.map((doc) => (
-    <section id={doc.slug} style="padding: 3rem 0; border-bottom: 1px solid var(--rule); scroll-margin-top: 5rem;">
-      <p class="eyebrow" style="margin-bottom: 0.6rem;">{doc.blurb}</p>
-      <div class="prose scroller" set:html={doc.html} />
-    </section>
-  ))}
+      {present.map((doc) => (
+        <section class="spec-doc" id={doc.slug}>
+          <h2 class="group-rule"><span>{doc.title}</span></h2>
+          <p class="spec-blurb">{doc.blurb}</p>
+          <div class="prose scroller spec-prose" set:html={doc.html} />
+          <p class="spec-source">
+            <a href={`https://github.com/skyl-dev/skyl/blob/main/spec/${doc.file}`}>{doc.file} on GitHub</a>
+          </p>
+        </section>
+      ))}
+    </div>
+  </div>
 </Base>
+
+<style is:global>
+  .spec-doc { padding-bottom: var(--sp-7); scroll-margin-top: 5rem; }
+  .spec-blurb { margin: 0 0 var(--sp-5); font-size: var(--fs-ui); color: var(--ink-faint); }
+  .spec-prose { max-width: 64ch; }
+  .spec-prose h2 { font-family: var(--mono); font-size: var(--fs-h3); font-weight: 600; margin: var(--sp-6) 0 var(--sp-3); scroll-margin-top: 5rem; }
+  .spec-prose h2:first-child { margin-top: 0; }
+  .spec-prose h3 { margin-top: var(--sp-5); }
+  .spec-source { margin: var(--sp-5) 0 0; font-size: var(--fs-meta); }
+  .spec-source a { color: var(--ink-faint); text-decoration: none; }
+  .spec-source a:hover { color: var(--accent); }
+</style>
+
+<script>
+  const links = new Map<string, HTMLElement>();
+  for (const link of document.querySelectorAll<HTMLElement>('[data-rail]')) links.set(link.dataset.rail!, link);
+  const headings = [...document.querySelectorAll<HTMLElement>('.spec-prose h2[id]')];
+
+  if (headings.length && 'IntersectionObserver' in window) {
+    const seen = new Set<string>();
+    const watcher = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) seen.add(entry.target.id);
+        else seen.delete(entry.target.id);
+      }
+      const first = headings.find((h) => seen.has(h.id))?.id;
+      for (const [id, link] of links) link.toggleAttribute('data-on', id === first);
+    }, { rootMargin: '-8% 0px -75% 0px', threshold: 0 });
+    for (const heading of headings) watcher.observe(heading);
+  }
+</script>
