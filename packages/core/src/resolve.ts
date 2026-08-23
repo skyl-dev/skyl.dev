@@ -8,9 +8,9 @@ import type { SkillMeta } from './types.ts';
  * Install order matters: `agent_sections` are concatenated in the order written, and a
  * layer that refers to its core reads wrong if it lands first.
  */
-export function resolve(skills: readonly SkillMeta[], requested: readonly string[]): SkillMeta[] {
+export function resolve<T extends SkillMeta>(skills: readonly T[], requested: readonly string[]): T[] {
   const byName = new Map(skills.map((s) => [s.name, s]));
-  const ordered: SkillMeta[] = [];
+  const ordered: T[] = [];
   const done = new Set<string>();
   const path: string[] = [];
 
@@ -45,7 +45,7 @@ export function resolve(skills: readonly SkillMeta[], requested: readonly string
 }
 
 /** What `resolve` added that the caller did not ask for, so a prompt can say so. */
-export function implied(resolved: readonly SkillMeta[], requested: readonly string[]): SkillMeta[] {
+export function implied<T extends SkillMeta>(resolved: readonly T[], requested: readonly string[]): T[] {
   const asked = new Set(requested);
   return resolved.filter((s) => !asked.has(s.name));
 }

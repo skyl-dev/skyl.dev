@@ -1,0 +1,27 @@
+name: checks
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: skyl.dev }
+      # the registry tests run against the real skills rather than a fixture
+      - uses: actions/checkout@v4
+        with: { repository: skyl-dev/skyl, path: skyl }
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: skyl.dev/pnpm-lock.yaml }
+      - run: pnpm install --frozen-lockfile
+        working-directory: skyl.dev
+      - run: pnpm typecheck
+        working-directory: skyl.dev
+      - run: pnpm build
+        working-directory: skyl.dev
+      - run: pnpm test
+        working-directory: skyl.dev

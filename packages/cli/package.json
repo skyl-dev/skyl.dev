@@ -1,0 +1,32 @@
+{
+  "name": "skyl",
+  "version": "0.0.0",
+  "description": "Install curated AI agent skills for what your project actually uses",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "skyl": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "bundle.json"
+  ],
+  "keywords": [
+    "ai",
+    "agent",
+    "skills",
+    "claude",
+    "cursor",
+    "llm"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --force"
+  },
+  "dependencies": {
+    "@skyl/core": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

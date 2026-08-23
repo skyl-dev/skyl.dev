@@ -54,7 +54,7 @@ export function detect(skills: readonly SkillMeta[], signals: ProjectSignals): M
  * Skills in the family that did *not* match, so `scan` can show what it considered and
  * rejected. A tool that only lists what it wants looks like it is guessing.
  */
-export function unmatched(skills: readonly SkillMeta[], matched: readonly Match[]): SkillMeta[] {
+export function unmatched<T extends SkillMeta>(skills: readonly T[], matched: readonly Match[]): T[] {
   const taken = new Set(matched.map((m) => m.skill));
   const families = new Set(matched.map((m) => m.skill.split('/')[0]!));
   return skills
