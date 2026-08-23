@@ -1,16 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
-import { loadDoc, loadFamilies } from '../lib/registry.ts';
+import { evidenceFacts, loadDoc, loadFamilies, tokens } from '../lib/registry.ts';
 
 const families = await loadFamilies();
-const docs = await Promise.all(
-  families.map(async (family) => ({
-    name: family.name,
-    overview: await loadDoc('evidence', family.name, 'README.md'),
-    matrix: await loadDoc('evidence', family.name, 'model-matrix.md'),
-    skills: family.skills.filter((s) => s.evidence),
-  })),
-);
+
+const family = families[0];
+const facts = family ? await evidenceFacts(family.name) : {};
+
+// the README opens with the same table we render as the strip below, and a two-item list
+// pointing at documents this page already links to
+const readme = (await loadDoc('evidence', family?.name ?? 'android', 'README.md'))
+  ?.replace(/<table[\s\S]*?<\/table>/, '')
+  .replace(/<ul>[\s\S]*?<\/ul>/, '')
+  // the section is already labelled above it
+  .replace(/<h2[^>]*>[\s\S]*?<\/h2>/, '');
+
+const matrix = await loadDoc('evidence', family?.name ?? 'android', 'model-matrix.md');
+
+const STRIP = [
+  { key: 'skills', label: 'skills' },
+  { key: 'evals', label: 'evals' },
+  { key: 'recorded runs', label: 'recorded runs' },
+];
+
+const measured = family?.skills.filter((s) => s.evidence) ?? [];
 ---
 
 <Base
@@ -18,38 +31,103 @@ const docs = await Promise.all(
   section="evidence"
   description="What was measured, on which models, and what did not work. None of it is sent to your agent."
 >
-  <section style="padding: var(--sp-7) 0 var(--sp-6);">
-    <p class="eyebrow">what was measured</p>
-    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Evidence</h1>
-    <p class="lede">
+  <header class="ev-head">
+    <p class="eyebrow" data-enter style="--i: 0">what was measured</p>
+    <h1 data-enter style="--i: 1">Evidence</h1>
+    <p class="ev-lede" data-enter style="--i: 2">
       A rule earns its place by changing what a model writes. These are the runs behind that claim,
       including the ones that changed nothing.
     </p>
+  </header>
+
+  <section class="ev-strip" data-enter style="--i: 3">
+    {STRIP.map((stat) => (
+      <div class="ev-stat">
+        <b>{facts[stat.key] ?? '—'}</b>
+        <span>{stat.label}</span>
+      </div>
+    ))}
+    <div class="ev-stat wide">
+      <b class="quiet" set:html={facts['models'] ?? '—'} />
+      <span>models</span>
+    </div>
+    <div class="ev-stat wide">
+      <b class="quiet" set:html={facts['harnesses'] ?? '—'} />
+      <span>harnesses</span>
+    </div>
   </section>
 
-  {docs.map((family) => (
-    <section style="padding-top: 1rem;">
-      {family.overview && (
-        <div class="prose scroller" style="padding-bottom: 2rem; border-bottom: 1px solid var(--rule);" set:html={family.overview} />
-      )}
-      {family.matrix && (
-        <div style="padding: 2.5rem 0; border-bottom: 1px solid var(--rule);">
-          <div class="prose scroller" set:html={family.matrix} />
-        </div>
-      )}
-      {family.skills.length > 0 && (
-        <div style="padding: 2.5rem 0;">
-          <p class="eyebrow" style="margin-bottom: 1rem;">per skill</p>
-          <div class="grid">
-            {family.skills.map((s) => (
-              <a class="card" href={`/skills/${s.meta.family}/${s.meta.skill}#evidence`}>
-                <strong>{s.meta.name}</strong>
-                <p style="margin: 0.4rem 0 0; color: var(--ink-soft); font-size: var(--fs-meta);">what the runs showed</p>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+  {readme && (
+    <section class="ev-read">
+      <h2 class="group-rule"><span>how to read this</span></h2>
+      <div class="prose scroller" set:html={readme} />
     </section>
-  ))}
+  )}
+
+  {measured.length > 0 && (
+    <section class="ev-skills">
+      <h2 class="group-rule"><span>per skill</span></h2>
+      <div class="ev-grid">
+        {measured.map((skill) => (
+          <a class="ev-card" href={`/skills/${skill.meta.family}/${skill.meta.skill}#evidence`}>
+            <div class="ev-card-head">
+              <strong>{skill.meta.skill}</strong>
+              <span class="chip">{skill.meta.axis}</span>
+            </div>
+            <p>{skill.meta.description}</p>
+            <span class="ev-card-foot">
+              <b>{skill.meta.rules.length}</b> rules · <b>~{tokens(skill.meta.installableWords).toLocaleString()}</b> tokens
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {matrix && (
+    <section class="ev-matrix">
+      <h2 class="group-rule"><span>model matrix</span></h2>
+      <p class="ev-note">The same task across models, harnesses and providers.</p>
+      <div class="prose scroller ev-table" set:html={matrix} />
+    </section>
+  )}
 </Base>
+
+<style is:global>
+  .ev-head { padding: var(--sp-7) 0 var(--sp-5); }
+  .ev-head h1 { font-size: var(--fs-title); margin: var(--sp-2) 0 var(--sp-3); }
+  .ev-lede { font-family: var(--prose); font-size: var(--fs-serif); color: var(--ink-soft); margin: 0; max-width: 52ch; }
+
+  /* the numbers first, since they are the claim */
+  .ev-strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px;
+    border: 1px solid var(--rule); border-radius: var(--r-lg); overflow: hidden;
+    background: var(--rule); box-shadow: var(--shadow);
+  }
+  .ev-stat { background: var(--raised); padding: var(--sp-4) var(--sp-4); display: grid; gap: 0.2rem; align-content: start; }
+  .ev-stat.wide { grid-column: span 2; }
+  .ev-stat b { font-size: var(--fs-strong); font-weight: 600; letter-spacing: -0.03em; color: var(--gold); }
+  .ev-stat b.quiet { font-size: var(--fs-ui); color: var(--ink); font-weight: 500; letter-spacing: 0; line-height: 1.5; }
+  .ev-stat span { font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); }
+  .ev-stat code { font-size: var(--fs-meta); }
+
+  .ev-read, .ev-skills, .ev-matrix { padding-top: var(--sp-6); }
+  .ev-note { margin: 0 0 var(--sp-4); font-size: var(--fs-ui); color: var(--ink-faint); }
+
+  .ev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--sp-3); }
+  .ev-card {
+    display: grid; gap: var(--sp-2); align-content: start; text-decoration: none;
+    border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised);
+    padding: var(--sp-4); transition: border-color 140ms, transform 140ms, box-shadow 200ms;
+  }
+  .ev-card:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .ev-card-head { display: flex; align-items: baseline; gap: var(--sp-2); }
+  .ev-card p { margin: 0; font-size: var(--fs-meta); color: var(--ink-soft); line-height: 1.55; }
+  .ev-card-foot { font-size: var(--fs-micro); color: var(--ink-faint); }
+  .ev-card-foot b { color: var(--gold); font-weight: 600; }
+
+  /* a wide table reads better banded, and it must scroll rather than push the page */
+  .ev-table table { font-size: var(--fs-meta); }
+  .ev-table tbody tr:nth-child(odd) { background: color-mix(in srgb, var(--raised) 60%, transparent); }
+  .ev-table td, .ev-table th { white-space: nowrap; }
+</style>

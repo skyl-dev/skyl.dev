@@ -164,7 +164,8 @@ export async function evidenceFacts(family: string): Promise<Record<string, stri
   if (!text) return {};
   const out: Record<string, string> = {};
   for (const row of text.matchAll(/^\|\s*([a-z][a-z ]*?)\s*\|\s*(.+?)\s*\|$/gm)) {
-    out[row[1]!] = row[2]!;
+    // the cell is markdown, so its inline code has to become inline code
+    out[row[1]!] = row[2]!.replace(/`([^`]+)`/g, '<code>$1</code>');
   }
   return out;
 }
