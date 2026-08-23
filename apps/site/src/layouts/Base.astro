@@ -70,11 +70,45 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
 
     <footer class="site">
       <div class="shell footer-inner">
-        <span>skyl</span>
-        <a href="https://github.com/skyl-dev/skyl">registry</a>
-        <a href="https://github.com/skyl-dev/skyl.dev">site and cli</a>
-        <a href="https://www.npmjs.com/package/skyl.dev">npm</a>
-        <span class="spacer">MIT</span>
+        <div class="footer-say">
+          <a class="wordmark" href="/">
+            <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            skyl
+          </a>
+          <p>
+            Curated agent skills, split by axis, so a project loads the intersection that applies to
+            it rather than one file that tries to cover everything.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <p class="eyebrow">Start</p>
+          <a href="/install">Install</a>
+          <a href="/#pick">Compose a stack</a>
+          <a href="/starters">Starters</a>
+          <a href="/docs">CLI commands</a>
+        </div>
+
+        <div class="footer-col">
+          <p class="eyebrow">Registry</p>
+          <a href="/skills">All skills</a>
+          <a href="/spec">Format and axes</a>
+          <a href="/evidence">Evidence</a>
+          <a href="/contributors">Contributors</a>
+        </div>
+
+        <div class="footer-col">
+          <p class="eyebrow">Source</p>
+          <a href="https://github.com/skyl-dev/skyl">Registry repo</a>
+          <a href="https://github.com/skyl-dev/skyl.dev">Site and CLI</a>
+          <a href="https://www.npmjs.com/package/skyl.dev">npm package</a>
+          <a href="https://github.com/skyl-dev/skyl/blob/main/CONTRIBUTING.md">Contributing</a>
+        </div>
+      </div>
+
+      <div class="shell footer-base">
+        <span>MIT licensed</span>
+        <span class="spacer">Skills are proposed, never installed without asking.</span>
       </div>
     </footer>
   </body>

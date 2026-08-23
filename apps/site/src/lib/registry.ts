@@ -129,6 +129,21 @@ export async function loadDoc(...path: string[]): Promise<string | undefined> {
   return readIfPresent(join(REGISTRY_ROOT, ...path));
 }
 
+/**
+ * The headline table from a family's evidence README, read rather than restated, so the
+ * site cannot claim a number the registry does not.
+ */
+export async function evidenceFacts(family: string): Promise<Record<string, string>> {
+  const text = await readFile(join(REGISTRY_ROOT, 'evidence', family, 'README.md'), 'utf8')
+    .catch(() => undefined);
+  if (!text) return {};
+  const out: Record<string, string> = {};
+  for (const row of text.matchAll(/^\|\s*([a-z][a-z ]*?)\s*\|\s*(.+?)\s*\|$/gm)) {
+    out[row[1]!] = row[2]!;
+  }
+  return out;
+}
+
 /** The token estimate the CLI prints, so the two never disagree in front of a user. */
 export function tokens(words: number): number {
   return Math.round((words * 4) / 300) * 100;

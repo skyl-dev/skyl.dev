@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Command from '../components/Command.astro';
-import { loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
+import { evidenceFacts, loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
 import { QUESTIONS, START } from '../lib/wizard.ts';
 
 const skills = await loadSkills();
@@ -30,6 +30,23 @@ const demo = skills.filter((s) =>
 // the five axes, and how much of each a typical project actually takes. This is the whole
 // idea in one picture, and it says it without naming a family
 const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
+const facts = await evidenceFacts(families[0]?.name ?? 'android');
+
+const AXIS_SAYS = [
+  { id: 'core', owns: 'The platform underneath. What the system can take away, what has to survive being killed, what leaves the main thread.' },
+  { id: 'language', owns: 'How the language you write expresses it. Scope and cancellation, nullability, equality, the things that read fine and behave badly.' },
+  { id: 'framework', owns: 'Whatever draws the screen or serves the request, and only where it goes wrong in a way particular to that framework.' },
+  { id: 'service', owns: 'A third party you talk to, and its own failure modes. Nothing published here yet.' },
+  { id: 'topic', owns: 'A concern that cuts across the rest. Data, network, permissions, images, tests: present in most projects, owned by none of the layers above.' },
+];
+
+const ADMISSION = [
+  { n: '01', ask: 'Does the model get this wrong unprompted?', says: 'If it already does the right thing, the rule buys nothing and costs context.' },
+  { n: '02', ask: 'Does a linter or the compiler already catch it?', says: 'Tools that run on every build are cheaper and more reliable than a sentence in a prompt.' },
+  { n: '03', ask: 'Would 900 of 1000 projects hit it?', says: 'A rule for the other hundred belongs in your own file, not in a shared registry.' },
+  { n: '04', ask: 'Is it checkable at every token?', says: 'A reader has to be able to hold it against a file and answer yes or no. Undecidable text is unfollowable.' },
+];
+
 const chosen = new Set(demo.map((s) => s.meta.name));
 const skipped = skills.filter((s) => !chosen.has(s.meta.name)).slice(0, 3).map((s) => s.meta.skill);
 void AXES;
@@ -124,29 +141,91 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     </div>
   </section>
 
-  <section class="pillars">
-    <div>
-      <h3>One axis, one job</h3>
-      <p>
-        Core, language, framework, service, topic. A rule lives on exactly one, so layers never
-        restate each other and a project can drop what it does not use.
+  <section class="axes-band">
+    <div class="band-head">
+      <p class="eyebrow">the model</p>
+      <h2>Five axes, and a project draws from the ones that apply</h2>
+      <p class="band-say">
+        A rule belongs to exactly one axis. That is what stops two layers restating each other, and
+        what lets a project drop the ones it does not use instead of carrying them.
       </p>
     </div>
-    <div>
-      <h3>A rule earns its slot</h3>
-      <p>
-        The model has to get it wrong unprompted, no linter can catch it, and it has to be checkable
-        at every token. Most candidates fail that and are not published.
+
+    <ul class="axis-list">
+      {AXIS_SAYS.map((axis) => {
+        const owned = skills.filter((s) => s.meta.axis === axis.id);
+        return (
+          <li class="axis-item" data-empty={owned.length === 0 ? '' : undefined}>
+            <div class="axis-key">
+              <span class="axis-title">{axis.id}</span>
+              <span class="axis-count">{owned.length === 0 ? 'none yet' : `${owned.length} skill${owned.length === 1 ? '' : 's'}`}</span>
+            </div>
+            <p class="axis-owns">{axis.owns}</p>
+            <div class="axis-names">
+              {owned.map((s) => <a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a>)}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+
+  <section class="admission">
+    <div class="band-head">
+      <p class="eyebrow">what gets in</p>
+      <h2>Four questions, and most candidate rules fail one</h2>
+      <p class="band-say">
+        The interesting part of a registry is what it refuses. Every rule here had to survive all
+        four, and the ones that did not are recorded alongside the ones that did.
       </p>
     </div>
-    <div>
-      <h3>Evidence, in public</h3>
+
+    <div class="tests">
+      {ADMISSION.map((test) => (
+        <div class="test">
+          <span class="test-n">{test.n}</span>
+          <h3>{test.ask}</h3>
+          <p>{test.says}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="measured">
+      <div><b>{facts['evals'] ?? '26'}</b><span>evals</span></div>
+      <div><b>{facts['recorded runs'] ?? '490'}</b><span>recorded runs</span></div>
+      <div><b>4</b><span>model families</span></div>
+      <div><b>2</b><span>harnesses</span></div>
       <p>
-        Every skill carries what was measured, on which models, and what did not work. That half
-        stays in the repository and never reaches your agent. <a href="/evidence">See it</a>.
+        Every run is published, including the ones that changed nothing.{' '}
+        <a href="/evidence">Read the evidence</a>.
       </p>
     </div>
   </section>
+
+  <section class="quick">
+    <div class="band-head">
+      <p class="eyebrow">shortcuts</p>
+      <h2>Or take a known shape</h2>
+    </div>
+    <div class="quick-grid">
+      {[
+        { title: 'A new Android app', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'] },
+        { title: 'A legacy codebase', picks: ['android/core', 'android/java', 'android/xml', 'android/mvvm'] },
+        { title: 'An app with a backend', picks: ['android/core', 'android/kotlin', 'android/networking', 'android/db', 'android/security'] },
+      ].map((starter) => {
+        const list = starter.picks.map((n) => skills.find((s) => s.meta.name === n)!).filter(Boolean);
+        const cost = tokens(list.reduce((n, s) => n + s.meta.installableWords, 0));
+        return (
+          <a class="quick-card" href="/starters">
+            <strong>{starter.title}</strong>
+            <p>{list.map((s) => s.meta.skill).join(' · ')}</p>
+            <span>{list.length} layers · ~{cost.toLocaleString()} tokens</span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
 </Base>
 
 <style is:global>
@@ -313,9 +392,58 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .result-row .why { color: var(--ink-faint); font-size: 12px; margin-left: auto; }
   @media (max-width: 700px) { .result-grid { grid-template-columns: 1fr; } }
 
-  .pillars { padding: 5rem 0 2rem; display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
-  .pillars h3 { font-size: 1rem; margin-bottom: 0.6rem; }
-  .pillars p { color: var(--ink-soft); font-size: 14.5px; margin: 0; max-width: 38ch; }
+  .band-head { max-width: 46rem; margin-bottom: 2.5rem; }
+  .band-head h2 { font-size: 1.75rem; letter-spacing: -0.03em; margin: 0.7rem 0 1rem; }
+  .band-say { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
+
+  .axes-band { padding: 6rem 0 0; }
+  .axis-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .axis-item {
+    display: grid; grid-template-columns: 11rem minmax(0, 1fr) 14rem; gap: 2rem;
+    padding: 1.5rem 0; border-bottom: 1px solid var(--rule); align-items: start;
+  }
+  .axis-key { display: grid; gap: 0.3rem; }
+  .axis-title { font-size: 1rem; font-weight: 600; }
+  .axis-count { font-size: 12px; color: var(--ink-faint); }
+  .axis-item[data-empty] .axis-title { color: var(--ink-faint); }
+  .axis-owns { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+  .axis-names { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .axis-names a {
+    font-size: 12px; text-decoration: none; color: var(--ink-soft);
+    border: 1px solid var(--rule); border-radius: 6px; padding: 0.15rem 0.5rem;
+  }
+  .axis-names a:hover { color: var(--accent); border-color: var(--accent); }
+
+  .admission { padding: 6rem 0 0; }
+  .tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }
+  .test { border-top: 2px solid var(--accent); padding-top: 1rem; }
+  .test-n { font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: 0.06em; }
+  .test h3 { font-size: 1rem; margin: 0.5rem 0 0.6rem; }
+  .test p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+  .measured {
+    margin-top: 2.5rem; padding: 1.5rem 1.8rem; border: 1px solid var(--rule); border-radius: 13px;
+    background: var(--raised); display: flex; gap: 2.5rem; align-items: baseline; flex-wrap: wrap;
+  }
+  .measured div { display: grid; }
+  .measured b { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.03em; }
+  .measured span { font-size: 12px; color: var(--ink-faint); }
+  .measured p { margin: 0 0 0 auto; font-size: 13.5px; color: var(--ink-soft); max-width: 26ch; }
+
+  .quick { padding: 6rem 0 2rem; }
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.9rem; }
+  .quick-card {
+    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
+    padding: 1.2rem 1.3rem; text-decoration: none; display: grid; gap: 0.5rem;
+  }
+  .quick-card:hover { border-color: var(--rule-strong); }
+  .quick-card p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+  .quick-card span { font-size: 12px; color: var(--ink-faint); }
+
+  @media (max-width: 820px) {
+    .axis-item { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; }
+    .measured p { margin-left: 0; }
+  }
 
   @media (max-width: 980px) {
     .hero { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding: 3.5rem 0 3rem; }
