@@ -10,16 +10,40 @@ const { text, label = 'copy', tone = 'plain' } = Astro.props;
 
 <script>
   // Progressive: the command is readable and selectable without this running at all.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  function toast(message: string, ok = true) {
+    let node = document.querySelector<HTMLElement>('#toast');
+    if (!node) {
+      node = document.createElement('div');
+      node.id = 'toast';
+      node.setAttribute('role', 'status');
+      node.setAttribute('aria-live', 'polite');
+      document.body.append(node);
+    }
+    node.textContent = message;
+    node.toggleAttribute('data-bad', !ok);
+    // reflow between messages, or a second copy never re-runs the animation
+    node.removeAttribute('data-on');
+    void node.offsetWidth;
+    node.setAttribute('data-on', '');
+    clearTimeout(timer);
+    timer = setTimeout(() => node!.removeAttribute('data-on'), 2200);
+  }
+
   document.addEventListener('click', async (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-copy]');
     if (!button) return;
+    const text = button.dataset.copy ?? '';
     try {
-      await navigator.clipboard.writeText(button.dataset.copy ?? '');
+      await navigator.clipboard.writeText(text);
       const was = button.textContent;
       button.textContent = 'copied';
       setTimeout(() => { button.textContent = was; }, 1400);
+      toast('Copied to clipboard');
     } catch {
       // clipboard refused, and the text is right there to select
+      toast('Could not copy. Select the text instead.', false);
     }
   });
 </script>

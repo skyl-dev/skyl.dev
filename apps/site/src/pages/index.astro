@@ -403,22 +403,15 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
   .soon p:last-child { margin-bottom: 0; }
 
-  /* columns follow the count, so selecting every layer fills sideways rather than pushing
-     the card taller than every other screen */
-  .result-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 0.35rem; margin: 1.1rem 0 0;
+  .result-names { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0 0; }
+  .result-names a {
+    font-size: 13px; text-decoration: none; color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 7px; padding: 0.3rem 0.65rem;
+    background: var(--ground);
   }
-  .result-row {
-    display: flex; align-items: baseline; gap: 0.55rem; text-decoration: none;
-    padding: 0.38rem 0.6rem; border-radius: 7px; background: var(--ground); border: 1px solid var(--rule);
-    font-size: 13px;
-  }
-  .result-row:hover { border-color: var(--rule-strong); }
-  .result-row b { font-weight: 600; }
-  .result-row .ax { color: var(--ink-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .result-row .why { color: var(--ink-faint); font-size: 12px; margin-left: auto; }
-  @media (max-width: 700px) { .result-grid { grid-template-columns: 1fr; } }
+  .result-names a:hover { border-color: var(--accent); color: var(--accent); }
+  .result-note { margin: 1.3rem 0 0; font-size: 13px; color: var(--ink-faint); max-width: 56ch; line-height: 1.6; }
+  .result-note code { color: var(--ink-soft); }
 
   .band-head { max-width: 46rem; margin-bottom: 2.5rem; }
   .band-head h2 { font-size: 1.75rem; letter-spacing: -0.03em; margin: 0.7rem 0 1rem; }
@@ -684,14 +677,13 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
           <code data-command>${command}</code>
           <button type="button" data-copy="${command}">copy</button>
         </div>
-        <div class="result-grid">
-          ${list.map((s) => `
-            <a class="result-row" href="/skills/${s.family}/${s.skill}">
-              <b>${s.skill}</b>
-              <span class="ax">${s.axis}</span>
-              <span class="why">${s.rules}</span>
-            </a>`).join('')}
+        <div class="result-names">
+          ${list.map((s) => `<a href="/skills/${s.family}/${s.skill}">${s.skill}</a>`).join('')}
         </div>
+        <p class="result-note">
+          Writes one file per layer into <code>.claude/skills</code> and records <code>skyl.lock</code>.
+          <a href="/install">Other tools</a> take the same command with a different target.
+        </p>
         ${actionsMarkup({})}`;
       wire(null);
       return;

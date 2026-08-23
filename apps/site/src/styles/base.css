@@ -138,6 +138,20 @@ footer.site a:hover { color: var(--accent); }
 .prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.55; }
 .prose pre code { background: none; border: 0; padding: 0; }
 
+#toast {
+  position: fixed; left: 50%; bottom: 2rem; z-index: 40;
+  transform: translate(-50%, 0.75rem);
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 13.5px; font-weight: 600; padding: 0.6rem 1.1rem; border-radius: 9px;
+  opacity: 0; pointer-events: none; transition: opacity 160ms, transform 160ms;
+}
+#toast[data-on] { opacity: 1; transform: translate(-50%, 0); }
+#toast[data-bad] { background: var(--raised); color: var(--ink); border: 1px solid var(--rule-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  #toast { transition: opacity 160ms; transform: translate(-50%, 0); }
+}
+
 /* wide content scrolls inside itself rather than pushing the page sideways */
 .scroller { overflow-x: auto; }
 
