@@ -48,6 +48,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
         working-directory: skyl.dev
+      # the tests import @skyl/core, which resolves to its build output, so this comes first
+      - run: pnpm build
+        working-directory: skyl.dev
       - run: pnpm test
         working-directory: skyl.dev
 
