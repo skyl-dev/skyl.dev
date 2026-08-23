@@ -80,14 +80,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   <span class="t-strong">Ruled out</span>  <span class="t-dim">{skipped.join('  ')}</span>
 
-  {demo.length} layers, ~{(demoCost / 1000).toFixed(1)}k tokens <span class="t-dim">into .claude/skills</span>
+  {demo.length} layers, ~{(demoCost / 1000).toFixed(1)}k tokens
   <span class="t-dim">Write them? [y/N]</span>
 </code></pre>
       </div>
 
-      <div class="launch-foot">
-        <span>five axes, and a project draws from the ones that apply</span>
-      </div>
     </div>
   </section>
 
@@ -213,10 +210,6 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .t-strong { color: var(--ink); font-weight: 600; }
   .t-ok { color: var(--term-ok); }
 
-  .launch-foot {
-    padding: 0.75rem 1.3rem; border-top: 1px solid var(--rule);
-    font-size: 12.5px; color: var(--ink-faint);
-  }
 
   .picker { border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
   .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }

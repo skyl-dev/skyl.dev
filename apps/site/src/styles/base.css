@@ -15,10 +15,10 @@
   --ink-faint: #63636e;
   --rule: #e0e0d9;
   --rule-strong: #c4c4ba;
-  --accent: #1f8a4d;
-  --accent-ink: #ffffff;
-  --accent-line: #1f8a4d;
-  --term-ok: #2f7d3a;
+  --accent: #3ddc84;
+  --accent-ink: #071d10;
+  --accent-line: #1b984f;
+  --term-ok: #1b984f;
   --shadow: 0 1px 2px rgb(22 22 26 / 5%), 0 8px 24px -12px rgb(22 22 26 / 12%);
 
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -39,10 +39,10 @@
     --ink-faint: #8b8b96;
     --rule: #2a2a31;
     --rule-strong: #43434d;
-    --accent: #86d6a1;
-    --accent-ink: #0f1a14;
-    --accent-line: #86d6a1;
-    --term-ok: #86d6a1;
+    --accent: #3ddc84;
+    --accent-ink: #071d10;
+    --accent-line: #3ddc84;
+    --term-ok: #3ddc84;
     --shadow: none;
   }
 }
@@ -56,10 +56,10 @@
   --ink-faint: #8b8b96;
   --rule: #2a2a31;
   --rule-strong: #43434d;
-  --accent: #86d6a1;
-  --accent-ink: #0f1a14;
-  --accent-line: #86d6a1;
-  --term-ok: #86d6a1;
+  --accent: #3ddc84;
+  --accent-ink: #071d10;
+  --accent-line: #3ddc84;
+  --term-ok: #3ddc84;
   --shadow: none;
 }
 
