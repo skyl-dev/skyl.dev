@@ -54,10 +54,10 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       </p>
       <div class="hero-cta">
         <a class="button" href="#pick">Find your skills</a>
-        <a class="button ghost" href="/skills">Browse all {skills.length}</a>
+        <a class="button ghost" href="/skills">Browse the skills</a>
       </div>
       <p class="hero-note">
-        {skills.length} skills · {totalRules} rules · {families.length} family published
+        Works with Claude Code, Cursor, Codex, Windsurf and Continue.
       </p>
     </div>
 
@@ -157,9 +157,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   }
   .hero > div:first-child { padding-top: 0.4rem; }
   .hero h1 {
-    font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.05; letter-spacing: -0.045em;
-    margin: 1.1rem 0 1.4rem; font-weight: 700;
+    font-size: clamp(2.3rem, 4.4vw, 3.4rem); line-height: 1.1; letter-spacing: -0.045em;
+    margin: 1.6rem 0 2rem; font-weight: 700;
   }
+  .hero .eyebrow { display: block; }
+  .hero .lede { line-height: 1.62; }
   /* a rule under the phrase, drawn on the element rather than painted behind the text:
      an inset shadow sits at a fixed em offset and drifts off the baseline as the line wraps */
   .hero .hl { position: relative; white-space: nowrap; }
@@ -167,8 +169,8 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     content: ""; position: absolute; left: 0; right: 0; bottom: 0.06em;
     height: 0.09em; background: var(--accent); border-radius: 2px;
   }
-  .hero-cta { display: flex; gap: 0.7rem; flex-wrap: wrap; margin: 2rem 0 1.2rem; }
-  .hero-note { color: var(--ink-faint); font-size: 14px; margin: 0; }
+  .hero-cta { display: flex; gap: 0.7rem; flex-wrap: wrap; margin: 2.6rem 0 2rem; }
+  .hero-note { color: var(--ink-faint); font-size: 13.5px; margin: 0; }
 
   .button {
     display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;

@@ -2,52 +2,15 @@
  * One accent doing all the work against a near-neutral ground, and a monospace used
  * structurally rather than only in code. Everything else is spacing and restraint.
  *
- * The accent is a surface, never body text: chartreuse reads well on near-black and badly
- * on white, so using it as a background with ink on top is what makes one accent work in
- * both themes instead of needing two.
+ * Dark only, on purpose. A second palette is a second thing to keep honest, and every
+ * shade below was chosen against this ground rather than adapted to it.
+ *
+ * The green is #3ddc84, the same one as rejowan.com. It is a surface rather than body
+ * text: green type on a dark ground is hard to read at any size worth using.
  */
 :root {
-  --ground: #fbfbf9;
-  --raised: #ffffff;
-  --sunken: #f3f3ef;
-  --ink: #121215;
-  --ink-soft: #3d3d46;
-  --ink-faint: #63636e;
-  --rule: #e0e0d9;
-  --rule-strong: #c4c4ba;
-  --accent: #3ddc84;
-  --accent-ink: #071d10;
-  --accent-line: #1b984f;
-  --term-ok: #1b984f;
-  --shadow: 0 1px 2px rgb(22 22 26 / 5%), 0 8px 24px -12px rgb(22 22 26 / 12%);
+  color-scheme: dark;
 
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --prose: Newsreader, ui-serif, Georgia, serif;
-
-  --measure: 68ch;
-  --gap: 1.5rem;
-  --radius: 10px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --ground: #0c0c0e;
-    --raised: #141417;
-    --sunken: #18181c;
-    --ink: #f2f2f5;
-    --ink-soft: #bcbcc6;
-    --ink-faint: #8b8b96;
-    --rule: #2a2a31;
-    --rule-strong: #43434d;
-    --accent: #3ddc84;
-    --accent-ink: #071d10;
-    --accent-line: #3ddc84;
-    --term-ok: #3ddc84;
-    --shadow: none;
-  }
-}
-
-:root[data-theme="dark"] {
   --ground: #0c0c0e;
   --raised: #141417;
   --sunken: #18181c;
@@ -61,6 +24,13 @@
   --accent-line: #3ddc84;
   --term-ok: #3ddc84;
   --shadow: none;
+
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --prose: Newsreader, ui-serif, Georgia, serif;
+
+  --measure: 68ch;
+  --gap: 1.5rem;
+  --radius: 10px;
 }
 
 * { box-sizing: border-box; }
@@ -76,18 +46,14 @@ body {
   background: var(--ground);
   color: var(--ink);
   font-family: var(--mono);
-  /* 450 rather than 400: a monospace at regular weight reads thin at UI sizes, and
-     thinner still as light text on a dark ground */
-  font-weight: 450;
   font-size: 16px;
   line-height: 1.62;
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
+  /* 460 rather than 400: a monospace at regular weight reads thin as light text on a dark
+     ground, which is the only ground this site has */
+  font-weight: 460;
   text-rendering: optimizeLegibility;
-}
-
-@media (prefers-color-scheme: dark) {
-  body { font-weight: 460; }
 }
 
 a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
