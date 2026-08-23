@@ -122,8 +122,15 @@ const PARTS = rule
     transition: color 160ms;
   }
   .part[data-on] .part-label { color: var(--accent); }
-  .part-text { font-size: var(--fs-body); color: var(--ink-soft); line-height: 1.55; }
-  .part[data-on] .part-text { color: var(--ink); }
+  /* the unselected parts collapse to a line. All three at full length put nine lines of
+     rule on screen at once, which is the section reading as a wall of text; this way the
+     interaction earns its keep and only the part being discussed is fully open. */
+  .part-text {
+    font-size: var(--fs-body); color: var(--ink-soft); line-height: 1.55;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;
+    transition: color 160ms;
+  }
+  .part[data-on] .part-text { color: var(--ink); -webkit-line-clamp: 6; }
 
   /* the counter-example: the same part written the way it usually is elsewhere, and what
      that costs. It mutates with the selection, so the right column is never a spare

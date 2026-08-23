@@ -79,26 +79,26 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 >
   <section class="hero">
     <div>
-      <p class="eyebrow">composable agent skills</p>
+      <p class="eyebrow" data-enter style="--i: 0">composable agent skills</p>
       <h1>
-        Agent rules for<br />
-        what your project<br />
-        <span class="hl">actually uses</span>.
+        <span class="mask" style="--i: 1"><span>Agent rules for</span></span>
+        <span class="mask" style="--i: 2"><span>what your project</span></span>
+        <span class="mask" style="--i: 3"><span><span class="gradient-word">actually uses</span>.</span></span>
       </h1>
-      <p class="lede">
+      <p class="lede" data-enter style="--i: 5">
         Skills are split along five axes, so a project loads the intersection that applies to it.
         Answer four questions, or let the CLI read your build files and propose.
       </p>
-      <div class="hero-cta">
+      <div class="hero-cta" data-enter style="--i: 6">
         <a class="button" href="#pick">Find your skills</a>
         <a class="button ghost" href="/skills">Browse the skills</a>
       </div>
-      <p class="hero-note">
+      <p class="hero-note" data-enter style="--i: 7">
         Works with Claude Code, Cursor, Codex, Windsurf and Continue.
       </p>
     </div>
 
-    <div class="launch">
+    <div class="launch" data-enter style="--i: 4">
       <div class="launch-head">
         <p class="launch-label">install</p>
         <Command text="npm i skyl.dev" tone="primary" />
@@ -163,34 +163,35 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   <section class="axes-band">
     <div class="band-head">
-      <p class="eyebrow">the model</p>
-      <h2>Five axes</h2>
-      <p class="band-say">A rule belongs to exactly one, so no two layers restate each other.</p>
+      <p class="eyebrow" data-reveal="0">the model</p>
+      <h2 data-reveal="1">Five axes</h2>
+      <p class="band-say" data-reveal="2">A rule belongs to exactly one, so no two layers restate each other.</p>
     </div>
 
-    <AxisGallery />
+    <div data-reveal="1"><AxisGallery /></div>
   </section>
 
   <section class="anatomy-band">
     <div class="band-head">
-      <p class="eyebrow">what a rule is</p>
-      <h2>Three parts, always</h2>
-      <p class="band-say">An instruction you can check, the failure it prevents, and where it stops applying.</p>
+      <p class="eyebrow" data-reveal="0">what a rule is</p>
+      <h2 data-reveal="1">Three parts, always</h2>
+      <p class="band-say" data-reveal="2">An instruction you can check, the failure it prevents, and where it stops applying.</p>
     </div>
 
-    <RuleAnatomy />
+    <div data-reveal="1"><RuleAnatomy /></div>
   </section>
 
   <section class="behaviour">
     <div class="band-head">
-      <p class="eyebrow">how it behaves</p>
-      <h2>Nothing is written without asking</h2>
+      <p class="eyebrow" data-reveal="0">how it behaves</p>
+      <h2 data-reveal="1">Nothing is written without asking</h2>
       <p class="band-say">It reads your project, proposes, and waits. Everything it does is reviewable and reversible.</p>
     </div>
 
+    <div class="behaviour-grid">
     <ol class="acts">
       {BEHAVIOUR.map((step, i) => (
-        <li class="act">
+        <li class="act" data-reveal={String(i + 1)}>
           <span class="act-n">{String(i + 1).padStart(2, '0')}</span>
           <div>
             <p class="act-name">{step.act}</p>
@@ -200,12 +201,27 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       ))}
     </ol>
 
+      <div class="console proof" data-reveal="2">
+        <div class="console-bar"><i></i><i></i><i></i><span>~/acme-pay</span></div>
+        <pre><code><span class="t-dim">$</span> skyl add compose
+
+  android/core     <span class="t-dim">required by another skill</span>
+  android/compose
+
+  3 skills, ~5,500 tokens <span class="t-dim">into .claude/skills</span>
+  <span class="t-strong">Write them? [y/N]</span> <span class="t-ok">y</span>
+
+  <span class="t-ok">Done.</span> <span class="t-dim">Recorded in skyl.lock.</span>
+</code></pre>
+      </div>
+    </div>
+
   </section>
 
   <section class="quick">
     <div class="band-head">
-      <p class="eyebrow">shortcuts</p>
-      <h2>Or take a known shape</h2>
+      <p class="eyebrow" data-reveal="0">shortcuts</p>
+      <h2 data-reveal="1">Or take a known shape</h2>
     </div>
     <div class="quick-grid">
       {[
@@ -215,14 +231,14 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
         { title: 'Media heavy', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/images', 'android/permissions'] },
         { title: 'Adding tests', picks: ['android/core', 'android/kotlin', 'android/testing', 'android/di'] },
         { title: 'Everything', picks: skills.map((s) => s.meta.name) },
-      ].map((starter) => {
+      ].map((starter, i) => {
         const list = starter.picks.map((n) => skills.find((s) => s.meta.name === n)!).filter(Boolean);
         const cost = tokens(list.reduce((n, s) => n + s.meta.installableWords, 0));
         return (
-          <a class="quick-card" href="/starters">
+          <a class="quick-card" href="/starters" data-reveal={String(i + 1)}>
             <strong>{starter.title}</strong>
             <p>{list.map((s) => s.meta.skill).join(' · ')}</p>
-            <span>{list.length} layers · ~{cost.toLocaleString()} tokens</span>
+            <span><b>{list.length}</b> layers · <b>~{cost.toLocaleString()}</b> tokens</span>
           </a>
         );
       })}
@@ -243,13 +259,8 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   }
   .hero .eyebrow { display: block; }
   .hero .lede { line-height: 1.62; }
-  /* a rule under the phrase, drawn on the element rather than painted behind the text:
-     an inset shadow sits at a fixed em offset and drifts off the baseline as the line wraps */
-  .hero .hl { position: relative; white-space: nowrap; }
-  .hero .hl::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 0.06em;
-    height: 0.09em; background: var(--accent); border-radius: 2px;
-  }
+  .hero h1 .mask { display: block; }
+  .hero h1 .mask > * { display: inline-block; }
   .hero-cta { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin: 2.6rem 0 2rem; }
   .hero-note { color: var(--ink-faint); font-size: var(--fs-ui); margin: 0; }
 
@@ -405,9 +416,16 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .anatomy-band { padding: var(--section) 0 0; }
 
   .behaviour { padding: var(--section) 0 0; }
-  .acts {
-    list-style: none; margin: 0; padding: 0;
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.5rem 2rem;
+  /* four steps beside the thing they describe, rather than a row across the page with the
+     evidence stranded underneath it */
+  .behaviour-grid {
+    display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: var(--sp-6); align-items: center;
+  }
+  .acts { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); }
+  .proof {
+    border: 1px solid var(--rule); border-radius: var(--r-lg);
+    background: var(--raised); box-shadow: var(--shadow); overflow: hidden;
   }
   .act { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: var(--sp-2); align-items: start; }
   .act-n { font-size: var(--fs-micro); font-weight: 700; color: var(--accent); padding-top: 0.2rem; }
@@ -423,6 +441,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .quick-card:hover { border-color: var(--rule-strong); }
   .quick-card p { margin: 0; color: var(--ink-soft); font-size: var(--fs-meta); }
   .quick-card span { font-size: var(--fs-micro); color: var(--ink-faint); }
+  .quick-card b { color: var(--gold); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .behaviour-grid { grid-template-columns: minmax(0, 1fr); }
+  }
 
   @media (max-width: 820px) {
     .axis-item { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }

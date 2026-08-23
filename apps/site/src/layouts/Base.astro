@@ -42,6 +42,12 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
     />
   </head>
   <body>
+    <script is:inline>
+      // set before paint, so nothing flashes in and then hides again
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.setAttribute('data-motion', '');
+      }
+    </script>
     <header class="masthead">
       <div class="shell masthead-inner">
         <a class="wordmark" href="/">
@@ -111,5 +117,33 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
         <span class="spacer">Skills are proposed, never installed without asking.</span>
       </div>
     </footer>
+    <script>
+      // one observer for the page: anything marked [data-reveal] rises into place once,
+      // and the delay is read off the element so a group can stagger
+      const targets = document.querySelectorAll('[data-reveal]');
+      if (targets.length && 'IntersectionObserver' in window) {
+        const watcher = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const el = entry.target;
+            const step = Number(el.getAttribute('data-reveal')) || 0;
+            window.setTimeout(() => el.setAttribute('data-shown', ''), step * 70);
+            watcher.unobserve(el);
+          }
+        }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+
+        for (const target of targets) watcher.observe(target);
+      } else {
+        for (const target of targets) target.setAttribute('data-shown', '');
+      }
+
+      // a floor, not a feature: anything still hidden after three seconds is shown
+      // regardless, so a missed observer can never leave a section invisible
+      window.setTimeout(() => {
+        for (const target of document.querySelectorAll('[data-reveal]:not([data-shown])')) {
+          target.setAttribute('data-shown', '');
+        }
+      }, 3000);
+    </script>
   </body>
 </html>

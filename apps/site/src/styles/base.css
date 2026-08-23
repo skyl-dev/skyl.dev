@@ -11,19 +11,33 @@
 :root {
   color-scheme: dark;
 
-  --ground: #0c0c0e;
-  --raised: #141417;
-  --sunken: #18181c;
-  --ink: #f2f2f5;
-  --ink-soft: #bcbcc6;
-  --ink-faint: #8b8b96;
-  --rule: #2a2a31;
-  --rule-strong: #43434d;
+  /*
+   * Warm near-black rather than grey. Every neutral sits at hue 45 with a little
+   * saturation, so nothing on the page is actually grey and the green has something to
+   * sit against. Neutral greys under a green accent read as a template.
+   */
+  --ground: hsl(48 8% 5%);
+  --raised: hsl(45 7% 8%);
+  --sunken: hsl(45 6% 11%);
+  --ink: hsl(48 22% 94%);
+  --ink-soft: hsl(45 8% 74%);
+  --ink-faint: hsl(45 6% 55%);
+  --rule: hsl(45 6% 17%);
+  --rule-strong: hsl(45 6% 27%);
+
   --accent: #3ddc84;
-  --accent-ink: #071d10;
+  --accent-ink: #06210f;
   --accent-line: #3ddc84;
   --term-ok: #3ddc84;
-  --shadow: none;
+  /* numbers, counts, and anything being honoured. Never a button. */
+  --gold: #ffb454;
+
+  /* an inner top highlight and one long, tight shadow: what makes a panel sit on the page */
+  --shadow: 0 1px 0 rgb(255 255 255 / 2%) inset, 0 8px 24px -12px rgb(0 0 0 / 60%);
+
+  /* the easing pair: expo-out to arrive, slow-then-gone to leave */
+  --ease-in: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.4, 0, 0.9, 0.4);
 
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --prose: Newsreader, ui-serif, Georgia, serif;
@@ -76,11 +90,79 @@
 
 * { box-sizing: border-box; }
 
+/*
+ * Reveal on scroll. The element is styled as revealed by default and only hidden once the
+ * script confirms it can observe it, so anything that arrives without JavaScript, or
+ * before it runs, is readable rather than invisible.
+ */
+[data-reveal] { transition: opacity 640ms var(--ease-in), transform 640ms var(--ease-in), filter 640ms var(--ease-in); }
+html[data-motion] [data-reveal]:not([data-shown]) { opacity: 0; transform: translateY(20px); filter: blur(6px); }
+html[data-motion] [data-reveal][data-shown] { opacity: 1; transform: none; filter: none; }
+
+/*
+ * Above the fold there is nothing to scroll into, so the hero arrives on load instead:
+ * one ladder, 90ms apart, in the same easing as everything else.
+ */
+html[data-motion] [data-enter] {
+  animation: enter 700ms var(--ease-in) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+@keyframes enter {
+  from { opacity: 0; transform: translateY(16px); filter: blur(7px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* the wordmark rises out of its own line rather than fading: a mask, not an opacity */
+html[data-motion] .mask { overflow: hidden; }
+html[data-motion] .mask > * { animation: unmask 900ms var(--ease-in) both; animation-delay: calc(var(--i, 0) * 90ms); }
+@keyframes unmask { from { transform: translateY(105%); } to { transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion] [data-reveal]:not([data-shown]) { opacity: 1; transform: none; filter: none; }
+  [data-reveal] { transition: none; }
+  html[data-motion] [data-enter], html[data-motion] .mask > * { animation: none; }
+}
+
+/* one word of one heading, and nowhere else */
+.gradient-word {
+  background: linear-gradient(115deg, var(--accent) 0%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
 /* an element with `display` set ignores the hidden attribute, which had the wizard's
    sidebar and its start-over button visible before anyone had answered anything */
 [hidden] { display: none !important; }
 
 html { -webkit-text-size-adjust: 100%; }
+
+/*
+ * Three layers, mounted once and never touched: two opposed radial tints over a slowly
+ * drifting four-stop gradient, a dot grid, and a little film grain. None of it is imagery,
+ * and together they stop a near-black page reading as an empty div.
+ */
+body::before, body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+}
+body::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 78% 12%, rgb(61 220 132 / 7%) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 10% 92%, rgb(255 180 84 / 5%) 0%, transparent 55%),
+    linear-gradient(-45deg, hsl(48 8% 4%), hsl(45 7% 6%), hsl(40 8% 7%), hsl(48 8% 5%));
+  background-size: 100% 100%, 100% 100%, 400% 400%;
+  animation: drift 24s ease infinite;
+}
+body::after {
+  background-image:
+    radial-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  background-size: 22px 22px, 256px 256px;
+}
+@keyframes drift {
+  0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+  50% { background-position: 0% 50%, 0% 50%, 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
 body {
   margin: 0;
@@ -213,7 +295,7 @@ footer.site a:hover { color: var(--accent); }
   border: 1px solid var(--rule); border-radius: var(--radius); background: var(--raised);
   padding: 1.1rem 1.25rem; transition: border-color 120ms, transform 120ms;
 }
-.card:hover { border-color: var(--rule-strong); transform: translateY(-1px); }
+.card:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
 
 .grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); }
 
