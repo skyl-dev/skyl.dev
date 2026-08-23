@@ -163,14 +163,16 @@ footer.site a:hover { color: var(--accent); }
 .grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); }
 
 .command {
-  display: flex; align-items: center; gap: 0.75rem;
+  display: flex; align-items: flex-start; gap: 0.75rem;
   background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius);
-  padding: 0.8rem 1rem; font-size: 14px; overflow-x: auto;
+  padding: 0.8rem 1rem; font-size: 14px;
 }
-.command .sigil { color: var(--accent-line); user-select: none; }
-.command code { white-space: nowrap; }
+.command .sigil { color: var(--accent-line); user-select: none; flex: none; line-height: 1.5; }
+/* wraps rather than scrolls: a long command used to slide the copy button out of the box */
+.command code { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
 .command button {
-  margin-left: auto; font: inherit; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+  margin-left: auto; flex: none; align-self: flex-start;
+  font: inherit; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
   background: none; border: 1px solid var(--rule-strong); color: var(--ink-soft);
   border-radius: 6px; padding: 0.25rem 0.55rem; cursor: pointer;
 }

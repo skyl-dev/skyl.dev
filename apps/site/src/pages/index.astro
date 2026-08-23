@@ -32,12 +32,34 @@ const demo = skills.filter((s) =>
 const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
 const facts = await evidenceFacts(families[0]?.name ?? 'android');
 
+// examples rather than inventory: the axis is the idea, and naming the skills inside it
+// made a model of everything read like a list of one family
 const AXIS_SAYS = [
-  { id: 'core', owns: 'The platform underneath. What the system can take away, what has to survive being killed, what leaves the main thread.' },
-  { id: 'language', owns: 'How the language you write expresses it. Scope and cancellation, nullability, equality, the things that read fine and behave badly.' },
-  { id: 'framework', owns: 'Whatever draws the screen or serves the request, and only where it goes wrong in a way particular to that framework.' },
-  { id: 'service', owns: 'A third party you talk to, and its own failure modes. Nothing published here yet.' },
-  { id: 'topic', owns: 'A concern that cuts across the rest. Data, network, permissions, images, tests: present in most projects, owned by none of the layers above.' },
+  {
+    n: '01', id: 'core', holds: 'the platform you ship on',
+    owns: 'What the system can take away from you. Where state has to survive, what work leaves the main thread, what happens when the process is killed.',
+    like: 'Android · iOS · the browser · a server',
+  },
+  {
+    n: '02', id: 'language', holds: 'the language you write',
+    owns: 'How that language expresses the decision, and only where it expresses it in a way that goes wrong. Scope, cancellation, nullability, equality.',
+    like: 'Kotlin · Swift · TypeScript · Python',
+  },
+  {
+    n: '03', id: 'framework', holds: 'what draws the screen, or serves the request',
+    owns: 'The mechanics of one toolkit, where they are particular to it. A rule that would read the same without the framework belongs to core.',
+    like: 'Compose · SwiftUI · React · Django',
+  },
+  {
+    n: '04', id: 'service', holds: 'a third party you depend on',
+    owns: 'Somebody else\'s API and its own failure modes: what it does under retry, what it charges for, what it silently truncates.',
+    like: 'Stripe · Firebase · Supabase · Appwrite',
+  },
+  {
+    n: '05', id: 'topic', holds: 'a concern that cuts across the rest',
+    owns: 'Present in most projects and owned by none of the layers above, so it composes with all of them rather than sitting under one.',
+    like: 'data · network · permissions · media · tests',
+  },
 ];
 
 const ADMISSION = [
@@ -146,28 +168,26 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       <p class="eyebrow">the model</p>
       <h2>Five axes, and a project draws from the ones that apply</h2>
       <p class="band-say">
-        A rule belongs to exactly one axis. That is what stops two layers restating each other, and
-        what lets a project drop the ones it does not use instead of carrying them.
+        A rule belongs to exactly one. That is what stops two layers restating each other, and what
+        lets a project drop the ones it does not use instead of carrying them.
       </p>
     </div>
 
-    <ul class="axis-list">
-      {AXIS_SAYS.map((axis) => {
-        const owned = skills.filter((s) => s.meta.axis === axis.id);
-        return (
-          <li class="axis-item" data-empty={owned.length === 0 ? '' : undefined}>
-            <div class="axis-key">
-              <span class="axis-title">{axis.id}</span>
-              <span class="axis-count">{owned.length === 0 ? 'none yet' : `${owned.length} skill${owned.length === 1 ? '' : 's'}`}</span>
+    <ol class="stack">
+      {AXIS_SAYS.map((axis) => (
+        <li class="slab">
+          <span class="slab-n">{axis.n}</span>
+          <div class="slab-body">
+            <div class="slab-title">
+              <h3>{axis.id}</h3>
+              <span class="slab-holds">{axis.holds}</span>
             </div>
-            <p class="axis-owns">{axis.owns}</p>
-            <div class="axis-names">
-              {owned.map((s) => <a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a>)}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+            <p class="slab-owns">{axis.owns}</p>
+          </div>
+          <p class="slab-like">{axis.like}</p>
+        </li>
+      ))}
+    </ol>
   </section>
 
   <section class="admission">
@@ -314,7 +334,12 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .tally-sub { margin: 0.45rem 0 0; font-size: 13px; color: var(--ink-soft); }
   .meter { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-top: 0.5rem; }
   .meter div { height: 100%; width: 0%; background: var(--accent); transition: width 220ms; }
-  .tally-list { list-style: none; margin: 0; padding: 0; font-size: 13px; display: grid; gap: 0.3rem; }
+  /* the running list is a readout, not a layout driver: selecting every layer used to make
+     it taller than the questions beside it and stretch the whole card */
+  .tally-list {
+    list-style: none; margin: 0; padding: 0; font-size: 13px; display: grid; gap: 0.3rem;
+    max-height: 15rem; overflow-y: auto;
+  }
   .tally-list li { color: var(--ink-soft); display: flex; gap: 0.5rem; }
   .tally-list li span { color: var(--ink-faint); margin-left: auto; }
 
@@ -378,8 +403,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
   .soon p:last-child { margin-bottom: 0; }
 
+  /* columns follow the count, so selecting every layer fills sideways rather than pushing
+     the card taller than every other screen */
   .result-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 1.1rem 0 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.35rem; margin: 1.1rem 0 0;
   }
   .result-row {
     display: flex; align-items: baseline; gap: 0.55rem; text-decoration: none;
@@ -397,22 +425,52 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .band-say { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
 
   .axes-band { padding: 6rem 0 0; }
-  .axis-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-  .axis-item {
-    display: grid; grid-template-columns: 11rem minmax(0, 1fr) 14rem; gap: 2rem;
-    padding: 1.5rem 0; border-bottom: 1px solid var(--rule); align-items: start;
+
+  /* a stack of slabs rather than a table: the shape should carry the idea before the words
+     do, so each one is a layer sitting on a spine, and the accent runs down the middle of it */
+  .stack { list-style: none; margin: 0; padding: 0 0 0 3.5rem; position: relative; }
+  .stack::before {
+    content: ""; position: absolute; left: 1.1rem; top: 0.8rem; bottom: 0.8rem; width: 1px;
+    background: linear-gradient(var(--rule), var(--rule-strong), var(--rule));
   }
-  .axis-key { display: grid; gap: 0.3rem; }
-  .axis-title { font-size: 1rem; font-weight: 600; }
-  .axis-count { font-size: 12px; color: var(--ink-faint); }
-  .axis-item[data-empty] .axis-title { color: var(--ink-faint); }
-  .axis-owns { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
-  .axis-names { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  .axis-names a {
-    font-size: 12px; text-decoration: none; color: var(--ink-soft);
-    border: 1px solid var(--rule); border-radius: 6px; padding: 0.15rem 0.5rem;
+
+  .slab {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 2rem;
+    padding: 1.35rem 1.4rem; margin-bottom: 0.5rem; align-items: center;
+    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
+    transition: border-color 140ms, transform 140ms, background 140ms;
   }
-  .axis-names a:hover { color: var(--accent); border-color: var(--accent); }
+  .slab::before {
+    content: ""; position: absolute; left: -2.42rem; top: 50%; width: 9px; height: 9px;
+    border-radius: 50%; background: var(--ground); border: 2px solid var(--rule-strong);
+    transform: translateY(-50%); transition: border-color 140ms, background 140ms;
+  }
+  .slab:hover { border-color: var(--rule-strong); transform: translateX(3px); }
+  .slab:hover::before { border-color: var(--accent); background: var(--accent); }
+
+  .slab-n {
+    position: absolute; left: -3.5rem; top: 50%; transform: translateY(-50%);
+    font-size: 11px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.05em;
+  }
+  .slab-body { min-width: 0; }
+  .slab-title { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
+  .slab-title h3 { font-size: 1.15rem; letter-spacing: -0.02em; }
+  .slab-holds { font-size: 13px; color: var(--accent); }
+  .slab-owns { margin: 0; color: var(--ink-soft); font-size: 14.5px; max-width: 62ch; }
+  .slab-like {
+    margin: 0; font-size: 12.5px; color: var(--ink-faint); text-align: right;
+    border-left: 1px solid var(--rule); padding-left: 1.4rem; align-self: stretch;
+    display: flex; align-items: center; justify-content: flex-end;
+  }
+
+  @media (max-width: 860px) {
+    .stack { padding-left: 2.6rem; }
+    .stack::before { left: 0.65rem; }
+    .slab { grid-template-columns: minmax(0, 1fr); gap: 0.8rem; }
+    .slab::before { left: -2rem; }
+    .slab-n { left: -2.9rem; }
+    .slab-like { text-align: left; border-left: 0; border-top: 1px solid var(--rule); padding: 0.7rem 0 0; justify-content: flex-start; }
+  }
 
   .admission { padding: 6rem 0 0; }
   .tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }

@@ -35,7 +35,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'building',
     prompt: 'What are you building?',
-    help: 'Five axes decide what loads. This is the first one.',
+    help: 'This picks the family. The five axes come after it.',
     options: [
       { id: 'mobile', label: 'A mobile app', hint: 'Ships to a phone', next: 'platform' },
       {
@@ -55,6 +55,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'platform',
     prompt: 'Which platform?',
+    help: 'The core axis: what the system underneath can take away from you.',
     options: [
       { id: 'android', label: 'Android', hint: '13 skills published', picks: ['android/core'], next: 'language' },
       {
@@ -70,6 +71,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'language',
     prompt: 'Which language is most of the code?',
+    help: 'The language axis. A rule that would read the same in another language belongs to core instead.',
     options: [
       { id: 'kotlin', label: 'Kotlin', picks: ['android/kotlin'], next: 'ui' },
       { id: 'java', label: 'Java', picks: ['android/java'], next: 'ui' },
@@ -83,6 +85,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'ui',
     prompt: 'How is the interface built?',
+    help: 'The framework axis: only the mechanics particular to one toolkit live here.',
     options: [
       { id: 'compose', label: 'Jetpack Compose', picks: ['android/compose'], next: 'arch' },
       { id: 'xml', label: 'XML layouts', hint: 'Views, Fragments, ViewBinding', picks: ['android/xml'], next: 'arch' },
@@ -96,7 +99,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'arch',
     prompt: 'Is there a ViewModel layer?',
-    help: 'State that has to survive a rotation or the process being killed.',
+    help: 'A topic: state that has to survive a rotation, or the process being killed.',
     options: [
       { id: 'yes', label: 'Yes', picks: ['android/mvvm'], next: 'needs' },
       { id: 'no', label: 'No', hint: 'State lives in the screen', next: 'needs' },
@@ -109,7 +112,7 @@ export const QUESTIONS: readonly Question[] = [
   {
     id: 'needs',
     prompt: 'What does the app actually do?',
-    help: 'Pick every one that applies. Each adds one layer.',
+    help: 'Topics, and they compose. Pick every one that applies; each adds one layer.',
     multi: true,
     options: [
       { id: 'network', label: 'Talks to a server', hint: 'Retrofit, Ktor, OkHttp', picks: ['android/networking'] },
