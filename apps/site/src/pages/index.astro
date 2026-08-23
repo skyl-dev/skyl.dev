@@ -218,11 +218,13 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .picker-head h2 { font-size: 1.25rem; margin-top: 0.35rem; }
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
-  .picker-body > #stage { padding: 1.8rem; min-height: 21rem; }
+  /* sized to the longest step, so answering one does not resize the card under the cursor */
+  .picker-body > #stage { padding: 1.8rem; min-height: 37.5rem; }
   .steps { grid-column: 1 / -1; display: flex; gap: 0.4rem; padding: 1rem 1.8rem 0; }
   .step { height: 3px; border-radius: 2px; background: var(--rule); flex: 1; transition: background 200ms; }
   .step[data-done] { background: var(--accent); }
-  .step[data-now] { background: var(--accent-line); }
+  /* the current step reads as done when both are the same green, so it is held back */
+  .step[data-now] { background: color-mix(in srgb, var(--accent) 38%, var(--rule)); }
 
   .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.8rem; display: grid; gap: 1.5rem; align-content: start; }
   .tally-count { font-size: 2.3rem; letter-spacing: -0.04em; margin: 0.3rem 0 0; line-height: 1; font-weight: 600; }
@@ -234,9 +236,21 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .tally-list li { color: var(--ink-soft); display: flex; gap: 0.5rem; }
   .tally-list li span { color: var(--ink-faint); margin-left: auto; }
 
+  .crumbs { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+  .crumb {
+    font: inherit; font-size: 12px; background: none; cursor: pointer;
+    border: 1px solid var(--rule); border-radius: 999px; padding: 0.2rem 0.6rem; color: var(--ink-soft);
+  }
+  .crumb:hover { color: var(--ink); border-color: var(--accent-line); }
+  .crumb-sep { color: var(--rule-strong); font-size: 12px; }
+
   .q-prompt { font-size: 1.35rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; font-weight: 600; }
   .q-help { color: var(--ink-soft); font-size: 14px; margin: 0 0 1.6rem; }
   .q-options { display: grid; gap: 0.6rem; }
+  /* the one multi-select has seven answers, and stacking them made the card twice the
+     height of every other step */
+  .q-options[data-multi] { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 700px) { .q-options[data-multi] { grid-template-columns: 1fr; } }
   .q-option {
     display: flex; align-items: flex-start; gap: 0.85rem; text-align: left; width: 100%;
     font: inherit; color: inherit; cursor: pointer;
@@ -383,6 +397,19 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     return option?.next ?? null;
   }
 
+  function trailMarkup() {
+    if (trail.length === 0) return '';
+    const crumbs = trail.map((step, i) => {
+      const question = questions.get(step.id);
+      const labels = step.chosen.map((id) => question.options.find((o) => o.id === id)?.label ?? id);
+      const say = question.multi
+        ? (labels.length === 0 ? 'nothing extra' : `${labels.length} selected`)
+        : labels[0];
+      return `<button class="crumb" type="button" data-crumb="${i}" title="change this">${say}</button>`;
+    });
+    return `<div class="crumbs">${crumbs.join('<span class="crumb-sep">/</span>')}</div>`;
+  }
+
   function optionMarkup(question, option, chosen) {
     const on = chosen.includes(option.id) ? ' data-on' : '';
     return `
@@ -402,7 +429,8 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
     if (stalled) {
       stage.innerHTML = `
-        <p class="q-prompt">Not published yet</p>
+        ${trailMarkup()}
+      <p class="q-prompt">Not published yet</p>
         <div class="soon">
           <p>${stalled.soon.replace(/`([^`]+)`/g, '<code>$1</code>')}</p>
           <p>The registry says what it covers rather than pretending to cover everything.</p>
@@ -417,7 +445,8 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     if (current === null) {
       const args = all.map((n, i) => (i === 0 ? n : n.split('/')[1]));
       stage.innerHTML = `
-        <p class="q-prompt">${all.length} skills, ${rules} rules</p>
+        ${trailMarkup()}
+      <p class="q-prompt">${all.length} skills, ${rules} rules</p>
         <p class="q-help">~${estimate(words).toLocaleString()} tokens. Each one is a layer you can drop later.</p>
         <div class="result-grid">
           ${list.map((s) => `
@@ -444,9 +473,10 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     const chosen = step?.chosen ?? [];
 
     stage.innerHTML = `
+      ${trailMarkup()}
       <p class="q-prompt">${question.prompt}</p>
       ${question.help ? `<p class="q-help">${question.help}</p>` : ''}
-      <div class="q-options">
+      <div class="q-options"${question.multi ? ' data-multi' : ''}>
         ${question.options.map((o) => optionMarkup(question, o, chosen)).join('')}
       </div>
       <div class="q-actions">
@@ -465,6 +495,16 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     if (done) done.addEventListener('click', () => { current = null; render(); });
     const backButton = stage.querySelector('[data-back]');
     if (backButton) backButton.addEventListener('click', back);
+
+    for (const crumb of stage.querySelectorAll('[data-crumb]')) {
+      crumb.addEventListener('click', () => {
+        const at = Number(crumb.dataset.crumb);
+        current = trail[at].id;
+        trail = trail.slice(0, at);
+        stalled = null;
+        render();
+      });
+    }
   }
 
   restart.addEventListener('click', () => { trail = []; current = START; stalled = null; render(); });
