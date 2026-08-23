@@ -236,13 +236,17 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .tally-list li { color: var(--ink-soft); display: flex; gap: 0.5rem; }
   .tally-list li span { color: var(--ink-faint); margin-left: auto; }
 
-  .crumbs { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
-  .crumb {
-    font: inherit; font-size: 12px; background: none; cursor: pointer;
-    border: 1px solid var(--rule); border-radius: 999px; padding: 0.2rem 0.6rem; color: var(--ink-soft);
+  .crumbs {
+    display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+    min-height: 1.9rem; margin-bottom: 1.2rem;
   }
-  .crumb:hover { color: var(--ink); border-color: var(--accent-line); }
-  .crumb-sep { color: var(--rule-strong); font-size: 12px; }
+  .crumb {
+    font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer;
+    background: var(--sunken); border: 1px solid var(--rule-strong); border-radius: 7px;
+    padding: 0.28rem 0.65rem; color: var(--ink);
+  }
+  .crumb:hover { border-color: var(--accent); color: var(--accent); }
+  .crumb-sep { color: var(--ink-faint); font-size: 12px; }
 
   .q-prompt { font-size: 1.35rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; font-weight: 600; }
   .q-help { color: var(--ink-soft); font-size: 14px; margin: 0 0 1.6rem; }
@@ -308,24 +312,32 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     chosen: document.querySelector('#chosen'),
   };
 
-  /** answered questions, in order, each with the option ids picked */
-  let trail = [];
+  /**
+   * Answers outlive the path through them. Going back used to pop the answer with the
+   * step, so returning to a question showed it unanswered and the sidebar dropped what it
+   * had counted. The path is where you are; the answers are what you said.
+   */
+  const answers = new Map();
+  let path = [];
   let current = START;
   let stalled = null;
 
-  function picksSoFar() {
+  const answerFor = (id) => answers.get(id) ?? [];
+  const answered = () => (current && answers.has(current) ? [...path, current] : path);
+
+  function picks() {
     const out = [];
-    for (const step of trail) {
-      const question = questions.get(step.id);
-      for (const id of step.chosen) {
-        const option = question.options.find((o) => o.id === id);
+    for (const id of answered()) {
+      const question = questions.get(id);
+      for (const chosen of answerFor(id)) {
+        const option = question.options.find((o) => o.id === chosen);
         for (const pick of option?.picks ?? []) out.push(pick);
       }
     }
     return out;
   }
 
-  function resolve(chosen) {
+  function resolve(wanted) {
     const out = new Set();
     const visit = (name) => {
       if (out.has(name)) return;
@@ -334,12 +346,12 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       for (const dep of skill.requires) visit(dep);
       out.add(name);
     };
-    for (const name of chosen) visit(name);
+    for (const name of wanted) visit(name);
     return [...out];
   }
 
   function renderTally() {
-    const all = resolve(picksSoFar());
+    const all = resolve(picks());
     const list = all.map((n) => byName.get(n));
     const words = list.reduce((n, s) => n + s.words, 0);
     const rules = list.reduce((n, s) => n + s.rules, 0);
@@ -356,61 +368,28 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   function renderSteps() {
     const total = 5;
+    const done = path.length;
     steps.innerHTML = Array.from({ length: total }, (_, i) => {
-      const state = i < trail.length ? ' data-done' : i === trail.length ? ' data-now' : '';
+      const state = i < done ? ' data-done' : i === done ? ' data-now' : '';
       return `<div class="step"${state}></div>`;
     }).join('');
   }
 
-  function choose(question, optionId) {
-    const option = question.options.find((o) => o.id === optionId);
-    if (question.multi) {
-      const step = trail.find((s) => s.id === question.id);
-      if (step) {
-        step.chosen = step.chosen.includes(optionId)
-          ? step.chosen.filter((c) => c !== optionId)
-          : [...step.chosen, optionId];
-      } else {
-        trail.push({ id: question.id, chosen: [optionId] });
-      }
-      render();
-      return;
-    }
-
-    trail.push({ id: question.id, chosen: [optionId] });
-    if (option.soon) { stalled = option; render(); return; }
-    current = option.next ?? null;
-    render();
-  }
-
-  function back() {
-    trail.pop();
-    stalled = null;
-    current = trail.length === 0 ? START : nextAfter(trail[trail.length - 1]);
-    render();
-  }
-
-  function nextAfter(step) {
-    const question = questions.get(step.id);
-    if (question.multi) return null;
-    const option = question.options.find((o) => o.id === step.chosen[0]);
-    return option?.next ?? null;
-  }
-
   function trailMarkup() {
-    if (trail.length === 0) return '';
-    const crumbs = trail.map((step, i) => {
-      const question = questions.get(step.id);
-      const labels = step.chosen.map((id) => question.options.find((o) => o.id === id)?.label ?? id);
+    // the row is always here, empty or not, so answering the first question does not
+    // shove everything below it down the page
+    const crumbs = path.map((id, i) => {
+      const question = questions.get(id);
+      const labels = answerFor(id).map((c) => question.options.find((o) => o.id === c)?.label ?? c);
       const say = question.multi
         ? (labels.length === 0 ? 'nothing extra' : `${labels.length} selected`)
         : labels[0];
-      return `<button class="crumb" type="button" data-crumb="${i}" title="change this">${say}</button>`;
+      return `<button class="crumb" type="button" data-crumb="${i}" title="go back and change this">${say}</button>`;
     });
     return `<div class="crumbs">${crumbs.join('<span class="crumb-sep">/</span>')}</div>`;
   }
 
-  function optionMarkup(question, option, chosen) {
+  function optionMarkup(option, chosen) {
     const on = chosen.includes(option.id) ? ' data-on' : '';
     return `
       <button class="q-option" type="button" data-option="${option.id}"${on}>
@@ -422,32 +401,54 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
       </button>`;
   }
 
+  function choose(question, optionId) {
+    const option = question.options.find((o) => o.id === optionId);
+
+    if (question.multi) {
+      const was = answerFor(question.id);
+      answers.set(question.id, was.includes(optionId) ? was.filter((c) => c !== optionId) : [...was, optionId]);
+      render();
+      return;
+    }
+
+    answers.set(question.id, [optionId]);
+    if (!path.includes(question.id)) path.push(question.id);
+    stalled = option.soon ? option : null;
+    current = option.soon ? null : (option.next ?? null);
+    render();
+  }
+
+  function back() {
+    stalled = null;
+    current = path.pop() ?? START;
+    render();
+  }
+
   function render() {
     renderSteps();
     const { all, list, words, rules } = renderTally();
-    restart.hidden = trail.length === 0;
+    restart.hidden = path.length === 0 && !answers.size;
 
     if (stalled) {
       stage.innerHTML = `
         ${trailMarkup()}
-      <p class="q-prompt">Not published yet</p>
+        <p class="q-prompt">Not published yet</p>
         <div class="soon">
           <p>${stalled.soon.replace(/`([^`]+)`/g, '<code>$1</code>')}</p>
           <p>The registry says what it covers rather than pretending to cover everything.</p>
         </div>
-        <div class="q-actions">
-          <button class="q-back" type="button" data-back>Back</button>
-        </div>`;
-      wire();
+        <div class="q-actions"><button class="q-back" type="button" data-back>Back</button></div>`;
+      wire(null);
       return;
     }
 
     if (current === null) {
       const args = all.map((n, i) => (i === 0 ? n : n.split('/')[1]));
+      const command = `npx skyl.dev add ${args.join(' ')}`;
       stage.innerHTML = `
         ${trailMarkup()}
-      <p class="q-prompt">${all.length} skills, ${rules} rules</p>
-        <p class="q-help">~${estimate(words).toLocaleString()} tokens. Each one is a layer you can drop later.</p>
+        <p class="q-prompt">${all.length} skills, ${rules} rules</p>
+        <p class="q-help">~${estimate(words).toLocaleString()} tokens. Every one is a layer you can drop later.</p>
         <div class="result-grid">
           ${list.map((s) => `
             <div class="result-row">
@@ -458,55 +459,65 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
         </div>
         <div class="command">
           <span class="sigil">$</span>
-          <code data-command>npx skyl.dev add ${args.join(' ')}</code>
-          <button type="button" data-copy="npx skyl.dev add ${args.join(' ')}">copy</button>
+          <code data-command>${command}</code>
+          <button type="button" data-copy="${command}">copy</button>
         </div>
-        <div class="q-actions">
-          <button class="q-back" type="button" data-back>Back</button>
-        </div>`;
-      wire();
+        <div class="q-actions"><button class="q-back" type="button" data-back>Back</button></div>`;
+      wire(null);
       return;
     }
 
     const question = questions.get(current);
-    const step = trail.find((s) => s.id === question.id);
-    const chosen = step?.chosen ?? [];
+    const chosen = answerFor(question.id);
 
     stage.innerHTML = `
       ${trailMarkup()}
       <p class="q-prompt">${question.prompt}</p>
       ${question.help ? `<p class="q-help">${question.help}</p>` : ''}
       <div class="q-options"${question.multi ? ' data-multi' : ''}>
-        ${question.options.map((o) => optionMarkup(question, o, chosen)).join('')}
+        ${question.options.map((o) => optionMarkup(o, chosen)).join('')}
       </div>
       <div class="q-actions">
         ${question.multi ? `<button class="button small" type="button" data-done>${chosen.length === 0 ? 'Nothing extra' : 'Done'}</button>` : ''}
-        ${trail.length > 0 ? '<button class="q-back" type="button" data-back>Back</button>' : ''}
+        ${path.length > 0 ? '<button class="q-back" type="button" data-back>Back</button>' : ''}
       </div>`;
-    wire();
+    wire(question);
   }
 
-  function wire() {
-    const question = questions.get(current);
-    for (const button of stage.querySelectorAll('[data-option]')) {
-      button.addEventListener('click', () => choose(question, button.dataset.option));
+  function wire(question) {
+    if (question) {
+      for (const button of stage.querySelectorAll('[data-option]')) {
+        button.addEventListener('click', () => choose(question, button.dataset.option));
+      }
+      const done = stage.querySelector('[data-done]');
+      if (done) {
+        done.addEventListener('click', () => {
+          if (!path.includes(question.id)) path.push(question.id);
+          current = null;
+          render();
+        });
+      }
     }
-    const done = stage.querySelector('[data-done]');
-    if (done) done.addEventListener('click', () => { current = null; render(); });
     const backButton = stage.querySelector('[data-back]');
     if (backButton) backButton.addEventListener('click', back);
 
     for (const crumb of stage.querySelectorAll('[data-crumb]')) {
       crumb.addEventListener('click', () => {
         const at = Number(crumb.dataset.crumb);
-        current = trail[at].id;
-        trail = trail.slice(0, at);
+        current = path[at];
+        path = path.slice(0, at);
         stalled = null;
         render();
       });
     }
   }
 
-  restart.addEventListener('click', () => { trail = []; current = START; stalled = null; render(); });
+  restart.addEventListener('click', () => {
+    answers.clear();
+    path = [];
+    current = START;
+    stalled = null;
+    render();
+  });
   render();
 </script>
