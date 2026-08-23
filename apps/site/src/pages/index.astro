@@ -218,10 +218,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
   /* sized to the longest step, so answering one does not resize the card under the cursor */
-  /* 38rem is what the longest screen needs, measured: the result at 607px, then the first
-     question at 574. Pinning to it costs empty space on the short steps and buys a card
-     that never resizes under the cursor. */
-  .picker-body > #stage { position: relative; padding: 1.5rem 1.8rem 5.2rem; min-height: 38rem; }
+  /* 36rem is what the longest screen needs, measured: the first question at 574px. The
+     result used to be the tallest at 607 and is now the shortest at 426, which is what let
+     this come down. Pinning costs empty space on the short steps and buys a card that never
+     resizes under the cursor. */
+  .picker-body > #stage { position: relative; padding: 1.5rem 1.8rem 5.2rem; min-height: 36rem; }
   .steps { grid-column: 1 / -1; display: flex; gap: 2px; height: 3px; }
   .step { flex: 1; background: var(--rule); transition: background 200ms; }
   .step[data-done] { background: var(--accent); }
@@ -298,10 +299,19 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
   .soon p:last-child { margin-bottom: 0; }
 
-  .result-grid { display: grid; gap: 0.5rem; margin: 1.4rem 0 1.6rem; }
-  .result-row { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.55rem 0.7rem; border-radius: 8px; background: var(--ground); border: 1px solid var(--rule); }
-  .result-row a { font-weight: 600; text-decoration: none; }
-  .result-row .why { color: var(--ink-faint); font-size: 13px; margin-left: auto; }
+  .result-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 1.1rem 0 0;
+  }
+  .result-row {
+    display: flex; align-items: baseline; gap: 0.55rem; text-decoration: none;
+    padding: 0.38rem 0.6rem; border-radius: 7px; background: var(--ground); border: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  .result-row:hover { border-color: var(--rule-strong); }
+  .result-row b { font-weight: 600; }
+  .result-row .ax { color: var(--ink-faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .result-row .why { color: var(--ink-faint); font-size: 12px; margin-left: auto; }
+  @media (max-width: 700px) { .result-grid { grid-template-columns: 1fr; } }
 
   .pillars { padding: 5rem 0 2rem; display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
   .pillars h3 { font-size: 1rem; margin-bottom: 0.6rem; }
@@ -483,18 +493,18 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
           <p class="q-prompt">${all.length} skills, ${rules} rules</p>
           <p class="q-help">~${estimate(words).toLocaleString()} tokens. Every one is a layer you can drop later.</p>
         </div>
-        <div class="result-grid">
-          ${list.map((s) => `
-            <div class="result-row">
-              <a href="/skills/${s.family}/${s.skill}">${s.name}</a>
-              <span class="chip">${s.axis}</span>
-              <span class="why">${s.rules} rules</span>
-            </div>`).join('')}
-        </div>
-        <div class="command">
+        <div class="command command-primary">
           <span class="sigil">$</span>
           <code data-command>${command}</code>
           <button type="button" data-copy="${command}">copy</button>
+        </div>
+        <div class="result-grid">
+          ${list.map((s) => `
+            <a class="result-row" href="/skills/${s.family}/${s.skill}">
+              <b>${s.skill}</b>
+              <span class="ax">${s.axis}</span>
+              <span class="why">${s.rules}</span>
+            </a>`).join('')}
         </div>
         ${actionsMarkup({})}`;
       wire(null);
