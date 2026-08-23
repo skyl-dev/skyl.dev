@@ -213,19 +213,22 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
 
   .picker { margin-top: 1.5rem; border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
-  .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }
+  .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 1.8rem 1.4rem; }
   .picker-head h2 { font-size: 1.25rem; margin-top: 0.35rem; }
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
   /* sized to the longest step, so answering one does not resize the card under the cursor */
-  .picker-body > #stage { position: relative; padding: 1.8rem 1.8rem 6rem; min-height: 40rem; }
-  .steps { grid-column: 1 / -1; display: flex; gap: 0.4rem; padding: 1rem 1.8rem 0; }
-  .step { height: 3px; border-radius: 2px; background: var(--rule); flex: 1; transition: background 200ms; }
+  /* 38rem is what the longest screen needs, measured: the result at 607px, then the first
+     question at 574. Pinning to it costs empty space on the short steps and buys a card
+     that never resizes under the cursor. */
+  .picker-body > #stage { position: relative; padding: 1.5rem 1.8rem 5.2rem; min-height: 38rem; }
+  .steps { grid-column: 1 / -1; display: flex; gap: 2px; height: 3px; }
+  .step { flex: 1; background: var(--rule); transition: background 200ms; }
   .step[data-done] { background: var(--accent); }
   /* the current step reads as done when both are the same green, so it is held back */
   .step[data-now] { background: color-mix(in srgb, var(--accent) 38%, var(--rule)); }
 
-  .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.8rem; display: grid; gap: 1.5rem; align-content: start; }
+  .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.5rem 1.8rem; display: grid; gap: 1.4rem; align-content: start; }
   .tally-count { font-size: 2.3rem; letter-spacing: -0.04em; margin: 0.3rem 0 0; line-height: 1; font-weight: 600; }
   .tally-count small { font-size: 0.9rem; color: var(--ink-faint); font-weight: 450; letter-spacing: 0; }
   .tally-sub { margin: 0.45rem 0 0; font-size: 13px; color: var(--ink-soft); }
@@ -237,7 +240,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   /* an exact height, not a minimum: the first chip used to arrive and push the question
      down the card */
-  .crumbs { display: flex; align-items: center; gap: 0.45rem; height: 2rem; overflow: hidden; }
+  .crumbs { display: flex; align-items: center; gap: 0.45rem; height: 1.85rem; overflow: hidden; }
   .crumb {
     font: inherit; font-size: 12.5px; font-weight: 600; line-height: 1.4; cursor: pointer;
     background: color-mix(in srgb, var(--accent) 15%, transparent);
@@ -250,7 +253,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   /* the prompt and its help occupy the same block on every screen, so the answers below
      always begin on the same line */
-  .q-head { height: 5.1rem; margin: 1.1rem 0 0.3rem; }
+  .q-head { height: 4.6rem; margin: 0.9rem 0 0.2rem; }
 
   .q-prompt { font-size: 1.35rem; letter-spacing: -0.02em; margin: 0 0 0.45rem; font-weight: 600; }
   .q-help { color: var(--ink-soft); font-size: 14px; margin: 0; min-height: 1.4em; }
@@ -262,7 +265,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .q-option {
     display: flex; align-items: flex-start; gap: 0.85rem; text-align: left; width: 100%;
     font: inherit; color: inherit; cursor: pointer;
-    background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; padding: 0.95rem 1.1rem;
+    background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; padding: 0.8rem 1.05rem;
     transition: border-color 120ms, background 120ms;
   }
   .q-option:hover { border-color: var(--rule-strong); }
@@ -278,7 +281,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   /* pinned to the bottom of the stage: the answers above it change length every step, and
      a control that moves is a control you have to look for */
   .q-actions {
-    position: absolute; left: 1.8rem; right: 1.8rem; bottom: 1.8rem;
+    position: absolute; left: 1.8rem; right: 1.8rem; bottom: 1.5rem;
     display: flex; gap: 0.6rem; align-items: center;
     padding-top: 1.2rem; border-top: 1px solid var(--rule);
   }
