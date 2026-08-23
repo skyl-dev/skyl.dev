@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadDoc, loadFamilies } from '../lib/registry.ts';
+
+const families = await loadFamilies();
+const docs = await Promise.all(
+  families.map(async (family) => ({
+    name: family.name,
+    overview: await loadDoc('evidence', family.name, 'README.md'),
+    matrix: await loadDoc('evidence', family.name, 'model-matrix.md'),
+    skills: family.skills.filter((s) => s.evidence),
+  })),
+);
+---
+
+<Base
+  title="evidence"
+  section="evidence"
+  description="What was measured, on which models, and what did not work. None of it is sent to your agent."
+>
+  <section style="padding: 3.5rem 0 2rem;">
+    <p class="eyebrow">what was measured</p>
+    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Evidence</h1>
+    <p class="lede">
+      A rule earns its place by changing what a model writes. These are the runs behind that claim,
+      including the ones that changed nothing.
+    </p>
+  </section>
+
+  {docs.map((family) => (
+    <section style="padding-top: 1rem;">
+      {family.overview && (
+        <div class="prose scroller" style="padding-bottom: 2rem; border-bottom: 1px solid var(--rule);" set:html={family.overview} />
+      )}
+      {family.matrix && (
+        <div style="padding: 2.5rem 0; border-bottom: 1px solid var(--rule);">
+          <div class="prose scroller" set:html={family.matrix} />
+        </div>
+      )}
+      {family.skills.length > 0 && (
+        <div style="padding: 2.5rem 0;">
+          <p class="eyebrow" style="margin-bottom: 1rem;">per skill</p>
+          <div class="grid">
+            {family.skills.map((s) => (
+              <a class="card" href={`/skills/${s.meta.family}/${s.meta.skill}#evidence`}>
+                <strong>{s.meta.name}</strong>
+                <p style="margin: 0.4rem 0 0; color: var(--ink-soft); font-size: 13px;">what the runs showed</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  ))}
+</Base>

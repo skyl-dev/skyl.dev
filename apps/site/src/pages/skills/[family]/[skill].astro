@@ -1,0 +1,159 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Command from '../../../components/Command.astro';
+import { loadSkills, tokens } from '../../../lib/registry.ts';
+
+export async function getStaticPaths() {
+  const skills = await loadSkills();
+  return skills.map((skill) => ({
+    params: { family: skill.meta.family, skill: skill.meta.skill },
+    props: { skill, all: skills },
+  }));
+}
+
+const { skill, all } = Astro.props;
+const meta = skill.meta;
+
+const agentParts = skill.parts.filter((p) => p.forAgent);
+const humanParts = skill.parts.filter((p) => !p.forAgent);
+
+// what else composes with this: the layers that need it, and the ones it needs
+const neededBy = all.filter((s) => s.meta.requires.includes(meta.name));
+const sameFamily = all.filter((s) => s.meta.family === meta.family && s.meta.name !== meta.name);
+const detect = Object.entries(meta.detect);
+const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}/${meta.skill}/SKILL.md`;
+---
+
+<Base
+  title={meta.name}
+  section="skills"
+  description={`${meta.rules.length} rules for ${meta.name}. What each one prevents, where it does not apply, and what was measured.`}
+>
+  <article>
+    <header style="padding: 3rem 0 2rem; border-bottom: 1px solid var(--rule);">
+      <p class="eyebrow"><a href="/skills" style="text-decoration: none;">skills</a> / {meta.family}</p>
+      <h1 style="font-size: 2.4rem; margin: 0.5rem 0 0.9rem; letter-spacing: -0.03em;">{meta.skill}</h1>
+      <p style="font-family: var(--prose); font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); max-width: 56ch; margin: 0 0 1.5rem;">
+        {meta.description}
+      </p>
+
+      <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <span class="chip solid">{meta.axis}</span>
+        <span class="chip">v{meta.version}</span>
+        <span class="chip">{skill.rulesCount.must} must</span>
+        {skill.rulesCount.should > 0 && <span class="chip">{skill.rulesCount.should} should</span>}
+        <span class="chip">~{tokens(meta.installableWords).toLocaleString()} tokens</span>
+        {meta.retired.length > 0 && <span class="chip">{meta.retired.length} retired</span>}
+      </div>
+
+      <Command text={`npx skyl.dev add ${meta.name}`} />
+
+      {meta.requires.length > 0 && (
+        <p style="margin: 0.9rem 0 0; color: var(--ink-soft); font-size: 13px;">
+          Installs {meta.requires.map((r) => <a href={`/skills/${r.replace('/', '/')}`}>{r}</a>)} with it, because a layer
+          that refers to its core reads wrong without it.
+        </p>
+      )}
+    </header>
+
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 3.5rem; padding-top: 2.5rem; align-items: start;">
+      <div>
+        {agentParts.map((part) => (
+          <section style="margin-bottom: 3rem;">
+            <div style="display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.2rem;">
+              <h2 style="font-size: 1.1rem;">{part.heading}</h2>
+              <span class="chip solid">installed</span>
+            </div>
+            <div class="prose scroller" set:html={part.html} />
+          </section>
+        ))}
+
+        {humanParts.length > 0 && (
+          <div style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
+            <p class="eyebrow" style="margin-bottom: 2rem;">
+              below this line is for you, and is never sent to a model
+            </p>
+            {humanParts.map((part) => (
+              <section style="margin-bottom: 3rem;">
+                <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem;">{part.heading}</h2>
+                <div class="prose scroller" set:html={part.html} />
+              </section>
+            ))}
+          </div>
+        )}
+
+        {skill.references.length > 0 && (
+          <div style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
+            <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">References</h2>
+            <p style="color: var(--ink-faint); font-size: 13px; margin-bottom: 1.5rem;">
+              Depth a rule points at, loaded only when the agent asks for it.
+            </p>
+            {skill.references.map((reference) => (
+              <details style="border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; background: var(--raised);">
+                <summary style="cursor: pointer; font-size: 14px;">{reference.title}</summary>
+                <div class="prose scroller" style="margin-top: 1.2rem;" set:html={reference.html} />
+              </details>
+            ))}
+          </div>
+        )}
+
+        {skill.evidence && (
+          <div id="evidence" style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem;">Evidence</h2>
+            <div class="prose scroller" set:html={skill.evidence} />
+          </div>
+        )}
+      </div>
+
+      <aside style="position: sticky; top: 5rem; font-size: 13px; display: grid; gap: 2rem;">
+        {detect.length > 0 && (
+          <div>
+            <p class="eyebrow" style="margin-bottom: 0.7rem;">detected by</p>
+            {detect.map(([key, values]) => (
+              <div style="margin-bottom: 0.8rem;">
+                <p style="margin: 0 0 0.3rem; color: var(--ink-faint); font-size: 11px;">{key.replace(/_/g, ' ')}</p>
+                <ul style="margin: 0; padding: 0; list-style: none; color: var(--ink-soft);">
+                  {values.map((v) => <li style="overflow-wrap: anywhere; margin-bottom: 0.15rem;">{v}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {neededBy.length > 0 && (
+          <div>
+            <p class="eyebrow" style="margin-bottom: 0.7rem;">required by</p>
+            <ul style="margin: 0; padding: 0; list-style: none;">
+              {neededBy.map((s) => (
+                <li style="margin-bottom: 0.3rem;"><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.name}</a></li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {sameFamily.length > 0 && (
+          <div>
+            <p class="eyebrow" style="margin-bottom: 0.7rem;">composes with</p>
+            <ul style="margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 1rem;">
+              {sameFamily.map((s) => (
+                <li style="margin-bottom: 0.3rem;"><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a></li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div>
+          <p class="eyebrow" style="margin-bottom: 0.7rem;">source</p>
+          <a href={source}>SKILL.md on GitHub</a>
+        </div>
+      </aside>
+    </div>
+  </article>
+</Base>
+
+<style>
+  @media (max-width: 900px) {
+    article > div { grid-template-columns: minmax(0, 1fr) !important; gap: 2.5rem !important; }
+    aside { position: static !important; }
+  }
+</style>

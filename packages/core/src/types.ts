@@ -26,6 +26,8 @@ export interface SkillMeta {
   readonly family: string;
   readonly skill: string;
   readonly axis: Axis;
+  /** One line: what the skill governs, and when it applies. Shown wherever it is listed. */
+  readonly description: string;
   readonly version: string;
   readonly requires: readonly string[];
   /** Which sections an installer gives the agent. Everything else is for humans. */

@@ -172,6 +172,7 @@ export function parseSkill(text: string): Skill {
     family: name.slice(0, slash),
     skill: name.slice(slash + 1),
     axis: axis as Axis,
+    description: typeof fm['description'] === 'string' ? fm['description'] : '',
     version,
     requires: list(fm, 'requires'),
     agentSections,

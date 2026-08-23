@@ -1,0 +1,203 @@
+/*
+ * One accent doing all the work against a near-neutral ground, and a monospace used
+ * structurally rather than only in code. Everything else is spacing and restraint.
+ *
+ * The accent is a surface, never body text: chartreuse reads well on near-black and badly
+ * on white, so using it as a background with ink on top is what makes one accent work in
+ * both themes instead of needing two.
+ */
+:root {
+  --ground: #fbfbf9;
+  --raised: #ffffff;
+  --sunken: #f3f3ef;
+  --ink: #121215;
+  --ink-soft: #3d3d46;
+  --ink-faint: #63636e;
+  --rule: #e0e0d9;
+  --rule-strong: #c4c4ba;
+  --accent: #b8f227;
+  --accent-ink: #16161a;
+  --accent-line: #7ba300;
+  --shadow: 0 1px 2px rgb(22 22 26 / 5%), 0 8px 24px -12px rgb(22 22 26 / 12%);
+
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --prose: Newsreader, ui-serif, Georgia, serif;
+
+  --measure: 68ch;
+  --gap: 1.5rem;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0c0c0e;
+    --raised: #141417;
+    --sunken: #18181c;
+    --ink: #f2f2f5;
+    --ink-soft: #bcbcc6;
+    --ink-faint: #8b8b96;
+    --rule: #2a2a31;
+    --rule-strong: #43434d;
+    --accent: #c6f53f;
+    --accent-ink: #101013;
+    --accent-line: #c6f53f;
+    --shadow: none;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground: #0c0c0e;
+  --raised: #141417;
+  --sunken: #18181c;
+  --ink: #f2f2f5;
+  --ink-soft: #bcbcc6;
+  --ink-faint: #8b8b96;
+  --rule: #2a2a31;
+  --rule-strong: #43434d;
+  --accent: #c6f53f;
+  --accent-ink: #101013;
+  --accent-line: #c6f53f;
+  --shadow: none;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--mono);
+  /* 450 rather than 400: a monospace at regular weight reads thin at UI sizes, and
+     thinner still as light text on a dark ground */
+  font-weight: 450;
+  font-size: 16px;
+  line-height: 1.62;
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: dark) {
+  body { font-weight: 460; }
+}
+
+a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent-line); }
+
+h1, h2, h3, h4 { font-weight: 600; line-height: 1.18; letter-spacing: -0.015em; margin: 0; }
+
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+
+code { font-family: var(--mono); font-size: 0.92em; }
+
+/* ---------- layout ---------- */
+
+.shell { max-width: 76rem; margin: 0 auto; padding: 0 1.5rem; }
+
+.masthead {
+  display: flex; align-items: center; gap: 2rem;
+  padding: 0.9rem 0; border-bottom: 1px solid var(--rule);
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--ground) 86%, transparent);
+  backdrop-filter: saturate(140%) blur(12px);
+}
+
+.wordmark {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  font-weight: 700; font-size: 17px; letter-spacing: -0.03em; text-decoration: none; flex: none;
+}
+/* four cells, two lit: the composition idea, small enough to read as a mark */
+.wordmark .mark { display: grid; grid-template-columns: 6px 6px; gap: 2px; }
+.wordmark .mark i { width: 6px; height: 6px; border-radius: 1.5px; background: var(--rule-strong); }
+.wordmark .mark i:nth-child(1), .wordmark .mark i:nth-child(4) { background: var(--accent); }
+
+.masthead-end { display: flex; align-items: center; gap: 1rem; flex: none; }
+.masthead-end .ghost {
+  display: inline-flex; align-items: center; color: var(--ink-faint);
+  text-decoration: none; font-size: 14px; font-weight: 500;
+}
+.masthead-end .ghost:hover { color: var(--ink); }
+
+.nav { display: flex; gap: 1.4rem; margin-left: auto; font-size: 14px; font-weight: 500; color: var(--ink-soft); flex-wrap: wrap; align-items: center; }
+.nav a { text-decoration: none; }
+.nav a:hover, .nav a[aria-current] { color: var(--ink); }
+.nav a[aria-current] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+
+footer.site {
+  border-top: 1px solid var(--rule); margin-top: 6rem; padding: 2.5rem 0 4rem;
+  color: var(--ink-soft); font-size: 14px;
+  display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: baseline;
+}
+footer.site a { text-decoration: none; }
+footer.site a:hover { color: var(--ink); }
+footer.site .spacer { margin-left: auto; }
+
+/* ---------- prose ---------- */
+
+.prose { font-family: var(--prose); font-size: 1.2rem; font-weight: 420; line-height: 1.7; color: var(--ink); max-width: var(--measure); }
+.prose p { margin: 0 0 1.15em; }
+.prose strong { font-weight: 600; }
+.prose code { background: var(--sunken); padding: 0.1em 0.36em; border-radius: 4px; border: 1px solid var(--rule); font-size: 0.86em; }
+.prose h3 { font-family: var(--mono); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-soft); margin: 2.75rem 0 1rem; }
+.prose ul, .prose ol { margin: 0 0 1.15em; padding-left: 1.2em; }
+.prose li { margin: 0 0 0.55em; }
+.prose li::marker { color: var(--ink-faint); }
+.prose blockquote { margin: 0 0 1.15em; padding-left: 1rem; border-left: 2px solid var(--accent); color: var(--ink-soft); }
+.prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.86rem; margin: 0 0 1.5em; }
+.prose th, .prose td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.76rem; }
+.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.55; }
+.prose pre code { background: none; border: 0; padding: 0; }
+
+/* wide content scrolls inside itself rather than pushing the page sideways */
+.scroller { overflow-x: auto; }
+
+/* ---------- pieces ---------- */
+
+.eyebrow { font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-soft); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 0.4ch;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase;
+  padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid var(--rule-strong); color: var(--ink-soft);
+  white-space: nowrap;
+}
+.chip.solid { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+
+.card {
+  display: block; text-decoration: none;
+  border: 1px solid var(--rule); border-radius: var(--radius); background: var(--raised);
+  padding: 1.1rem 1.25rem; transition: border-color 120ms, transform 120ms;
+}
+.card:hover { border-color: var(--rule-strong); transform: translateY(-1px); }
+
+.grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); }
+
+.command {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 0.8rem 1rem; font-size: 14px; overflow-x: auto;
+}
+.command .sigil { color: var(--accent-line); user-select: none; }
+.command code { white-space: nowrap; }
+.command button {
+  margin-left: auto; font: inherit; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+  background: none; border: 1px solid var(--rule-strong); color: var(--ink-soft);
+  border-radius: 6px; padding: 0.25rem 0.55rem; cursor: pointer;
+}
+.command button:hover { color: var(--ink); border-color: var(--accent-line); }
+
+.lede { font-family: var(--prose); font-size: 1.42rem; font-weight: 420; line-height: 1.5; color: var(--ink-soft); max-width: 48ch; }
+
+@media (max-width: 860px) {
+  .masthead { gap: 1rem; flex-wrap: wrap; }
+  .nav { order: 3; width: 100%; margin-left: 0; gap: 1.1rem; padding-top: 0.15rem; }
+  .masthead-end { margin-left: auto; }
+}
+
+@media (max-width: 640px) {
+  .lede { font-size: 1.2rem; }
+  .nav { font-size: 13px; gap: 0.9rem; }
+}

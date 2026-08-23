@@ -7,6 +7,7 @@ const skill = (extra: string, rules: string): string => `---
 name: android/demo
 axis: framework
 family: android
+description: A demo skill, for testing the linter. Use when testing the linter.
 version: 1.0.0
 agent_sections: [rules]
 detect:
@@ -44,7 +45,7 @@ test('a reused retired id is an error, with the line it is on', () => {
   assert.ok(reuse);
   assert.equal(reuse.level, 'error');
   // counted against the whole file, frontmatter included, or it points at the wrong line
-  assert.equal(reuse.line, 14);
+  assert.equal(reuse.line, 15);
 });
 
 test('a retired entry that is not a bare id is an error, because it hides reuse', () => {

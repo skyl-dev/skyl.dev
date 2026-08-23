@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadDoc } from '../lib/registry.ts';
+
+const docs = [
+  { slug: 'format', title: 'Skill format', file: 'FORMAT.md', blurb: 'What a skill file is, and which half of it reaches the model.' },
+  { slug: 'axes', title: 'The axes', file: 'AXES.md', blurb: 'Five of them. A rule belongs to exactly one.' },
+  { slug: 'admission', title: 'Admission', file: 'ADMISSION.md', blurb: 'The four tests a rule has to pass to be published.' },
+];
+
+const rendered = await Promise.all(
+  docs.map(async (doc) => ({ ...doc, html: await loadDoc('spec', doc.file) })),
+);
+const present = rendered.filter((d) => d.html);
+---
+
+<Base title="spec" section="spec" description="The skill format, the axis vocabulary, and the four tests a rule has to pass.">
+  <section style="padding: 3.5rem 0 2rem;">
+    <p class="eyebrow">the standard</p>
+    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Spec</h1>
+    <p class="lede">
+      A registry is only as good as what it refuses. This is what a skill has to be, and what a rule
+      has to survive.
+    </p>
+  </section>
+
+  <nav style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding-bottom: 2.5rem; border-bottom: 1px solid var(--rule);">
+    {present.map((doc) => <a class="chip" href={`#${doc.slug}`} style="text-decoration: none;">{doc.title}</a>)}
+  </nav>
+
+  {present.map((doc) => (
+    <section id={doc.slug} style="padding: 3rem 0; border-bottom: 1px solid var(--rule); scroll-margin-top: 5rem;">
+      <p class="eyebrow" style="margin-bottom: 0.6rem;">{doc.blurb}</p>
+      <div class="prose scroller" set:html={doc.html} />
+    </section>
+  ))}
+</Base>

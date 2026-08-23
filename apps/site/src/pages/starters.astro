@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Command from '../components/Command.astro';
+import { loadSkills, tokens } from '../lib/registry.ts';
+
+const skills = await loadSkills();
+const byName = new Map(skills.map((s) => [s.meta.name, s]));
+
+/**
+ * Presets for situations, not for stacks.
+ *
+ * Only Android exists so far, and inventing a Next.js or FastAPI preset would describe
+ * skills nobody can install. These are the shapes an Android project actually arrives in.
+ */
+const STARTERS = [
+  {
+    title: 'A new Android app',
+    when: 'Kotlin and Compose, started this year, nothing legacy in it yet.',
+    picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'],
+  },
+  {
+    title: 'A legacy codebase',
+    when: 'Java, XML layouts, Fragments. The rules that matter here are different ones, not fewer.',
+    picks: ['android/core', 'android/java', 'android/xml', 'android/mvvm'],
+  },
+  {
+    title: 'An app with a backend',
+    when: 'It talks to a server, caches what it fetches, and holds a token it must not leak.',
+    picks: ['android/core', 'android/kotlin', 'android/networking', 'android/db', 'android/security'],
+  },
+  {
+    title: 'A media-heavy app',
+    when: 'Feeds, avatars, uploads. Where images are the product rather than decoration.',
+    picks: ['android/core', 'android/kotlin', 'android/compose', 'android/images', 'android/permissions'],
+  },
+  {
+    title: 'A team adding tests',
+    when: 'The code exists and the suite does not, or it exists and nobody trusts it.',
+    picks: ['android/core', 'android/kotlin', 'android/testing', 'android/di'],
+  },
+  {
+    title: 'Everything',
+    when: 'The whole family, for a project that genuinely spans it. Read the cost before you do this.',
+    picks: skills.map((s) => s.meta.name),
+  },
+];
+
+function summarise(picks: string[]) {
+  const chosen = picks.map((p) => byName.get(p)).filter(Boolean);
+  return {
+    rules: chosen.reduce((n, s) => n + s!.meta.rules.length, 0),
+    tokens: tokens(chosen.reduce((n, s) => n + s!.meta.installableWords, 0)),
+  };
+}
+
+const command = (picks: string[]) =>
+  `npx skyl.dev add ${picks.map((p, i) => (i === 0 ? p : p.split('/')[1])).join(' ')}`;
+---
+
+<Base
+  title="starters"
+  section="starters"
+  description="Presets for the shapes a project actually arrives in, with what each one costs."
+>
+  <section style="padding: 3.5rem 0 2.5rem;">
+    <p class="eyebrow">known shapes</p>
+    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Starters</h1>
+    <p class="lede">
+      If your project looks like one of these, take the line and move on. If it does not,
+      <a href="/#builder">compose it</a> or let <code>scan</code> read the build files and propose.
+    </p>
+  </section>
+
+  <div style="display: grid; gap: 1rem;">
+    {STARTERS.map((starter) => {
+      const stat = summarise(starter.picks);
+      return (
+        <article style="border: 1px solid var(--rule); border-radius: 12px; background: var(--raised); padding: 1.4rem 1.5rem;">
+          <div style="display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap;">
+            <h2 style="font-size: 1.05rem;">{starter.title}</h2>
+            <span class="chip">{starter.picks.length} skills</span>
+            <span class="chip">{stat.rules} rules</span>
+            <span class="chip">~{stat.tokens.toLocaleString()} tokens</span>
+          </div>
+          <p style="color: var(--ink-soft); font-size: 13px; margin: 0.6rem 0 1.1rem; max-width: 60ch;">{starter.when}</p>
+          <Command text={command(starter.picks)} />
+        </article>
+      );
+    })}
+  </div>
+
+  <p style="color: var(--ink-faint); font-size: 13px; margin-top: 2rem;">
+    One family so far. A preset for a stack whose skills do not exist yet would be a list of things
+    you cannot install, so there is not one.
+  </p>
+</Base>

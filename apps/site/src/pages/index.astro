@@ -1,0 +1,437 @@
+---
+import Base from '../layouts/Base.astro';
+import Command from '../components/Command.astro';
+import { loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
+import { QUESTIONS, START } from '../lib/wizard.ts';
+
+const skills = await loadSkills();
+const families = await loadFamilies();
+
+const model = skills.map((s) => ({
+  name: s.meta.name,
+  family: s.meta.family,
+  skill: s.meta.skill,
+  axis: s.meta.axis,
+  requires: s.meta.requires,
+  words: s.meta.installableWords,
+  rules: s.meta.rules.length,
+}));
+
+const totalRules = skills.reduce((n, s) => n + s.meta.rules.length, 0);
+const everything = tokens(skills.reduce((n, s) => n + s.meta.installableWords, 0));
+
+// the terminal is generated from the registry, so it cannot drift from what scan prints
+const demo = skills
+  .filter((s) => ['core', 'compose', 'db', 'di', 'networking'].includes(s.meta.skill))
+  .map((s) => ({
+    name: s.meta.name,
+    on: Object.values(s.meta.detect).flat()[0] ?? '',
+  }));
+const demoCost = tokens(
+  skills.filter((s) => demo.some((d) => d.name === s.meta.name)).reduce((n, s) => n + s.meta.installableWords, 0),
+);
+---
+
+<Base
+  title="skyl"
+  description="A composable registry of AI agent skills. Answer a few questions about your project and install the layers that apply to it, not one file that tries to cover everything."
+>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">composable agent skills</p>
+      <h1>
+        Your agent does not need<br />
+        <span class="strike">every rule</span> <span class="hl">your rules</span>.
+      </h1>
+      <p class="lede">
+        Skills are split along five axes, so a project loads the intersection that applies to it.
+        Answer four questions, or let the CLI read your build files and propose.
+      </p>
+      <div class="hero-cta">
+        <a class="button" href="#pick">Find your skills</a>
+        <a class="button ghost" href="/skills">Browse all {skills.length}</a>
+      </div>
+      <p class="hero-note">
+        {skills.length} skills · {totalRules} rules · {families.length} family published
+      </p>
+    </div>
+
+    <div class="terminal" aria-hidden="true">
+      <div class="terminal-bar"><i></i><i></i><i></i><span>skyl scan</span></div>
+      <pre><code><span class="t-dim">$</span> npx skyl.dev scan
+
+  <span class="t-strong">Detected</span>
+{demo.map((d) => (
+  <>{'    '}<span class="t-ok">{d.name.padEnd(20)}</span><span class="t-dim">{d.on}</span>{'\n'}</>
+))}
+  <span class="t-strong">Considered and not detected</span>
+    <span class="t-dim">android/java   android/xml   android/mvvm</span>
+
+  {demo.length} to install, ~{demoCost.toLocaleString()} tokens <span class="t-dim">into .claude/skills</span>
+</code></pre>
+    </div>
+  </section>
+
+  <section id="pick" class="picker">
+    <div class="picker-head">
+      <div>
+        <p class="eyebrow">the composer</p>
+        <h2>Tell it about the project</h2>
+      </div>
+      <button type="button" id="restart" class="button ghost small" hidden>Start over</button>
+    </div>
+
+    <div class="picker-body">
+      <div class="steps" id="steps"></div>
+
+      <div id="stage">
+        <noscript>
+          <p style="color: var(--ink-soft);">
+            This part needs JavaScript. <a href="/starters">Starters</a> covers the common shapes
+            without it, and <code>npx skyl.dev scan</code> does the same job in a terminal.
+          </p>
+        </noscript>
+      </div>
+
+      <aside class="tally" id="tally" hidden>
+        <div>
+          <p class="eyebrow">so far</p>
+          <p class="tally-count"><span id="count">0</span> <small>skills</small></p>
+          <p class="tally-sub" id="breakdown">nothing yet</p>
+        </div>
+        <div>
+          <p class="eyebrow">context cost</p>
+          <div class="meter"><div id="bar"></div></div>
+          <p class="tally-sub"><span id="cost">~0</span> of ~{everything.toLocaleString()} for everything</p>
+        </div>
+        <ul class="tally-list" id="chosen"></ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="pillars">
+    <div>
+      <h3>One axis, one job</h3>
+      <p>
+        Core, language, framework, service, topic. A rule lives on exactly one, so layers never
+        restate each other and a project can drop what it does not use.
+      </p>
+    </div>
+    <div>
+      <h3>A rule earns its slot</h3>
+      <p>
+        The model has to get it wrong unprompted, no linter can catch it, and it has to be checkable
+        at every token. Most candidates fail that and are not published.
+      </p>
+    </div>
+    <div>
+      <h3>Evidence, in public</h3>
+      <p>
+        Every skill carries what was measured, on which models, and what did not work. That half
+        stays in the repository and never reaches your agent. <a href="/evidence">See it</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 4rem; align-items: center; padding: 5.5rem 0 5rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.05; letter-spacing: -0.045em;
+    margin: 1.1rem 0 1.4rem; font-weight: 700;
+  }
+  .hero .strike { color: var(--ink-faint); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .hero .hl { box-shadow: inset 0 -0.42em 0 var(--accent); }
+  :root[data-theme="dark"] .hero .hl, :root:not([data-theme="light"]) .hero .hl { box-shadow: inset 0 -0.42em 0 color-mix(in srgb, var(--accent) 32%, transparent); }
+  .hero-cta { display: flex; gap: 0.7rem; flex-wrap: wrap; margin: 2rem 0 1.2rem; }
+  .hero-note { color: var(--ink-faint); font-size: 14px; margin: 0; }
+
+  .button {
+    display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;
+    background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 15px;
+    padding: 0.7rem 1.2rem; border-radius: 9px; border: 1px solid transparent; cursor: pointer;
+    font-family: var(--mono);
+  }
+  .button:hover { filter: brightness(1.04); }
+  .button.ghost { background: none; color: var(--ink); border-color: var(--rule-strong); }
+  .button.ghost:hover { border-color: var(--accent-line); filter: none; }
+  .button.small { font-size: 13px; padding: 0.45rem 0.8rem; }
+
+  .terminal {
+    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
+    box-shadow: var(--shadow); overflow: hidden; min-width: 0;
+  }
+  .terminal-bar {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--rule); background: var(--sunken);
+  }
+  .terminal-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--rule-strong); }
+  .terminal-bar span { margin-left: 0.6rem; font-size: 12px; color: var(--ink-faint); }
+  .terminal pre { margin: 0; padding: 1.1rem; font-size: 12.5px; line-height: 1.75; overflow-x: auto; }
+  .terminal code { font-family: var(--mono); white-space: pre; }
+  .t-dim { color: var(--ink-faint); }
+  .t-strong { color: var(--ink); font-weight: 600; }
+  .t-ok { color: var(--accent-line); }
+
+  .picker { border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
+  .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }
+  .picker-head h2 { font-size: 1.25rem; margin-top: 0.35rem; }
+  .picker-head button { margin-left: auto; }
+  .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
+  .picker-body > #stage { padding: 1.8rem; min-height: 21rem; }
+  .steps { grid-column: 1 / -1; display: flex; gap: 0.4rem; padding: 1rem 1.8rem 0; }
+  .step { height: 3px; border-radius: 2px; background: var(--rule); flex: 1; transition: background 200ms; }
+  .step[data-done] { background: var(--accent); }
+  .step[data-now] { background: var(--accent-line); }
+
+  .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.8rem; display: grid; gap: 1.5rem; align-content: start; }
+  .tally-count { font-size: 2.3rem; letter-spacing: -0.04em; margin: 0.3rem 0 0; line-height: 1; font-weight: 600; }
+  .tally-count small { font-size: 0.9rem; color: var(--ink-faint); font-weight: 450; letter-spacing: 0; }
+  .tally-sub { margin: 0.45rem 0 0; font-size: 13px; color: var(--ink-soft); }
+  .meter { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-top: 0.5rem; }
+  .meter div { height: 100%; width: 0%; background: var(--accent); transition: width 220ms; }
+  .tally-list { list-style: none; margin: 0; padding: 0; font-size: 13px; display: grid; gap: 0.3rem; }
+  .tally-list li { color: var(--ink-soft); display: flex; gap: 0.5rem; }
+  .tally-list li span { color: var(--ink-faint); margin-left: auto; }
+
+  .q-prompt { font-size: 1.35rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; font-weight: 600; }
+  .q-help { color: var(--ink-soft); font-size: 14px; margin: 0 0 1.6rem; }
+  .q-options { display: grid; gap: 0.6rem; }
+  .q-option {
+    display: flex; align-items: flex-start; gap: 0.85rem; text-align: left; width: 100%;
+    font: inherit; color: inherit; cursor: pointer;
+    background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; padding: 0.95rem 1.1rem;
+    transition: border-color 120ms, background 120ms;
+  }
+  .q-option:hover { border-color: var(--rule-strong); }
+  .q-option[data-on] { border-color: var(--accent-line); background: color-mix(in srgb, var(--accent) 9%, var(--ground)); }
+  .q-option .box { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--rule-strong); flex: none; margin-top: 2px; position: relative; }
+  .q-option[data-on] .box { background: var(--accent); border-color: var(--accent); }
+  .q-option[data-on] .box::after {
+    content: ""; position: absolute; inset: 3px 3px 4px 3px;
+    border-left: 1.6px solid var(--accent-ink); border-bottom: 1.6px solid var(--accent-ink); transform: rotate(-45deg);
+  }
+  .q-option b { font-weight: 600; display: block; }
+  .q-option small { color: var(--ink-faint); font-size: 13px; }
+  .q-actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; align-items: center; }
+  .q-back { background: none; border: 0; font: inherit; font-size: 14px; color: var(--ink-faint); cursor: pointer; padding: 0; }
+  .q-back:hover { color: var(--ink); }
+
+  .soon { border: 1px dashed var(--rule-strong); border-radius: 10px; padding: 1.2rem 1.3rem; background: var(--ground); }
+  .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
+  .soon p:last-child { margin-bottom: 0; }
+
+  .result-grid { display: grid; gap: 0.5rem; margin: 1.4rem 0 1.6rem; }
+  .result-row { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.55rem 0.7rem; border-radius: 8px; background: var(--ground); border: 1px solid var(--rule); }
+  .result-row a { font-weight: 600; text-decoration: none; }
+  .result-row .why { color: var(--ink-faint); font-size: 13px; margin-left: auto; }
+
+  .pillars { padding: 5rem 0 2rem; display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  .pillars h3 { font-size: 1rem; margin-bottom: 0.6rem; }
+  .pillars p { color: var(--ink-soft); font-size: 14.5px; margin: 0; max-width: 38ch; }
+
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding: 3.5rem 0 3rem; }
+    .picker-body { grid-template-columns: minmax(0, 1fr); }
+    .tally { border-left: 0; border-top: 1px solid var(--rule); }
+  }
+</style>
+
+<script define:vars={{ model, QUESTIONS, START }}>
+  const byName = new Map(model.map((s) => [s.name, s]));
+  const questions = new Map(QUESTIONS.map((q) => [q.id, q]));
+  const everythingWords = model.reduce((n, s) => n + s.words, 0);
+  const estimate = (words) => Math.round((words * 4) / 300) * 100;
+
+  const stage = document.querySelector('#stage');
+  const steps = document.querySelector('#steps');
+  const tally = document.querySelector('#tally');
+  const restart = document.querySelector('#restart');
+  const els = {
+    count: document.querySelector('#count'),
+    breakdown: document.querySelector('#breakdown'),
+    cost: document.querySelector('#cost'),
+    bar: document.querySelector('#bar'),
+    chosen: document.querySelector('#chosen'),
+  };
+
+  /** answered questions, in order, each with the option ids picked */
+  let trail = [];
+  let current = START;
+  let stalled = null;
+
+  function picksSoFar() {
+    const out = [];
+    for (const step of trail) {
+      const question = questions.get(step.id);
+      for (const id of step.chosen) {
+        const option = question.options.find((o) => o.id === id);
+        for (const pick of option?.picks ?? []) out.push(pick);
+      }
+    }
+    return out;
+  }
+
+  function resolve(chosen) {
+    const out = new Set();
+    const visit = (name) => {
+      if (out.has(name)) return;
+      const skill = byName.get(name);
+      if (!skill) return;
+      for (const dep of skill.requires) visit(dep);
+      out.add(name);
+    };
+    for (const name of chosen) visit(name);
+    return [...out];
+  }
+
+  function renderTally() {
+    const all = resolve(picksSoFar());
+    const list = all.map((n) => byName.get(n));
+    const words = list.reduce((n, s) => n + s.words, 0);
+    const rules = list.reduce((n, s) => n + s.rules, 0);
+
+    tally.hidden = all.length === 0;
+    els.count.textContent = String(all.length);
+    els.breakdown.textContent = all.length === 0 ? 'nothing yet' : `${rules} rules`;
+    els.cost.textContent = `~${estimate(words).toLocaleString()}`;
+    els.bar.style.width = `${Math.min(100, (words / everythingWords) * 100)}%`;
+    els.chosen.innerHTML = list
+      .map((s) => `<li>${s.skill}<span>${s.rules}</span></li>`)
+      .join('');
+    return { all, list, words, rules };
+  }
+
+  function renderSteps() {
+    const total = 5;
+    steps.innerHTML = Array.from({ length: total }, (_, i) => {
+      const state = i < trail.length ? ' data-done' : i === trail.length ? ' data-now' : '';
+      return `<div class="step"${state}></div>`;
+    }).join('');
+  }
+
+  function choose(question, optionId) {
+    const option = question.options.find((o) => o.id === optionId);
+    if (question.multi) {
+      const step = trail.find((s) => s.id === question.id);
+      if (step) {
+        step.chosen = step.chosen.includes(optionId)
+          ? step.chosen.filter((c) => c !== optionId)
+          : [...step.chosen, optionId];
+      } else {
+        trail.push({ id: question.id, chosen: [optionId] });
+      }
+      render();
+      return;
+    }
+
+    trail.push({ id: question.id, chosen: [optionId] });
+    if (option.soon) { stalled = option; render(); return; }
+    current = option.next ?? null;
+    render();
+  }
+
+  function back() {
+    trail.pop();
+    stalled = null;
+    current = trail.length === 0 ? START : nextAfter(trail[trail.length - 1]);
+    render();
+  }
+
+  function nextAfter(step) {
+    const question = questions.get(step.id);
+    if (question.multi) return null;
+    const option = question.options.find((o) => o.id === step.chosen[0]);
+    return option?.next ?? null;
+  }
+
+  function optionMarkup(question, option, chosen) {
+    const on = chosen.includes(option.id) ? ' data-on' : '';
+    return `
+      <button class="q-option" type="button" data-option="${option.id}"${on}>
+        <span class="box"></span>
+        <span>
+          <b>${option.label}</b>
+          ${option.hint ? `<small>${option.hint}</small>` : ''}
+        </span>
+      </button>`;
+  }
+
+  function render() {
+    renderSteps();
+    const { all, list, words, rules } = renderTally();
+    restart.hidden = trail.length === 0;
+
+    if (stalled) {
+      stage.innerHTML = `
+        <p class="q-prompt">Not published yet</p>
+        <div class="soon">
+          <p>${stalled.soon.replace(/`([^`]+)`/g, '<code>$1</code>')}</p>
+          <p>The registry says what it covers rather than pretending to cover everything.</p>
+        </div>
+        <div class="q-actions">
+          <button class="q-back" type="button" data-back>Back</button>
+        </div>`;
+      wire();
+      return;
+    }
+
+    if (current === null) {
+      const args = all.map((n, i) => (i === 0 ? n : n.split('/')[1]));
+      stage.innerHTML = `
+        <p class="q-prompt">${all.length} skills, ${rules} rules</p>
+        <p class="q-help">~${estimate(words).toLocaleString()} tokens. Each one is a layer you can drop later.</p>
+        <div class="result-grid">
+          ${list.map((s) => `
+            <div class="result-row">
+              <a href="/skills/${s.family}/${s.skill}">${s.name}</a>
+              <span class="chip">${s.axis}</span>
+              <span class="why">${s.rules} rules</span>
+            </div>`).join('')}
+        </div>
+        <div class="command">
+          <span class="sigil">$</span>
+          <code data-command>npx skyl.dev add ${args.join(' ')}</code>
+          <button type="button" data-copy="npx skyl.dev add ${args.join(' ')}">copy</button>
+        </div>
+        <div class="q-actions">
+          <button class="q-back" type="button" data-back>Back</button>
+        </div>`;
+      wire();
+      return;
+    }
+
+    const question = questions.get(current);
+    const step = trail.find((s) => s.id === question.id);
+    const chosen = step?.chosen ?? [];
+
+    stage.innerHTML = `
+      <p class="q-prompt">${question.prompt}</p>
+      ${question.help ? `<p class="q-help">${question.help}</p>` : ''}
+      <div class="q-options">
+        ${question.options.map((o) => optionMarkup(question, o, chosen)).join('')}
+      </div>
+      <div class="q-actions">
+        ${question.multi ? `<button class="button small" type="button" data-done>${chosen.length === 0 ? 'Nothing extra' : 'Done'}</button>` : ''}
+        ${trail.length > 0 ? '<button class="q-back" type="button" data-back>Back</button>' : ''}
+      </div>`;
+    wire();
+  }
+
+  function wire() {
+    const question = questions.get(current);
+    for (const button of stage.querySelectorAll('[data-option]')) {
+      button.addEventListener('click', () => choose(question, button.dataset.option));
+    }
+    const done = stage.querySelector('[data-done]');
+    if (done) done.addEventListener('click', () => { current = null; render(); });
+    const backButton = stage.querySelector('[data-back]');
+    if (backButton) backButton.addEventListener('click', back);
+  }
+
+  restart.addEventListener('click', () => { trail = []; current = START; stalled = null; render(); });
+  render();
+</script>

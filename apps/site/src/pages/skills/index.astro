@@ -1,0 +1,112 @@
+---
+import Base from '../../layouts/Base.astro';
+import { AXIS_ORDER, loadFamilies, tokens } from '../../lib/registry.ts';
+
+const families = await loadFamilies();
+const total = families.reduce((n, f) => n + f.skills.length, 0);
+const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta.rules.length, 0), 0);
+---
+
+<Base
+  title="skills"
+  section="skills"
+  description="Every published skill, by family and axis. What each one is for, and what it costs in context."
+>
+  <section style="padding: 3.5rem 0 2rem;">
+    <p class="eyebrow">the registry</p>
+    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">{total} skills, {rules} rules</h1>
+    <p class="lede">
+      Each one is a layer. Install the intersection that matches your project, and nothing else.
+    </p>
+  </section>
+
+  <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; padding-bottom: 1.5rem;">
+    <input
+      id="filter"
+      type="search"
+      placeholder="filter by name, axis or dependency"
+      autocomplete="off"
+      style="flex: 1 1 18rem; font: inherit; font-size: 13px; padding: 0.55rem 0.8rem; border-radius: 10px; border: 1px solid var(--rule); background: var(--raised); color: var(--ink);"
+    />
+    <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+      {AXIS_ORDER.map((axis) => (
+        <button class="chip" type="button" data-axis={axis} style="cursor: pointer; background: none;">{axis}</button>
+      ))}
+    </div>
+  </div>
+
+  {families.map((family) => (
+    <section style="margin-bottom: 3rem;" data-family={family.name}>
+      <h2 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: 0.9rem;">
+        {family.name} <span style="color: var(--rule-strong);">/</span> {family.skills.length}
+      </h2>
+      <div class="grid">
+        {family.skills.map((skill) => (
+          <a
+            class="card"
+            href={`/skills/${skill.meta.family}/${skill.meta.skill}`}
+            data-name={skill.meta.name}
+            data-axis={skill.meta.axis}
+            data-detect={`${Object.values(skill.meta.detect).flat().join(' ')} ${skill.meta.description}`}
+          >
+            <div style="display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.5rem;">
+              <strong style="font-weight: 600;">{skill.meta.skill}</strong>
+              <span class="chip">{skill.meta.axis}</span>
+              <span style="margin-left: auto; color: var(--ink-faint); font-size: 12px;">v{skill.meta.version}</span>
+            </div>
+            <p style="margin: 0 0 0.7rem; color: var(--ink-soft); font-size: 14px; line-height: 1.5;">
+              {skill.meta.description}
+            </p>
+            <p style="margin: 0; color: var(--ink-faint); font-size: 13px;">
+              {skill.rulesCount.must} must{skill.rulesCount.should > 0 ? `, ${skill.rulesCount.should} should` : ''}
+              <span style="color: var(--rule-strong);"> · </span>
+              ~{tokens(skill.meta.installableWords).toLocaleString()} tokens
+            </p>
+            {skill.meta.requires.length > 0 && (
+              <p style="margin: 0.5rem 0 0; color: var(--ink-faint); font-size: 12px;">
+                requires {skill.meta.requires.join(', ')}
+              </p>
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <p id="empty" hidden style="color: var(--ink-faint); font-size: 13px;">Nothing matches that.</p>
+</Base>
+
+<script>
+  // Filtering happens here because the whole registry is already on the page: with a few
+  // dozen skills a search index would be more code than the thing it indexes.
+  const input = document.querySelector<HTMLInputElement>('#filter')!;
+  const cards = [...document.querySelectorAll<HTMLElement>('.card[data-name]')];
+  const families = [...document.querySelectorAll<HTMLElement>('[data-family]')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('button[data-axis]')];
+  const empty = document.querySelector<HTMLElement>('#empty')!;
+  let axis: string | null = null;
+
+  function apply() {
+    const term = input.value.trim().toLowerCase();
+    let shown = 0;
+    for (const card of cards) {
+      const haystack = `${card.dataset.name} ${card.dataset.axis} ${card.dataset.detect}`.toLowerCase();
+      const hit = (term === '' || haystack.includes(term)) && (axis === null || card.dataset.axis === axis);
+      card.hidden = !hit;
+      if (hit) shown += 1;
+    }
+    for (const family of families) {
+      family.hidden = [...family.querySelectorAll<HTMLElement>('.card')].every((c) => c.hidden);
+    }
+    empty.hidden = shown > 0;
+  }
+
+  input.addEventListener('input', apply);
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      axis = axis === chip.dataset.axis ? null : chip.dataset.axis!;
+      for (const c of chips) c.classList.toggle('solid', c.dataset.axis === axis);
+      apply();
+    });
+  }
+</script>

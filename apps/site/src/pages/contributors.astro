@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadSkills } from '../lib/registry.ts';
+
+const skills = await loadSkills();
+
+const byAuthor = new Map<string, typeof skills>();
+for (const skill of skills) {
+  for (const author of skill.meta.authors.length > 0 ? skill.meta.authors : ['unattributed']) {
+    byAuthor.set(author, [...(byAuthor.get(author) ?? []), skill]);
+  }
+}
+const authors = [...byAuthor].sort((a, b) => b[1].length - a[1].length);
+---
+
+<Base
+  title="contributors"
+  section="contributors"
+  description="Who wrote which skill, and what it takes to add one."
+>
+  <section style="padding: 3.5rem 0 2.5rem;">
+    <p class="eyebrow">credit</p>
+    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Contributors</h1>
+    <p class="lede">
+      A skill carries the name of whoever is accountable for it, on the file and here.
+    </p>
+  </section>
+
+  <div class="grid">
+    {authors.map(([author, written]) => (
+      <div class="card" style="cursor: default;">
+        <div style="display: flex; align-items: baseline; gap: 0.6rem;">
+          <strong>{author}</strong>
+          <span style="margin-left: auto; color: var(--ink-faint); font-size: 12px;">{written.length} skills</span>
+        </div>
+        <p style="margin: 0.7rem 0 0; font-size: 13px; color: var(--ink-soft);">
+          {written.map((s, i) => (
+            <>
+              {i > 0 && ', '}
+              <a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a>
+            </>
+          ))}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <section style="margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 2.5rem; max-width: var(--measure);">
+    <h2 style="font-size: 1.05rem; margin-bottom: 1rem;">Adding one</h2>
+    <p style="color: var(--ink-soft); font-size: 14px;">
+      The bar is deliberately high, and it is about evidence rather than writing. A rule has to be
+      something a model gets wrong unprompted, that no linter catches, that most projects in its
+      domain hit, and that a reader can check at any point in a file. Most candidate rules fail one
+      of those, and the ones that fail are more interesting than the ones that pass.
+    </p>
+    <p style="color: var(--ink-soft); font-size: 14px;">
+      <a href="https://github.com/skyl-dev/skyl/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> has the
+      full process, and <a href="/spec">the spec</a> has the format.
+    </p>
+  </section>
+</Base>

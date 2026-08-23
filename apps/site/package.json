@@ -1,0 +1,21 @@
+{
+  "name": "@skyl/site",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "devDependencies": {
+    "@skyl/core": "workspace:*",
+    "astro": "^7.1.6",
+    "marked": "^18.0.10",
+    "cookie": "^2.0.1"
+  },
+  "pnpm": {
+    "//": "cookie is declared only to win module resolution against a stray ~/node_modules on the author machine, which shadows astro copy with a CommonJS one. Safe to drop once that is gone."
+  }
+}

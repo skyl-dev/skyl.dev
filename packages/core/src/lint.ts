@@ -64,6 +64,20 @@ export function lintSkill(text: string, path?: string): Finding[] {
     }
   }
 
+  if (skill.description === '') {
+    found.push({
+      level: 'warn',
+      message: 'no `description`',
+      detail: 'nothing that lists this skill can say what it is for',
+    });
+  } else if (skill.description.length > 300) {
+    found.push({
+      level: 'warn',
+      message: `description is ${String(skill.description.length)} characters`,
+      detail: 'one line, read in a list next to a dozen others',
+    });
+  }
+
   const md = bodyOf(text);
   const all = sections(md);
   // line numbers are reported against the file, not the body, or they point at nothing
