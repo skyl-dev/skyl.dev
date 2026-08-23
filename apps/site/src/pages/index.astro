@@ -4,6 +4,7 @@ import Command from '../components/Command.astro';
 import { evidenceFacts, loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
 import { QUESTIONS, START } from '../lib/wizard.ts';
 import AxisGallery from '../components/AxisGallery.astro';
+import RuleAnatomy from '../components/RuleAnatomy.astro';
 
 const skills = await loadSkills();
 const families = await loadFamilies();
@@ -59,11 +60,11 @@ const AXIS_SAYS = [
   },
 ];
 
-const ADMISSION = [
-  { n: '01', ask: 'Does the model get this wrong unprompted?', says: 'If it already does the right thing, the rule buys nothing and costs context.' },
-  { n: '02', ask: 'Does a linter or the compiler already catch it?', says: 'Tools that run on every build are cheaper and more reliable than a sentence in a prompt.' },
-  { n: '03', ask: 'Would 900 of 1000 projects hit it?', says: 'A rule for the other hundred belongs in your own file, not in a shared registry.' },
-  { n: '04', ask: 'Is it checkable at every token?', says: 'A reader has to be able to hold it against a file and answer yes or no. Undecidable text is unfollowable.' },
+const BEHAVIOUR = [
+  { act: 'It proposes', say: 'scan prints what it matched, what it ruled out, and the token cost. It writes nothing.' },
+  { act: 'You confirm', say: 'nothing lands until you say so. --yes exists, for scripts that already know.' },
+  { act: 'It is recorded', say: 'skyl.lock holds a hash of every file, so a reinstall is no diff and a pull request shows exactly what moved.' },
+  { act: 'It is reversible', say: 'remove takes layers back out, and refuses to orphan one that another still needs.' },
 ];
 
 const chosen = new Set(demo.map((s) => s.meta.name));
@@ -170,36 +171,35 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     <AxisGallery />
   </section>
 
-  <section class="admission">
+  <section class="anatomy-band">
     <div class="band-head">
-      <p class="eyebrow">what gets in</p>
-      <h2>Four questions, and most candidate rules fail one</h2>
-      <p class="band-say">
-        The interesting part of a registry is what it refuses. Every rule here had to survive all
-        four, and the ones that did not are recorded alongside the ones that did.
-      </p>
+      <p class="eyebrow">what a rule is</p>
+      <h2>Three parts, always</h2>
+      <p class="band-say">An instruction you can check, the failure it prevents, and where it stops applying.</p>
     </div>
 
-    <div class="tests">
-      {ADMISSION.map((test) => (
-        <div class="test">
-          <span class="test-n">{test.n}</span>
-          <h3>{test.ask}</h3>
-          <p>{test.says}</p>
-        </div>
+    <RuleAnatomy />
+  </section>
+
+  <section class="behaviour">
+    <div class="band-head">
+      <p class="eyebrow">how it behaves</p>
+      <h2>Nothing is written without asking</h2>
+      <p class="band-say">It reads your project, proposes, and waits. Everything it does is reviewable and reversible.</p>
+    </div>
+
+    <ol class="acts">
+      {BEHAVIOUR.map((step, i) => (
+        <li class="act">
+          <span class="act-n">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <p class="act-name">{step.act}</p>
+            <p class="act-say">{step.say}</p>
+          </div>
+        </li>
       ))}
-    </div>
+    </ol>
 
-    <div class="measured">
-      <div><b>{facts['evals'] ?? '26'}</b><span>evals</span></div>
-      <div><b>{facts['recorded runs'] ?? '490'}</b><span>recorded runs</span></div>
-      <div><b>4</b><span>model families</span></div>
-      <div><b>2</b><span>harnesses</span></div>
-      <p>
-        Every run is published, including the ones that changed nothing.{' '}
-        <a href="/evidence">Read the evidence</a>.
-      </p>
-    </div>
   </section>
 
   <section class="quick">
@@ -209,9 +209,12 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     </div>
     <div class="quick-grid">
       {[
-        { title: 'A new Android app', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'] },
+        { title: 'A new app', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'] },
         { title: 'A legacy codebase', picks: ['android/core', 'android/java', 'android/xml', 'android/mvvm'] },
         { title: 'An app with a backend', picks: ['android/core', 'android/kotlin', 'android/networking', 'android/db', 'android/security'] },
+        { title: 'Media heavy', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/images', 'android/permissions'] },
+        { title: 'Adding tests', picks: ['android/core', 'android/kotlin', 'android/testing', 'android/di'] },
+        { title: 'Everything', picks: skills.map((s) => s.meta.name) },
       ].map((starter) => {
         const list = starter.picks.map((n) => skills.find((s) => s.meta.name === n)!).filter(Boolean);
         const cost = tokens(list.reduce((n, s) => n + s.meta.installableWords, 0));
@@ -399,21 +402,17 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   .axes-band { padding: 6rem 0 0; }
 
-  .admission { padding: 6rem 0 0; }
-  .tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }
-  .test { border-top: 2px solid var(--accent); padding-top: 1rem; }
-  .test-n { font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: 0.06em; }
-  .test h3 { font-size: 1rem; margin: 0.5rem 0 0.6rem; }
-  .test p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+  .anatomy-band { padding: 6rem 0 0; }
 
-  .measured {
-    margin-top: 2.5rem; padding: 1.5rem 1.8rem; border: 1px solid var(--rule); border-radius: 13px;
-    background: var(--raised); display: flex; gap: 2.5rem; align-items: baseline; flex-wrap: wrap;
+  .behaviour { padding: 6rem 0 0; }
+  .acts {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.5rem 2rem;
   }
-  .measured div { display: grid; }
-  .measured b { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.03em; }
-  .measured span { font-size: 12px; color: var(--ink-faint); }
-  .measured p { margin: 0 0 0 auto; font-size: 13.5px; color: var(--ink-soft); max-width: 26ch; }
+  .act { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.6rem; align-items: start; }
+  .act-n { font-size: 11px; font-weight: 700; color: var(--accent); padding-top: 0.2rem; }
+  .act-name { margin: 0 0 0.35rem; font-size: 15px; font-weight: 600; }
+  .act-say { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
 
   .quick { padding: 6rem 0 2rem; }
   .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.9rem; }

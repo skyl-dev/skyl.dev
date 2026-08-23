@@ -1,0 +1,156 @@
+---
+import { loadRule } from '../lib/registry.ts';
+
+/**
+ * One real rule, taken apart.
+ *
+ * Read from the registry rather than written here, so the example cannot drift from the
+ * file it claims to quote. The annotations are the only added words, and they appear when
+ * a part is asked about.
+ */
+const rule = await loadRule('android/compose', 'EFFECT-1');
+
+const PARTS = rule
+  ? [
+      {
+        id: 'instruction', label: 'the instruction', text: rule.instruction,
+        noteLabel: 'it has to be decidable',
+        note: 'A reader can hold it against a file and answer yes or no.',
+        foil: 'Handle effects appropriately.',
+        verdict: 'Nothing to check. It cannot be followed, and it cannot be failed.',
+      },
+      {
+        id: 'why', label: 'why', text: rule.why,
+        noteLabel: 'it names a failure, not a principle',
+        note: 'The reader has to be able to recognise this bug in the wild.',
+        foil: 'Because it is best practice.',
+        verdict: 'A slogan. Nobody can spot this going wrong in their own code.',
+      },
+      {
+        id: 'not-when', label: 'not when', text: rule.notWhen,
+        noteLabel: 'it says where it stops',
+        note: 'Almost nobody writes these, and their absence is what turns a rules file into a nitpick generator.',
+        foil: '(nothing)',
+        verdict: 'No boundary, so it is applied to the one case where the body is the right place.',
+      },
+    ]
+  : [];
+---
+
+{rule && (
+  <div class="anatomy">
+    <div class="anatomy-rule">
+      <div class="anatomy-head">
+        <span class="anatomy-id">{rule.id}</span>
+        <span class="anatomy-priority">{rule.priority}</span>
+        <a class="anatomy-from" href="/skills/android/compose">android/compose</a>
+      </div>
+
+      {PARTS.map((part) => (
+        <button class="part" data-part={part.id} type="button">
+          <span class="part-label">{part.label}</span>
+          <span class="part-text">{part.text}</span>
+        </button>
+      ))}
+    </div>
+
+    <aside class="foil">
+      <p class="foil-head">the same rule, written badly</p>
+      <div class="foil-body">
+        <p class="foil-label" data-foil-label></p>
+        <p class="foil-text" data-foil-text></p>
+        <p class="foil-verdict" data-foil-verdict></p>
+      </div>
+      <div class="foil-note" data-note></div>
+    </aside>
+  </div>
+)}
+
+<script define:vars={{ PARTS }}>
+  const scope = document.querySelector('.anatomy');
+  if (scope) {
+    const note = scope.querySelector('[data-note]');
+    const byId = new Map(PARTS.map((p) => [p.id, p]));
+
+    const show = (id) => {
+      const part = byId.get(id);
+      note.innerHTML = `<p class="note-label">${part.noteLabel}</p><p class="note-say">${part.note}</p>`;
+      scope.querySelector('[data-foil-label]').textContent = part.label;
+      scope.querySelector('[data-foil-text]').textContent = part.foil;
+      scope.querySelector('[data-foil-verdict]').textContent = part.verdict;
+      for (const el of scope.querySelectorAll('[data-part]')) {
+        el.toggleAttribute('data-on', el.dataset.part === id);
+      }
+    };
+
+    for (const el of scope.querySelectorAll('[data-part]')) {
+      el.addEventListener('mouseenter', () => show(el.dataset.part));
+      el.addEventListener('focus', () => show(el.dataset.part));
+      el.addEventListener('click', () => show(el.dataset.part));
+    }
+    show('instruction');
+  }
+</script>
+
+<style is:global>
+  .anatomy { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1.25rem; align-items: stretch; }
+
+  .anatomy-rule {
+    border: 1px solid var(--rule); border-radius: 13px; background: var(--raised); overflow: hidden;
+  }
+  .anatomy-head {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--rule); background: var(--sunken);
+  }
+  .anatomy-id { font-size: 13px; font-weight: 700; }
+  .anatomy-priority {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 5px; padding: 0.1rem 0.45rem;
+  }
+  .anatomy-from { margin-left: auto; font-size: 12px; color: var(--ink-faint); text-decoration: none; }
+  .anatomy-from:hover { color: var(--accent); }
+
+  .part {
+    display: grid; gap: 0.3rem; width: 100%; text-align: left; cursor: pointer;
+    font: inherit; background: none; border: 0; border-top: 1px solid var(--rule);
+    padding: 1rem 1.2rem; transition: background 160ms;
+  }
+  .part:first-of-type { border-top: 0; }
+  .part:hover, .part[data-on] { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .part-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
+    transition: color 160ms;
+  }
+  .part[data-on] .part-label { color: var(--accent); }
+  .part-text { font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+  .part[data-on] .part-text { color: var(--ink); }
+
+  /* the counter-example: the same part written the way it usually is elsewhere, and what
+     that costs. It mutates with the selection, so the right column is never a spare
+     paragraph floating beside a tall card. */
+  .foil {
+    display: grid; grid-template-rows: auto 1fr auto;
+    border: 1px dashed var(--rule-strong); border-radius: 13px; background: var(--ground); overflow: hidden;
+  }
+  .foil-head {
+    margin: 0; padding: 0.85rem 1.1rem; border-bottom: 1px dashed var(--rule-strong);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
+  }
+  .foil-body { padding: 1.2rem 1.1rem; display: grid; align-content: center; gap: 0.5rem; }
+  .foil-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint); }
+  .foil-text {
+    margin: 0; font-size: 16px; color: var(--ink-faint); line-height: 1.5;
+    text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-faint) 60%, transparent);
+  }
+  .foil-verdict { margin: 0.3rem 0 0; font-size: 13.5px; color: var(--ink-soft); }
+
+  .foil-note {
+    display: grid; gap: 0.3rem; padding: 1rem 1.1rem;
+    border-top: 1px dashed var(--rule-strong);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+  }
+  .note-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--accent); }
+  .note-say { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+
+  @media (max-width: 900px) { .anatomy { grid-template-columns: minmax(0, 1fr); } }
+</style>

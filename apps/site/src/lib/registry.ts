@@ -144,6 +144,37 @@ export async function evidenceFacts(family: string): Promise<Record<string, stri
   return out;
 }
 
+export interface RuleParts {
+  readonly id: string;
+  readonly priority: string;
+  readonly instruction: string;
+  readonly why: string;
+  readonly notWhen: string;
+}
+
+/**
+ * One rule, split into the three parts the format requires.
+ *
+ * Read from the registry rather than copied into the page, so the example cannot drift
+ * from the rule it claims to be quoting.
+ */
+export async function loadRule(name: string, id: string): Promise<RuleParts | undefined> {
+  const skills = await loadSkills();
+  const skill = skills.find((s) => s.meta.name === name);
+  if (!skill) return undefined;
+
+  const block = skill.meta.raw.split(/^- \*\*/m).find((b) => b.startsWith(`${id}**`));
+  if (!block) return undefined;
+
+  const tidy = (text: string) => text.replace(/\s+/g, ' ').trim();
+  const priority = /^[^`]*`(must|should)`/.exec(block)?.[1] ?? 'must';
+  const instruction = tidy(block.slice(block.indexOf(':') + 1).split('*Why:*')[0] ?? '');
+  const why = tidy(block.split('*Why:*')[1]?.split('*Not when:*')[0] ?? '');
+  const notWhen = tidy(block.split('*Not when:*')[1] ?? '');
+
+  return { id, priority, instruction, why, notWhen };
+}
+
 /** The token estimate the CLI prints, so the two never disagree in front of a user. */
 export function tokens(words: number): number {
   return Math.round((words * 4) / 300) * 100;
