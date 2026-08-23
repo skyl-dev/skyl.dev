@@ -6,3 +6,5 @@ dist/
 *.tsbuildinfo
 .env
 .env.local
+*.tgz
+coverage/
