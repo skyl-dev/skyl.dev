@@ -1,0 +1,63 @@
+# Publishing over OIDC, with no token anywhere.
+#
+# npm is retiring the 2FA-bypass tokens that automated publishing used to rely on: they
+# lost account and package management on 31 July 2026, and lose publishing itself in
+# January 2027. Trusted publishing replaces them. The runner proves who it is to npm
+# through a short-lived OIDC token, so there is no long-lived credential to leak, and npm
+# attaches a provenance attestation saying which workflow and which commit built the
+# package.
+#
+# npm must be told to trust this repository first, on the package settings page:
+#   organisation: skyl-dev   repository: skyl.dev   workflow: release.yml
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # this is what makes OIDC possible, and nothing works without it
+
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: skyl.dev }
+      # prepack builds the bundle from the registry, so the release carries the skills
+      # that existed at the moment it was cut
+      - uses: actions/checkout@v4
+        with: { repository: skyl-dev/skyl, path: skyl }
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.14.0" # trusted publishing needs 22.14 or later
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+          cache-dependency-path: skyl.dev/pnpm-lock.yaml
+      # the runner ships an npm too old to know what OIDC is
+      - run: npm install -g npm@latest
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: skyl.dev
+      - run: pnpm test
+        working-directory: skyl.dev
+
+      # a tag that disagrees with package.json publishes a version nobody asked for
+      - name: The tag and the version agree
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(node -p "require('./package.json').version")
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package version $version"
+            exit 1
+          fi
+        working-directory: skyl.dev/packages/cli
+
+      - run: npm publish
+        working-directory: skyl.dev/packages/cli
