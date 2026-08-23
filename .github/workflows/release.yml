@@ -35,12 +35,16 @@ jobs:
         with: { version: 9 }
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.14.0" # trusted publishing needs 22.14 or later
+          # 22.14 is the floor trusted publishing needs, and pinning it exactly turned the
+          # floor into a ceiling: npm 12 requires ^22.22.2 or ^24.15.0. 24 is current LTS
+          # and satisfies both, without pinning a patch that goes stale.
+          node-version: "24"
           registry-url: "https://registry.npmjs.org"
           cache: pnpm
           cache-dependency-path: skyl.dev/pnpm-lock.yaml
       # the runner ships an npm too old to know what OIDC is
       - run: npm install -g npm@latest
+      - run: node --version && npm --version
 
       - run: pnpm install --frozen-lockfile
         working-directory: skyl.dev
