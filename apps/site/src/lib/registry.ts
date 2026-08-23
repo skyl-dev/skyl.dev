@@ -82,7 +82,7 @@ export async function loadSkills(): Promise<SkillPage[]> {
       meta,
       parts,
       references: await loadReferences(meta),
-      evidence: await readIfPresent(join(REGISTRY_ROOT, 'evidence', meta.family, 'skills', `${meta.skill}.md`)),
+      evidence: await loadDoc('evidence', meta.family, 'skills', `${meta.skill}.md`),
       rulesCount: {
         must: meta.rules.filter((r) => r.priority === 'must').length,
         should: meta.rules.filter((r) => r.priority === 'should').length,
@@ -104,7 +104,7 @@ async function loadReferences(meta: Skill): Promise<Reference[]> {
     out.push({
       slug: file.replace(/\.md$/, ''),
       title: /^#\s+(.+)$/m.exec(text)?.[1] ?? file.replace(/\.md$/, '').replace(/-/g, ' '),
-      html: render(text.replace(/^#\s+.+$/m, '')),
+      html: absolutise(render(text.replace(/^#\s+.+$/m, '')), `skills/${meta.family}/${meta.skill}/references`),
     });
   }
   return out;
@@ -121,9 +121,17 @@ const readIfPresent = (path: string): Promise<string | undefined> =>
 const REPO = 'https://github.com/skyl-dev/skyl/blob/main';
 
 function absolutise(html: string, dir: string): string {
-  return html.replace(/href="(\.\/[^"]+|[^":/][^":]*\.md)"/g, (_all, href: string) => {
-    const clean = String(href).replace(/^\.\//, '');
-    return `href="${REPO}/${dir}/${clean}"`;
+  // resolved rather than pattern-matched: `../model-matrix.md` from evidence/android/skills
+  // has to climb, and a regex that only strips `./` leaves it broken
+  return html.replace(/href="((?:\.\.?\/)[^"]+|[^":/][^":]*\.md)"/g, (_all, href: string) => {
+    const parts = `${dir}/${href}`.split('/');
+    const out: string[] = [];
+    for (const part of parts) {
+      if (part === '' || part === '.') continue;
+      if (part === '..') out.pop();
+      else out.push(part);
+    }
+    return `href="${REPO}/${out.join('/')}"`;
   });
 }
 
