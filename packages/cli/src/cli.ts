@@ -4,6 +4,8 @@ import { list } from './commands/list.ts';
 import { scan } from './commands/scan.ts';
 import { bold, cyan, dim, err, out, red } from './ui.ts';
 
+const VERSION = '0.0.0';
+
 const HELP = `
   ${bold('skyl')} ${dim('curated agent skills for what your project actually uses')}
 
@@ -56,8 +58,10 @@ const str = (v: string | boolean | undefined): string | undefined => (typeof v =
 export async function run(argv: readonly string[]): Promise<number> {
   const { command, positional, flags } = parse(argv);
 
-  if (flags['help'] || flags['h'] || command === 'help' || command === undefined) { out(HELP); return command === undefined && !flags['help'] && !flags['h'] ? 1 : 0; }
-  if (flags['version'] || flags['v']) { out('skyl 0.0.0'); return 0; }
+  // version before the no-command case, or `skyl --version` prints help
+  if (flags['version'] === true || flags['v'] === true) { out(`skyl ${VERSION}`); return 0; }
+  if (flags['help'] === true || flags['h'] === true || command === 'help') { out(HELP); return 0; }
+  if (command === undefined) { out(HELP); return 1; }
 
   const root = str(flags['C']) ?? process.cwd();
   const dir = str(flags['dir']);

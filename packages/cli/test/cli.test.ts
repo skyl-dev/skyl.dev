@@ -84,8 +84,22 @@ test('list reports nothing installed before an add', async () => {
 });
 
 test('an unknown command fails rather than doing something', async () => {
-  const code = await quiet(() => run(['wat']));
-  assert.equal(code, 1);
+  assert.equal(await quiet(() => run(['wat'])), 1);
+});
+
+test('--version prints a version, not the help text', async () => {
+  let printed = '';
+  const write = process.stdout.write.bind(process.stdout);
+  process.stdout.write = ((s: string) => { printed += s; return true; }) as typeof process.stdout.write;
+  try {
+    assert.equal(await run(['--version']), 0);
+  } finally { process.stdout.write = write; }
+  assert.match(printed, /^skyl \d+\.\d+\.\d+/);
+});
+
+test('no command exits non-zero so a script notices', async () => {
+  assert.equal(await quiet(() => run([])), 1);
+  assert.equal(await quiet(() => run(['--help'])), 0);
 });
 
 test('--target writes where that tool looks', async () => {
