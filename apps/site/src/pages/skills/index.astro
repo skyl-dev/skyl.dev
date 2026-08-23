@@ -12,23 +12,23 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
   section="skills"
   description="Every published skill, by family and axis. What each one is for, and what it costs in context."
 >
-  <section style="padding: 3.5rem 0 2rem;">
+  <section style="padding: var(--sp-7) 0 var(--sp-6);">
     <p class="eyebrow">the registry</p>
-    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">{total} skills, {rules} rules</h1>
+    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">{total} skills, {rules} rules</h1>
     <p class="lede">
       Each one is a layer. Install the intersection that matches your project, and nothing else.
     </p>
   </section>
 
-  <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; padding-bottom: 1.5rem;">
+  <div style="display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; padding-bottom: 1.5rem;">
     <input
       id="filter"
       type="search"
       placeholder="filter by name, axis or dependency"
       autocomplete="off"
-      style="flex: 1 1 18rem; font: inherit; font-size: 13px; padding: 0.55rem 0.8rem; border-radius: 10px; border: 1px solid var(--rule); background: var(--raised); color: var(--ink);"
+      style="flex: 1 1 18rem; font: inherit; font-size: var(--fs-meta); padding: 0.55rem 0.8rem; border-radius: var(--r-md); border: 1px solid var(--rule); background: var(--raised); color: var(--ink);"
     />
-    <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+    <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap;">
       {AXIS_ORDER.map((axis) => (
         <button class="chip" type="button" data-axis={axis} style="cursor: pointer; background: none;">{axis}</button>
       ))}
@@ -37,7 +37,7 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
 
   {families.map((family) => (
     <section style="margin-bottom: 3rem;" data-family={family.name}>
-      <h2 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: 0.9rem;">
+      <h2 style="font-size: var(--fs-ui); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin-bottom: 0.9rem;">
         {family.name} <span style="color: var(--rule-strong);">/</span> {family.skills.length}
       </h2>
       <div class="grid">
@@ -49,21 +49,21 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
             data-axis={skill.meta.axis}
             data-detect={`${Object.values(skill.meta.detect).flat().join(' ')} ${skill.meta.description}`}
           >
-            <div style="display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: baseline; gap: var(--sp-2); margin-bottom: 0.5rem;">
               <strong style="font-weight: 600;">{skill.meta.skill}</strong>
               <span class="chip">{skill.meta.axis}</span>
-              <span style="margin-left: auto; color: var(--ink-faint); font-size: 12px;">v{skill.meta.version}</span>
+              <span style="margin-left: auto; color: var(--ink-faint); font-size: var(--fs-micro);">v{skill.meta.version}</span>
             </div>
-            <p style="margin: 0 0 0.7rem; color: var(--ink-soft); font-size: 14px; line-height: 1.5;">
+            <p style="margin: 0 0 0.7rem; color: var(--ink-soft); font-size: var(--fs-ui); line-height: 1.5;">
               {skill.meta.description}
             </p>
-            <p style="margin: 0; color: var(--ink-faint); font-size: 13px;">
+            <p style="margin: 0; color: var(--ink-faint); font-size: var(--fs-meta);">
               {skill.rulesCount.must} must{skill.rulesCount.should > 0 ? `, ${skill.rulesCount.should} should` : ''}
               <span style="color: var(--rule-strong);"> · </span>
               ~{tokens(skill.meta.installableWords).toLocaleString()} tokens
             </p>
             {skill.meta.requires.length > 0 && (
-              <p style="margin: 0.5rem 0 0; color: var(--ink-faint); font-size: 12px;">
+              <p style="margin: 0.5rem 0 0; color: var(--ink-faint); font-size: var(--fs-micro);">
                 requires {skill.meta.requires.join(', ')}
               </p>
             )}
@@ -73,7 +73,7 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
     </section>
   ))}
 
-  <p id="empty" hidden style="color: var(--ink-faint); font-size: 13px;">Nothing matches that.</p>
+  <p id="empty" hidden style="color: var(--ink-faint); font-size: var(--fs-meta);">Nothing matches that.</p>
 </Base>
 
 <script>

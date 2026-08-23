@@ -11,22 +11,22 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
 ---
 
 <Base title="docs" section="docs" description="Every skyl command, what it does, and why it behaves the way it does.">
-  <section style="padding: 3.5rem 0 2.5rem;">
+  <section style="padding: var(--sp-7) 0 var(--sp-6);">
     <p class="eyebrow">the cli</p>
-    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Commands</h1>
+    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Commands</h1>
     <p class="lede">Ten commands. Nothing is written without asking, and every one prints what it would do first.</p>
     <div style="margin-top: 1.8rem; max-width: 30rem;"><Command text="npm i -g skyl.dev" /></div>
-    <p style="color: var(--ink-faint); font-size: 14px; margin-top: 0.8rem;">
+    <p style="color: var(--ink-faint); font-size: var(--fs-ui); margin-top: 0.8rem;">
       Or prefix any command with <code>npx skyl.dev</code> and install nothing.
     </p>
   </section>
 
-  <div style="display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 3.5rem; align-items: start;" class="docs-grid">
-    <nav style="position: sticky; top: 5.5rem; font-size: 14px; display: grid; gap: 1.4rem;" class="docs-nav">
+  <div style="display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--sp-7); align-items: start;" class="docs-grid">
+    <nav style="position: sticky; top: 5.5rem; font-size: var(--fs-ui); display: grid; gap: var(--sp-4);" class="docs-nav">
       {groups.map((group) => (
         <div>
           <p class="eyebrow" style="margin-bottom: 0.55rem;">{group.title}</p>
-          <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem;">
+          <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-1);">
             {group.commands.map((c) => (
               <li><a href={`#${c.name}`} style="text-decoration: none; color: var(--ink-soft);">{c.name}</a></li>
             ))}
@@ -38,23 +38,23 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
     <div>
       {groups.map((group) => (
         <section>
-          <h2 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin: 2.5rem 0 1.2rem;">
+          <h2 style="font-size: var(--fs-ui); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); margin: 2.5rem 0 1.2rem;">
             {group.title}
           </h2>
           {group.commands.map((command) => (
             <article id={command.name} style="border-top: 1px solid var(--rule); padding: 2rem 0; scroll-margin-top: 5rem;">
-              <div style="display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap;">
-                <h3 style="font-size: 1.3rem;">{command.name}</h3>
-                <code style="color: var(--ink-faint); font-size: 14px;">{command.usage}</code>
+              <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
+                <h3 style="font-size: var(--fs-serif);">{command.name}</h3>
+                <code style="color: var(--ink-faint); font-size: var(--fs-ui);">{command.usage}</code>
               </div>
-              <p style="font-size: 1rem; color: var(--ink); margin: 0.7rem 0 1.2rem; font-weight: 500;">{command.summary}</p>
+              <p style="font-size: var(--fs-h3); color: var(--ink); margin: 0.7rem 0 1.2rem; font-weight: 500;">{command.summary}</p>
 
               {command.body.map((paragraph) => (
-                <p style="color: var(--ink-soft); font-size: 15px; max-width: 62ch; margin: 0 0 1rem;">{paragraph}</p>
+                <p style="color: var(--ink-soft); font-size: var(--fs-body); max-width: 62ch; margin: 0 0 1rem;">{paragraph}</p>
               ))}
 
               {command.flags && (
-                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 14px; max-width: 62ch;">
+                <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: var(--fs-ui); max-width: 62ch;">
                   <tbody>
                     {command.flags.map((flag) => (
                       <tr>
@@ -69,11 +69,11 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
               )}
 
               {command.examples && (
-                <div style="display: grid; gap: 0.6rem; margin-top: 1.4rem; max-width: 62ch;">
+                <div style="display: grid; gap: var(--sp-2); margin-top: 1.4rem; max-width: 62ch;">
                   {command.examples.map((example) => (
                     <div>
                       <Command text={example.run} />
-                      <p style="color: var(--ink-faint); font-size: 13px; margin: 0.4rem 0 0 0.2rem;">{example.does}</p>
+                      <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin: 0.4rem 0 0 0.2rem;">{example.does}</p>
                     </div>
                   ))}
                 </div>

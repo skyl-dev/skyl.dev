@@ -234,7 +234,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 <style is:global>
   .hero {
     display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 4rem; align-items: start; padding: 4rem 0 5.5rem;
+    gap: var(--sp-7); align-items: start; padding: 4rem 0 5.5rem;
   }
   .hero > div:first-child { padding-top: 0.4rem; }
   .hero h1 {
@@ -250,31 +250,31 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     content: ""; position: absolute; left: 0; right: 0; bottom: 0.06em;
     height: 0.09em; background: var(--accent); border-radius: 2px;
   }
-  .hero-cta { display: flex; gap: 0.7rem; flex-wrap: wrap; margin: 2.6rem 0 2rem; }
-  .hero-note { color: var(--ink-faint); font-size: 13.5px; margin: 0; }
+  .hero-cta { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin: 2.6rem 0 2rem; }
+  .hero-note { color: var(--ink-faint); font-size: var(--fs-ui); margin: 0; }
 
   .button {
-    display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;
-    background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 15px;
-    padding: 0.7rem 1.2rem; border-radius: 9px; border: 1px solid transparent; cursor: pointer;
+    display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none;
+    background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: var(--fs-body);
+    padding: 0.7rem 1.2rem; border-radius: var(--r-sm); border: 1px solid transparent; cursor: pointer;
     font-family: var(--mono);
   }
   .button:hover { filter: brightness(1.04); }
   .button.ghost { background: none; color: var(--ink); border-color: var(--rule-strong); }
   .button.ghost:hover { border-color: var(--accent-line); filter: none; }
-  .button.small { font-size: 13px; padding: 0.45rem 0.8rem; }
+  .button.small { font-size: var(--fs-meta); padding: 0.45rem 0.8rem; }
 
   /* one card holding the whole idea: the command, then which axes a project actually
      draws from. A transcript said the same thing in far more words and named a family in a
      section that has to speak to every project. */
   .launch {
-    border: 1px solid var(--rule); border-radius: 14px; background: var(--raised);
+    border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised);
     box-shadow: var(--shadow); overflow: hidden; min-width: 0; align-self: start;
   }
-  .launch-head { padding: 1.3rem 1.3rem 1.4rem; display: grid; gap: 0.5rem; }
+  .launch-head { padding: 1.3rem 1.3rem 1.4rem; display: grid; gap: var(--sp-2); }
   .launch-body { padding: 1.2rem 1.3rem; border-top: 1px solid var(--rule); background: var(--sunken); }
   .launch-label {
-    margin: 0; font-size: 11.5px; font-weight: 600; text-transform: uppercase;
+    margin: 0; font-size: var(--fs-micro); font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.11em; color: var(--ink-faint);
   }
   .launch-head .launch-label + * { margin-bottom: 0.5rem; }
@@ -282,21 +282,21 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   .console { border-top: 1px solid var(--rule); background: var(--sunken); }
   .console-bar {
-    display: flex; align-items: center; gap: 0.4rem; padding: 0.55rem 0.9rem;
+    display: flex; align-items: center; gap: var(--sp-1); padding: 0.55rem 0.9rem;
     border-bottom: 1px solid var(--rule);
   }
   .console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
-  .console-bar span { margin-left: 0.5rem; font-size: 11.5px; color: var(--ink-faint); }
-  .console pre { margin: 0; padding: 0.95rem 1.1rem; font-size: 12.5px; line-height: 1.65; overflow-x: auto; }
+  .console-bar span { margin-left: 0.5rem; font-size: var(--fs-micro); color: var(--ink-faint); }
+  .console pre { margin: 0; padding: 0.95rem 1.1rem; font-size: var(--fs-meta); line-height: 1.65; overflow-x: auto; }
   .console code { font-family: var(--mono); white-space: pre; }
   .t-dim { color: var(--ink-faint); }
   .t-strong { color: var(--ink); font-weight: 600; }
   .t-ok { color: var(--term-ok); }
 
 
-  .picker { margin-top: 1.5rem; border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
-  .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 1.8rem 1.4rem; }
-  .picker-head h2 { font-size: 1.25rem; margin-top: 0.35rem; }
+  .picker { margin-top: 1.5rem; border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
+  .picker-head { display: flex; align-items: center; gap: var(--sp-3); padding: 1.5rem 1.8rem 1.4rem; }
+  .picker-head h2 { font-size: var(--fs-serif); margin-top: 0.35rem; }
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
   /* sized to the longest step, so answering one does not resize the card under the cursor */
@@ -311,126 +311,126 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   /* the current step reads as done when both are the same green, so it is held back */
   .step[data-now] { background: color-mix(in srgb, var(--accent) 38%, var(--rule)); }
 
-  .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.5rem 1.8rem; display: grid; gap: 1.4rem; align-content: start; }
-  .tally-count { font-size: 2.3rem; letter-spacing: -0.04em; margin: 0.3rem 0 0; line-height: 1; font-weight: 600; }
-  .tally-count small { font-size: 0.9rem; color: var(--ink-faint); font-weight: 450; letter-spacing: 0; }
-  .tally-sub { margin: 0.45rem 0 0; font-size: 13px; color: var(--ink-soft); }
+  .tally { border-left: 1px solid var(--rule); background: var(--sunken); padding: 1.5rem 1.8rem; display: grid; gap: var(--sp-4); align-content: start; }
+  .tally-count { font-size: var(--fs-title); letter-spacing: -0.04em; margin: 0.3rem 0 0; line-height: 1; font-weight: 600; }
+  .tally-count small { font-size: var(--fs-body); color: var(--ink-faint); font-weight: 450; letter-spacing: 0; }
+  .tally-sub { margin: 0.45rem 0 0; font-size: var(--fs-meta); color: var(--ink-soft); }
   .meter { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-top: 0.5rem; }
   .meter div { height: 100%; width: 0%; background: var(--accent); transition: width 220ms; }
   /* the running list is a readout, not a layout driver: selecting every layer used to make
      it taller than the questions beside it and stretch the whole card */
   .tally-list {
-    list-style: none; margin: 0; padding: 0; font-size: 13px; display: grid; gap: 0.3rem;
+    list-style: none; margin: 0; padding: 0; font-size: var(--fs-meta); display: grid; gap: var(--sp-1);
     max-height: 15rem; overflow-y: auto;
   }
-  .tally-list li { color: var(--ink-soft); display: flex; gap: 0.5rem; }
+  .tally-list li { color: var(--ink-soft); display: flex; gap: var(--sp-2); }
   .tally-list li span { color: var(--ink-faint); margin-left: auto; }
 
   /* an exact height, not a minimum: the first chip used to arrive and push the question
      down the card */
-  .crumbs { display: flex; align-items: center; gap: 0.45rem; height: 1.85rem; overflow: hidden; }
+  .crumbs { display: flex; align-items: center; gap: var(--sp-1); height: 1.85rem; overflow: hidden; }
   .crumb {
-    font: inherit; font-size: 12.5px; font-weight: 600; line-height: 1.4; cursor: pointer;
+    font: inherit; font-size: var(--fs-meta); font-weight: 600; line-height: 1.4; cursor: pointer;
     background: color-mix(in srgb, var(--accent) 15%, transparent);
     border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-    border-radius: 7px; padding: 0.22rem 0.6rem; color: var(--accent);
+    border-radius: var(--r-xs); padding: 0.22rem 0.6rem; color: var(--accent);
     white-space: nowrap;
   }
   .crumb:hover { background: color-mix(in srgb, var(--accent) 26%, transparent); border-color: var(--accent); }
-  .crumb-sep { color: var(--ink-faint); font-size: 12px; }
+  .crumb-sep { color: var(--ink-faint); font-size: var(--fs-micro); }
 
   /* the prompt and its help occupy the same block on every screen, so the answers below
      always begin on the same line */
   .q-head { height: 4.6rem; margin: 0.9rem 0 0.2rem; }
 
-  .q-prompt { font-size: 1.35rem; letter-spacing: -0.02em; margin: 0 0 0.45rem; font-weight: 600; }
-  .q-help { color: var(--ink-soft); font-size: 14px; margin: 0; min-height: 1.4em; }
-  .q-options { display: grid; gap: 0.6rem; }
+  .q-prompt { font-size: var(--fs-serif); letter-spacing: -0.02em; margin: 0 0 0.45rem; font-weight: 600; }
+  .q-help { color: var(--ink-soft); font-size: var(--fs-ui); margin: 0; min-height: 1.4em; }
+  .q-options { display: grid; gap: var(--sp-2); }
   /* the one multi-select has seven answers, and stacking them made the card twice the
      height of every other step */
   .q-options[data-multi] { grid-template-columns: 1fr 1fr; }
   @media (max-width: 700px) { .q-options[data-multi] { grid-template-columns: 1fr; } }
   .q-option {
-    display: flex; align-items: flex-start; gap: 0.85rem; text-align: left; width: 100%;
+    display: flex; align-items: flex-start; gap: var(--sp-3); text-align: left; width: 100%;
     font: inherit; color: inherit; cursor: pointer;
-    background: var(--ground); border: 1px solid var(--rule); border-radius: 10px; padding: 0.8rem 1.05rem;
+    background: var(--ground); border: 1px solid var(--rule); border-radius: var(--r-md); padding: 0.8rem 1.05rem;
     transition: border-color 120ms, background 120ms;
   }
   .q-option:hover { border-color: var(--rule-strong); }
   .q-option[data-on] { border-color: var(--accent-line); background: color-mix(in srgb, var(--accent) 9%, var(--ground)); }
-  .q-option .box { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--rule-strong); flex: none; margin-top: 2px; position: relative; }
+  .q-option .box { width: 16px; height: 16px; border-radius: var(--r-xs); border: 1.5px solid var(--rule-strong); flex: none; margin-top: 2px; position: relative; }
   .q-option[data-on] .box { background: var(--accent); border-color: var(--accent); }
   .q-option[data-on] .box::after {
     content: ""; position: absolute; inset: 3px 3px 4px 3px;
     border-left: 1.6px solid var(--accent-ink); border-bottom: 1.6px solid var(--accent-ink); transform: rotate(-45deg);
   }
   .q-option b { font-weight: 600; display: block; }
-  .q-option small { color: var(--ink-faint); font-size: 13px; }
+  .q-option small { color: var(--ink-faint); font-size: var(--fs-meta); }
   /* pinned to the bottom of the stage: the answers above it change length every step, and
      a control that moves is a control you have to look for */
   .q-actions {
     position: absolute; left: 1.8rem; right: 1.8rem; bottom: 1.5rem;
-    display: flex; gap: 0.6rem; align-items: center;
+    display: flex; gap: var(--sp-2); align-items: center;
     padding-top: 1.2rem; border-top: 1px solid var(--rule);
   }
   .q-actions [data-forward] { margin-left: auto; }
   .q-actions [data-forward]:not(:disabled) { color: var(--ink); border-color: var(--rule-strong); }
   .q-btn {
-    font: inherit; font-size: 13.5px; cursor: pointer; color: var(--ink-soft);
-    background: none; border: 1px solid var(--rule); border-radius: 8px; padding: 0.45rem 0.9rem;
+    font: inherit; font-size: var(--fs-ui); cursor: pointer; color: var(--ink-soft);
+    background: none; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 0.45rem 0.9rem;
   }
   .q-btn:hover:not(:disabled) { color: var(--ink); border-color: var(--rule-strong); }
   .q-btn:disabled, .button:disabled { opacity: 0.38; cursor: not-allowed; }
 
-  .soon { border: 1px dashed var(--rule-strong); border-radius: 10px; padding: 1.2rem 1.3rem; background: var(--ground); }
-  .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: 14px; }
+  .soon { border: 1px dashed var(--rule-strong); border-radius: var(--r-md); padding: 1.2rem 1.3rem; background: var(--ground); }
+  .soon p { margin: 0 0 0.8rem; color: var(--ink-soft); font-size: var(--fs-ui); }
   .soon p:last-child { margin-bottom: 0; }
 
-  .result-names { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.2rem 0 0; }
+  .result-names { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin: 1.2rem 0 0; }
   .result-names a {
-    font-size: 13px; text-decoration: none; color: var(--ink);
-    border: 1px solid var(--rule); border-radius: 7px; padding: 0.3rem 0.65rem;
+    font-size: var(--fs-meta); text-decoration: none; color: var(--ink);
+    border: 1px solid var(--rule); border-radius: var(--r-xs); padding: 0.3rem 0.65rem;
     background: var(--ground);
   }
   .result-names a:hover { border-color: var(--accent); color: var(--accent); }
-  .result-note { margin: 1.3rem 0 0; font-size: 13px; color: var(--ink-faint); max-width: 56ch; line-height: 1.6; }
+  .result-note { margin: 1.3rem 0 0; font-size: var(--fs-meta); color: var(--ink-faint); max-width: 56ch; line-height: 1.6; }
   .result-note code { color: var(--ink-soft); }
 
   .band-head { max-width: 46rem; margin-bottom: 2.5rem; }
-  .band-head h2 { font-size: 1.75rem; letter-spacing: -0.03em; margin: 0.7rem 0 1rem; }
-  .band-say { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
+  .band-head h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0.7rem 0 1rem; }
+  .band-say { color: var(--ink-soft); font-size: var(--fs-body); margin: 0; max-width: 60ch; }
 
-  .axes-band { padding: 6rem 0 0; }
+  .axes-band { padding: var(--section) 0 0; }
 
-  .anatomy-band { padding: 6rem 0 0; }
+  .anatomy-band { padding: var(--section) 0 0; }
 
-  .behaviour { padding: 6rem 0 0; }
+  .behaviour { padding: var(--section) 0 0; }
   .acts {
     list-style: none; margin: 0; padding: 0;
     display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.5rem 2rem;
   }
-  .act { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0.6rem; align-items: start; }
-  .act-n { font-size: 11px; font-weight: 700; color: var(--accent); padding-top: 0.2rem; }
-  .act-name { margin: 0 0 0.35rem; font-size: 15px; font-weight: 600; }
-  .act-say { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+  .act { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: var(--sp-2); align-items: start; }
+  .act-n { font-size: var(--fs-micro); font-weight: 700; color: var(--accent); padding-top: 0.2rem; }
+  .act-name { margin: 0 0 0.35rem; font-size: var(--fs-body); font-weight: 600; }
+  .act-say { margin: 0; font-size: var(--fs-ui); color: var(--ink-soft); }
 
-  .quick { padding: 6rem 0 2rem; }
-  .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.9rem; }
+  .quick { padding: var(--section) 0 var(--sp-5); }
+  .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--sp-3); }
   .quick-card {
-    border: 1px solid var(--rule); border-radius: 12px; background: var(--raised);
-    padding: 1.2rem 1.3rem; text-decoration: none; display: grid; gap: 0.5rem;
+    border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised);
+    padding: 1.2rem 1.3rem; text-decoration: none; display: grid; gap: var(--sp-2);
   }
   .quick-card:hover { border-color: var(--rule-strong); }
-  .quick-card p { margin: 0; color: var(--ink-soft); font-size: 13px; }
-  .quick-card span { font-size: 12px; color: var(--ink-faint); }
+  .quick-card p { margin: 0; color: var(--ink-soft); font-size: var(--fs-meta); }
+  .quick-card span { font-size: var(--fs-micro); color: var(--ink-faint); }
 
   @media (max-width: 820px) {
-    .axis-item { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; }
+    .axis-item { grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
     .measured p { margin-left: 0; }
   }
 
   @media (max-width: 980px) {
-    .hero { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding: 3.5rem 0 3rem; }
+    .hero { grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); padding: var(--sp-7) 0 var(--sp-6); }
     .picker-body { grid-template-columns: minmax(0, 1fr); }
     .tally { border-left: 0; border-top: 1px solid var(--rule); }
   }

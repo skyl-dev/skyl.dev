@@ -93,36 +93,36 @@ const PARTS = rule
 </script>
 
 <style is:global>
-  .anatomy { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1.25rem; align-items: stretch; }
+  .anatomy { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: var(--sp-4); align-items: stretch; }
 
   .anatomy-rule {
-    border: 1px solid var(--rule); border-radius: 13px; background: var(--raised); overflow: hidden;
+    border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised); overflow: hidden;
   }
   .anatomy-head {
-    display: flex; align-items: center; gap: 0.7rem;
+    display: flex; align-items: center; gap: var(--sp-2);
     padding: 0.85rem 1.2rem; border-bottom: 1px solid var(--rule); background: var(--sunken);
   }
-  .anatomy-id { font-size: 13px; font-weight: 700; }
+  .anatomy-id { font-size: var(--fs-meta); font-weight: 700; }
   .anatomy-priority {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent);
-    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 5px; padding: 0.1rem 0.45rem;
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: var(--r-xs); padding: 0.1rem 0.45rem;
   }
-  .anatomy-from { margin-left: auto; font-size: 12px; color: var(--ink-faint); text-decoration: none; }
+  .anatomy-from { margin-left: auto; font-size: var(--fs-micro); color: var(--ink-faint); text-decoration: none; }
   .anatomy-from:hover { color: var(--accent); }
 
   .part {
-    display: grid; gap: 0.3rem; width: 100%; text-align: left; cursor: pointer;
+    display: grid; gap: var(--sp-1); width: 100%; text-align: left; cursor: pointer;
     font: inherit; background: none; border: 0; border-top: 1px solid var(--rule);
     padding: 1rem 1.2rem; transition: background 160ms;
   }
   .part:first-of-type { border-top: 0; }
   .part:hover, .part[data-on] { background: color-mix(in srgb, var(--accent) 7%, transparent); }
   .part-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
     transition: color 160ms;
   }
   .part[data-on] .part-label { color: var(--accent); }
-  .part-text { font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+  .part-text { font-size: var(--fs-body); color: var(--ink-soft); line-height: 1.55; }
   .part[data-on] .part-text { color: var(--ink); }
 
   /* the counter-example: the same part written the way it usually is elsewhere, and what
@@ -130,27 +130,27 @@ const PARTS = rule
      paragraph floating beside a tall card. */
   .foil {
     display: grid; grid-template-rows: auto 1fr auto;
-    border: 1px dashed var(--rule-strong); border-radius: 13px; background: var(--ground); overflow: hidden;
+    border: 1px dashed var(--rule-strong); border-radius: var(--r-lg); background: var(--ground); overflow: hidden;
   }
   .foil-head {
     margin: 0; padding: 0.85rem 1.1rem; border-bottom: 1px dashed var(--rule-strong);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
   }
-  .foil-body { padding: 1.2rem 1.1rem; display: grid; align-content: center; gap: 0.5rem; }
-  .foil-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint); }
+  .foil-body { padding: 1.2rem 1.1rem; display: grid; align-content: center; gap: var(--sp-2); }
+  .foil-label { margin: 0; font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint); }
   .foil-text {
-    margin: 0; font-size: 16px; color: var(--ink-faint); line-height: 1.5;
+    margin: 0; font-size: var(--fs-h3); color: var(--ink-faint); line-height: 1.5;
     text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-faint) 60%, transparent);
   }
-  .foil-verdict { margin: 0.3rem 0 0; font-size: 13.5px; color: var(--ink-soft); }
+  .foil-verdict { margin: 0.3rem 0 0; font-size: var(--fs-ui); color: var(--ink-soft); }
 
   .foil-note {
-    display: grid; gap: 0.3rem; padding: 1rem 1.1rem;
+    display: grid; gap: var(--sp-1); padding: 1rem 1.1rem;
     border-top: 1px dashed var(--rule-strong);
     background: color-mix(in srgb, var(--accent) 7%, transparent);
   }
-  .note-label { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.11em; color: var(--accent); }
-  .note-say { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+  .note-label { margin: 0; font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.11em; color: var(--accent); }
+  .note-say { margin: 0; font-size: var(--fs-ui); color: var(--ink-soft); }
 
   @media (max-width: 900px) { .anatomy { grid-template-columns: minmax(0, 1fr); } }
 </style>

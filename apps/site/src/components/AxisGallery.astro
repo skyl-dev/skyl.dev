@@ -124,7 +124,7 @@ const data = { AXES };
 
 <style is:global>
   .axis-map {
-    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 2.25rem;
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--sp-6);
     align-items: center; min-width: 0;
   }
   .nodes { width: 100%; height: auto; }
@@ -134,11 +134,11 @@ const data = { AXES };
 
   /* the root is not a choice, so it does not wear the colour that means one */
   .hub-box { fill: var(--sunken); stroke: var(--ink-faint); stroke-width: 1.5; }
-  .hub-text { fill: var(--ink); font-size: 13.5px; font-weight: 700; text-anchor: middle; font-family: var(--mono); }
+  .hub-text { fill: var(--ink); font-size: var(--fs-ui); font-weight: 700; text-anchor: middle; font-family: var(--mono); }
 
   .node { cursor: pointer; outline: none; transition: opacity 160ms; }
   .node circle { fill: var(--sunken); stroke: var(--rule-strong); stroke-width: 1.5; transition: stroke 160ms, fill 160ms; }
-  .node-text { fill: var(--ink-soft); font-size: 13px; font-weight: 600; text-anchor: middle; font-family: var(--mono); transition: fill 160ms; }
+  .node-text { fill: var(--ink-soft); font-size: var(--fs-meta); font-weight: 600; text-anchor: middle; font-family: var(--mono); transition: fill 160ms; }
 
   /* :focus-visible rather than :focus, or a clicked node keeps its highlight while the
      pointer is somewhere else and two nodes look chosen */
@@ -150,18 +150,18 @@ const data = { AXES };
   .node[data-dim] { opacity: 0.45; }
 
   /* the one place words appear, and only about the thing being asked about */
-  .readout { display: grid; align-content: center; gap: 0.1rem; }
-  .readout-name { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
-  .readout-holds { margin: 0.15rem 0 0.9rem; font-size: 14px; color: var(--accent); }
-  .readout-say { margin: 0 0 1.2rem; font-size: 15px; color: var(--ink-soft); }
-  .readout-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.1rem; }
+  .readout { display: grid; align-content: center; gap: 0.1rem;; }
+  .readout-name { margin: 0; font-size: var(--fs-strong); font-weight: 700; letter-spacing: -0.025em; }
+  .readout-holds { margin: 0.15rem 0 0.9rem; font-size: var(--fs-ui); color: var(--accent); }
+  .readout-say { margin: 0 0 1.2rem; font-size: var(--fs-body); color: var(--ink-soft); }
+  .readout-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: 1.1rem; }
   .readout-chips span {
-    font-size: 12px; color: var(--ink-soft); border: 1px solid var(--rule);
-    border-radius: 6px; padding: 0.22rem 0.55rem; background: var(--ground);
+    font-size: var(--fs-micro); color: var(--ink-soft); border: 1px solid var(--rule);
+    border-radius: var(--r-xs); padding: 0.22rem 0.55rem; background: var(--ground);
   }
-  .readout-like { margin: 0; font-size: 12px; color: var(--ink-faint); }
+  .readout-like { margin: 0; font-size: var(--fs-micro); color: var(--ink-faint); }
 
   @media (max-width: 900px) {
-    .axis-map { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+    .axis-map { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
   }
 </style>

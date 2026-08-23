@@ -8,3 +8,32 @@
 {"message":"[200] / 3ms","label":null,"level":"info"}
 {"message":"[200] / 2ms","label":null,"level":"info"}
 {"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] / 3ms","label":null,"level":"info"}
+{"message":"[200] /skills 6ms","label":null,"level":"info"}
+{"message":"[200] /docs 5ms","label":null,"level":"info"}
+{"message":"[200] /install 5ms","label":null,"level":"info"}
+{"message":"[200] /starters 5ms","label":null,"level":"info"}
+{"message":"[200] /spec 7ms","label":null,"level":"info"}
+{"message":"[200] /evidence 5ms","label":null,"level":"info"}
+{"message":"[200] /contributors 4ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/components/RuleAnatomy.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] / 3ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 13ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/components/RuleAnatomy.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 9ms","label":null,"level":"info"}
+{"message":"[200] / 6ms","label":null,"level":"info"}
+{"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 9ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}

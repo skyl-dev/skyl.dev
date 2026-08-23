@@ -30,14 +30,14 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
   description={`${meta.rules.length} rules for ${meta.name}. What each one prevents, where it does not apply, and what was measured.`}
 >
   <article>
-    <header style="padding: 3rem 0 2rem; border-bottom: 1px solid var(--rule);">
+    <header style="padding: var(--sp-7) 0 var(--sp-6); border-bottom: 1px solid var(--rule);">
       <p class="eyebrow"><a href="/skills" style="text-decoration: none;">skills</a> / {meta.family}</p>
-      <h1 style="font-size: 2.4rem; margin: 0.5rem 0 0.9rem; letter-spacing: -0.03em;">{meta.skill}</h1>
-      <p style="font-family: var(--prose); font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); max-width: 56ch; margin: 0 0 1.5rem;">
+      <h1 style="font-size: var(--fs-title); margin: 0.5rem 0 0.9rem; letter-spacing: -0.03em;">{meta.skill}</h1>
+      <p style="font-family: var(--prose); font-size: var(--fs-serif); line-height: 1.5; color: var(--ink-soft); max-width: 56ch; margin: 0 0 1.5rem;">
         {meta.description}
       </p>
 
-      <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-bottom: 1.5rem;">
         <span class="chip solid">{meta.axis}</span>
         <span class="chip">v{meta.version}</span>
         <span class="chip">{skill.rulesCount.must} must</span>
@@ -49,19 +49,19 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
       <Command text={`npx skyl.dev add ${meta.name}`} />
 
       {meta.requires.length > 0 && (
-        <p style="margin: 0.9rem 0 0; color: var(--ink-soft); font-size: 13px;">
+        <p style="margin: 0.9rem 0 0; color: var(--ink-soft); font-size: var(--fs-meta);">
           Installs {meta.requires.map((r) => <a href={`/skills/${r.replace('/', '/')}`}>{r}</a>)} with it, because a layer
           that refers to its core reads wrong without it.
         </p>
       )}
     </header>
 
-    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 3.5rem; padding-top: 2.5rem; align-items: start;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: var(--sp-7); padding-top: 2.5rem; align-items: start;">
       <div>
         {agentParts.map((part) => (
           <section style="margin-bottom: 3rem;">
-            <div style="display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.2rem;">
-              <h2 style="font-size: 1.1rem;">{part.heading}</h2>
+            <div style="display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 1.2rem;">
+              <h2 style="font-size: var(--fs-lead);">{part.heading}</h2>
               <span class="chip solid">installed</span>
             </div>
             <div class="prose scroller" set:html={part.html} />
@@ -75,7 +75,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
             </p>
             {humanParts.map((part) => (
               <section style="margin-bottom: 3rem;">
-                <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem;">{part.heading}</h2>
+                <h2 style="font-size: var(--fs-lead); margin-bottom: 1.2rem;">{part.heading}</h2>
                 <div class="prose scroller" set:html={part.html} />
               </section>
             ))}
@@ -84,13 +84,13 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
 
         {skill.references.length > 0 && (
           <div style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
-            <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">References</h2>
-            <p style="color: var(--ink-faint); font-size: 13px; margin-bottom: 1.5rem;">
+            <h2 style="font-size: var(--fs-lead); margin-bottom: 0.5rem;">References</h2>
+            <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-bottom: 1.5rem;">
               Depth a rule points at, loaded only when the agent asks for it.
             </p>
             {skill.references.map((reference) => (
               <details style="border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; background: var(--raised);">
-                <summary style="cursor: pointer; font-size: 14px;">{reference.title}</summary>
+                <summary style="cursor: pointer; font-size: var(--fs-ui);">{reference.title}</summary>
                 <div class="prose scroller" style="margin-top: 1.2rem;" set:html={reference.html} />
               </details>
             ))}
@@ -99,19 +99,19 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
 
         {skill.evidence && (
           <div id="evidence" style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1.2rem;">Evidence</h2>
+            <h2 style="font-size: var(--fs-lead); margin-bottom: 1.2rem;">Evidence</h2>
             <div class="prose scroller" set:html={skill.evidence} />
           </div>
         )}
       </div>
 
-      <aside style="position: sticky; top: 5rem; font-size: 13px; display: grid; gap: 2rem;">
+      <aside style="position: sticky; top: 5rem; font-size: var(--fs-meta); display: grid; gap: var(--sp-5);">
         {detect.length > 0 && (
           <div>
             <p class="eyebrow" style="margin-bottom: 0.7rem;">detected by</p>
             {detect.map(([key, values]) => (
               <div style="margin-bottom: 0.8rem;">
-                <p style="margin: 0 0 0.3rem; color: var(--ink-faint); font-size: 11px;">{key.replace(/_/g, ' ')}</p>
+                <p style="margin: 0 0 0.3rem; color: var(--ink-faint); font-size: var(--fs-micro);">{key.replace(/_/g, ' ')}</p>
                 <ul style="margin: 0; padding: 0; list-style: none; color: var(--ink-soft);">
                   {values.map((v) => <li style="overflow-wrap: anywhere; margin-bottom: 0.15rem;">{v}</li>)}
                 </ul>
@@ -134,7 +134,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
         {sameFamily.length > 0 && (
           <div>
             <p class="eyebrow" style="margin-bottom: 0.7rem;">composes with</p>
-            <ul style="margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 1rem;">
+            <ul style="margin: 0; padding: 0; list-style: none; columns: 2; column-gap: var(--sp-3);">
               {sameFamily.map((s) => (
                 <li style="margin-bottom: 0.3rem;"><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a></li>
               ))}

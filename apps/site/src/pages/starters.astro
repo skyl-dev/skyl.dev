@@ -62,34 +62,34 @@ const command = (picks: string[]) =>
   section="starters"
   description="Presets for the shapes a project actually arrives in, with what each one costs."
 >
-  <section style="padding: 3.5rem 0 2.5rem;">
+  <section style="padding: var(--sp-7) 0 var(--sp-6);">
     <p class="eyebrow">known shapes</p>
-    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Starters</h1>
+    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Starters</h1>
     <p class="lede">
       If your project looks like one of these, take the line and move on. If it does not,
       <a href="/#builder">compose it</a> or let <code>scan</code> read the build files and propose.
     </p>
   </section>
 
-  <div style="display: grid; gap: 1rem;">
+  <div style="display: grid; gap: var(--sp-3);">
     {STARTERS.map((starter) => {
       const stat = summarise(starter.picks);
       return (
-        <article style="border: 1px solid var(--rule); border-radius: 12px; background: var(--raised); padding: 1.4rem 1.5rem;">
-          <div style="display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap;">
-            <h2 style="font-size: 1.05rem;">{starter.title}</h2>
+        <article style="border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;">
+          <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
+            <h2 style="font-size: var(--fs-h3);">{starter.title}</h2>
             <span class="chip">{starter.picks.length} skills</span>
             <span class="chip">{stat.rules} rules</span>
             <span class="chip">~{stat.tokens.toLocaleString()} tokens</span>
           </div>
-          <p style="color: var(--ink-soft); font-size: 13px; margin: 0.6rem 0 1.1rem; max-width: 60ch;">{starter.when}</p>
+          <p style="color: var(--ink-soft); font-size: var(--fs-meta); margin: 0.6rem 0 1.1rem; max-width: 60ch;">{starter.when}</p>
           <Command text={command(starter.picks)} />
         </article>
       );
     })}
   </div>
 
-  <p style="color: var(--ink-faint); font-size: 13px; margin-top: 2rem;">
+  <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-top: 2rem;">
     One family so far. A preset for a stack whose skills do not exist yet would be a list of things
     you cannot install, so there is not one.
   </p>

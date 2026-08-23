@@ -15,16 +15,16 @@ const present = rendered.filter((d) => d.html);
 ---
 
 <Base title="spec" section="spec" description="The skill format, the axis vocabulary, and the four tests a rule has to pass.">
-  <section style="padding: 3.5rem 0 2rem;">
+  <section style="padding: var(--sp-7) 0 var(--sp-6);">
     <p class="eyebrow">the standard</p>
-    <h1 style="font-size: 2rem; margin: 0.6rem 0 1rem;">Spec</h1>
+    <h1 style="font-size: var(--fs-title); margin: 0.6rem 0 1rem;">Spec</h1>
     <p class="lede">
       A registry is only as good as what it refuses. This is what a skill has to be, and what a rule
       has to survive.
     </p>
   </section>
 
-  <nav style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding-bottom: 2.5rem; border-bottom: 1px solid var(--rule);">
+  <nav style="display: flex; gap: var(--sp-2); flex-wrap: wrap; padding-bottom: 2.5rem; border-bottom: 1px solid var(--rule);">
     {present.map((doc) => <a class="chip" href={`#${doc.slug}`} style="text-decoration: none;">{doc.title}</a>)}
   </nav>
 

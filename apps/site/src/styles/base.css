@@ -29,8 +29,49 @@
   --prose: Newsreader, ui-serif, Georgia, serif;
 
   --measure: 68ch;
-  --gap: 1.5rem;
-  --radius: 10px;
+
+  /*
+   * The scales. Before these there were 29 font sizes, 15 radii and 23 gap values on the
+   * site, which is why nothing lined up with anything: there was no system to line up to.
+   * Every size below is one of these, or it is a mistake.
+   */
+
+  /* type: five steps for the interface, three for headings */
+  --fs-micro: 11.5px;  /* eyebrows, chips, meta */
+  --fs-meta: 12.5px;   /* captions, counts, terminal */
+  --fs-ui: 13.5px;     /* controls, secondary copy */
+  --fs-body: 15px;     /* body copy in a section */
+  --fs-lead: 17px;     /* the sentence under a heading */
+  --fs-h3: 1.05rem;      /* a heading inside a section */
+  --fs-strong: 1.5rem;   /* a readout, a number that has to land */
+  --fs-h2: 1.75rem;      /* section heading */
+  --fs-title: 2rem;      /* page title */
+  --fs-h1: clamp(2.3rem, 4.4vw, 3.4rem);  /* the hero, and only the hero */
+  --fs-serif: 1.35rem;   /* the serif sentence under a title */
+
+  /* radius: four, and a pill */
+  --r-tiny: 4px;
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  /* space: a single ladder, used for gap, padding and margin alike */
+  --sp-1: 0.35rem;
+  --sp-2: 0.6rem;
+  --sp-3: 0.9rem;
+  --sp-4: 1.25rem;
+  --sp-5: 1.75rem;
+  --sp-6: 2.5rem;
+  --sp-7: 4rem;
+  --sp-8: 6rem;
+
+  /* one rhythm for every section on a page */
+  --section: var(--sp-8);
+
+  --gap: var(--sp-5);
+  --radius: var(--r-md);
 }
 
 * { box-sizing: border-box; }
@@ -46,7 +87,7 @@ body {
   background: var(--ground);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: var(--fs-h3);
   line-height: 1.62;
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
@@ -77,72 +118,72 @@ code { font-family: var(--mono); font-size: 0.92em; }
   background: color-mix(in srgb, var(--ground) 86%, transparent);
   backdrop-filter: saturate(140%) blur(12px);
 }
-.masthead-inner { display: flex; align-items: center; gap: 2rem; padding-top: 0.9rem; padding-bottom: 0.9rem; }
+.masthead-inner { display: flex; align-items: center; gap: var(--sp-5); padding-top: 0.9rem; padding-bottom: 0.9rem; }
 
 .wordmark {
-  display: inline-flex; align-items: center; gap: 0.55rem;
-  font-weight: 700; font-size: 17px; letter-spacing: -0.03em; text-decoration: none; flex: none;
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  font-weight: 700; font-size: var(--fs-lead); letter-spacing: -0.03em; text-decoration: none; flex: none;
 }
 /* four cells, two lit: the composition idea, small enough to read as a mark */
 .wordmark .mark { display: grid; grid-template-columns: 6px 6px; gap: 2px; }
 .wordmark .mark i { width: 6px; height: 6px; border-radius: 1.5px; background: var(--rule-strong); }
 .wordmark .mark i:nth-child(1), .wordmark .mark i:nth-child(4) { background: var(--accent); }
 
-.masthead-end { display: flex; align-items: center; gap: 1rem; flex: none; }
+.masthead-end { display: flex; align-items: center; gap: var(--sp-3); flex: none; }
 .masthead-end .ghost {
   display: inline-flex; align-items: center; color: var(--ink-faint);
-  text-decoration: none; font-size: 14px; font-weight: 500;
+  text-decoration: none; font-size: var(--fs-ui); font-weight: 500;
 }
 .masthead-end .ghost:hover { color: var(--ink); }
 
-.nav { display: flex; gap: 1.4rem; margin-left: auto; font-size: 14px; font-weight: 500; color: var(--ink-soft); flex-wrap: wrap; align-items: center; }
+.nav { display: flex; gap: var(--sp-4); margin-left: auto; font-size: var(--fs-ui); font-weight: 500; color: var(--ink-soft); flex-wrap: wrap; align-items: center; }
 .nav a { text-decoration: none; }
 .nav a:hover, .nav a[aria-current] { color: var(--ink); }
 .nav a[aria-current] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
 
-footer.site { border-top: 1px solid var(--rule); margin-top: 7rem; color: var(--ink-soft); font-size: 14px; }
+footer.site { border-top: 1px solid var(--rule); margin-top: 7rem; color: var(--ink-soft); font-size: var(--fs-ui); }
 .footer-inner {
   padding-top: 3rem; padding-bottom: 2.5rem;
-  display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: 2.5rem;
+  display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: var(--sp-6);
 }
-.footer-say p { margin: 1rem 0 0; color: var(--ink-faint); font-size: 13.5px; max-width: 34ch; line-height: 1.55; }
-.footer-col { display: grid; gap: 0.55rem; align-content: start; }
+.footer-say p { margin: 1rem 0 0; color: var(--ink-faint); font-size: var(--fs-ui); max-width: 34ch; line-height: 1.55; }
+.footer-col { display: grid; gap: var(--sp-2); align-content: start; }
 .footer-col .eyebrow { margin: 0 0 0.35rem; }
 footer.site a { text-decoration: none; color: var(--ink-soft); }
 footer.site a:hover { color: var(--accent); }
 .footer-base {
   padding-top: 1.5rem; padding-bottom: 3rem; border-top: 1px solid var(--rule);
-  display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-faint);
+  display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--fs-meta); color: var(--ink-faint);
 }
 .footer-base .spacer { margin-left: auto; }
 
 @media (max-width: 820px) {
-  .footer-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+  .footer-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); }
   .footer-say { grid-column: 1 / -1; }
 }
 
 /* ---------- prose ---------- */
 
-.prose { font-family: var(--prose); font-size: 1.2rem; font-weight: 420; line-height: 1.7; color: var(--ink); max-width: var(--measure); }
+.prose { font-family: var(--prose); font-size: var(--fs-serif); font-weight: 420; line-height: 1.7; color: var(--ink); max-width: var(--measure); }
 .prose p { margin: 0 0 1.15em; }
 .prose strong { font-weight: 600; }
-.prose code { background: var(--sunken); padding: 0.1em 0.36em; border-radius: 4px; border: 1px solid var(--rule); font-size: 0.86em; }
-.prose h3 { font-family: var(--mono); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-soft); margin: 2.75rem 0 1rem; }
+.prose code { background: var(--sunken); padding: 0.1em 0.36em; border-radius: var(--r-tiny); border: 1px solid var(--rule); font-size: 0.86em; }
+.prose h3 { font-family: var(--mono); font-weight: 600; font-size: var(--fs-meta); text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-soft); margin: 2.75rem 0 1rem; }
 .prose ul, .prose ol { margin: 0 0 1.15em; padding-left: 1.2em; }
 .prose li { margin: 0 0 0.55em; }
 .prose li::marker { color: var(--ink-faint); }
 .prose blockquote { margin: 0 0 1.15em; padding-left: 1rem; border-left: 2px solid var(--accent); color: var(--ink-soft); }
-.prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.86rem; margin: 0 0 1.5em; }
+.prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-ui); margin: 0 0 1.5em; }
 .prose th, .prose td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.76rem; }
-.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.55; }
+.prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--fs-meta); }
+.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: var(--fs-ui); line-height: 1.55; }
 .prose pre code { background: none; border: 0; padding: 0; }
 
 #toast {
   position: fixed; left: 50%; bottom: 2rem; z-index: 40;
   transform: translate(-50%, 0.75rem);
   background: var(--accent); color: var(--accent-ink);
-  font-size: 13.5px; font-weight: 600; padding: 0.6rem 1.1rem; border-radius: 9px;
+  font-size: var(--fs-ui); font-weight: 600; padding: 0.6rem 1.1rem; border-radius: var(--r-sm);
   opacity: 0; pointer-events: none; transition: opacity 160ms, transform 160ms;
 }
 #toast[data-on] { opacity: 1; transform: translate(-50%, 0); }
@@ -157,11 +198,11 @@ footer.site a:hover { color: var(--accent); }
 
 /* ---------- pieces ---------- */
 
-.eyebrow { font-size: 0.76rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-soft); }
+.eyebrow { font-size: var(--fs-meta); font-weight: 600; text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-soft); }
 
 .chip {
   display: inline-flex; align-items: center; gap: 0.4ch;
-  font-size: 12px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase;
+  font-size: var(--fs-micro); font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase;
   padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid var(--rule-strong); color: var(--ink-soft);
   white-space: nowrap;
 }
@@ -174,42 +215,42 @@ footer.site a:hover { color: var(--accent); }
 }
 .card:hover { border-color: var(--rule-strong); transform: translateY(-1px); }
 
-.grid { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); }
+.grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); }
 
 .command {
-  display: flex; align-items: flex-start; gap: 0.75rem;
+  display: flex; align-items: flex-start; gap: var(--sp-2);
   background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius);
-  padding: 0.8rem 1rem; font-size: 14px;
+  padding: 0.8rem 1rem; font-size: var(--fs-ui);
 }
 .command .sigil { color: var(--accent-line); user-select: none; flex: none; line-height: 1.5; }
 /* wraps rather than scrolls: a long command used to slide the copy button out of the box */
 .command code { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
 .command button {
   margin-left: auto; flex: none; align-self: flex-start;
-  font: inherit; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+  font: inherit; font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
   background: none; border: 1px solid var(--rule-strong); color: var(--ink-soft);
-  border-radius: 6px; padding: 0.25rem 0.55rem; cursor: pointer;
+  border-radius: var(--r-xs); padding: 0.25rem 0.55rem; cursor: pointer;
 }
 .command button:hover { color: var(--ink); border-color: var(--accent-line); }
 
 /* the one command someone actually has to run first */
 .command-primary {
   background: color-mix(in srgb, var(--accent) 10%, var(--ground));
-  border-color: var(--accent-line); font-size: 15px; padding: 0.9rem 1rem;
+  border-color: var(--accent-line); font-size: var(--fs-body); padding: 0.9rem 1rem;
 }
 .command-primary .sigil { color: var(--accent-line); }
 .command-primary code { font-weight: 600; }
 .command-primary button { border-color: var(--accent-line); color: var(--ink); }
 
-.lede { font-family: var(--prose); font-size: 1.42rem; font-weight: 420; line-height: 1.5; color: var(--ink-soft); max-width: 48ch; }
+.lede { font-family: var(--prose); font-size: var(--fs-serif); font-weight: 420; line-height: 1.5; color: var(--ink-soft); max-width: 48ch; }
 
 @media (max-width: 860px) {
-  .masthead-inner { gap: 1rem; flex-wrap: wrap; }
-  .nav { order: 3; width: 100%; margin-left: 0; gap: 1.1rem; padding-top: 0.15rem; }
+  .masthead-inner { gap: var(--sp-3); flex-wrap: wrap; }
+  .nav { order: 3; width: 100%; margin-left: 0; gap: var(--sp-4); padding-top: 0.15rem; }
   .masthead-end { margin-left: auto; }
 }
 
 @media (max-width: 640px) {
-  .lede { font-size: 1.2rem; }
-  .nav { font-size: 13px; gap: 0.9rem; }
+  .lede { font-size: var(--fs-serif); }
+  .nav { font-size: var(--fs-meta); gap: var(--sp-3); }
 }
