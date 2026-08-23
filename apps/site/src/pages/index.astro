@@ -30,11 +30,9 @@ const demo = skills.filter((s) =>
 // the five axes, and how much of each a typical project actually takes. This is the whole
 // idea in one picture, and it says it without naming a family
 const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
-const axisRows = AXES.map((axis) => ({
-  axis,
-  total: skills.filter((s) => s.meta.axis === axis).length,
-  matched: demo.filter((s) => s.meta.axis === axis).length,
-}));
+const chosen = new Set(demo.map((s) => s.meta.name));
+const skipped = skills.filter((s) => !chosen.has(s.meta.name)).slice(0, 3).map((s) => s.meta.skill);
+void AXES;
 const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 ---
 
@@ -71,29 +69,24 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
         <Command text="skyl scan" />
       </div>
 
-      <div class="launch-body">
-        <p class="launch-label">what it loads</p>
-        <ul class="axes">
-          {axisRows.map((row) => (
-            <li class="axis" data-empty={row.total === 0 ? '' : undefined}>
-              <span class="axis-name">{row.axis}</span>
-              <span class="axis-cells">
-                {Array.from({ length: Math.max(row.total, 1) }, (_, i) => (
-                  <i data-on={i < row.matched ? '' : undefined}></i>
-                ))}
-              </span>
-              <span class="axis-say">
-                {row.total === 0 ? 'none yet' : row.matched === 0 ? 'not this project' : `${row.matched} of ${row.total}`}
-              </span>
-            </li>
-          ))}
-        </ul>
+      <div class="console">
+        <div class="console-bar"><i></i><i></i><i></i><span>~/your-project</span></div>
+        <pre><code><span class="t-dim">$</span> skyl scan
+
+  <span class="t-strong">Detected</span>
+{demo.slice(0, 3).map((d) => (
+  <>{'    '}<span class="t-ok">{d.meta.skill.padEnd(13)}</span><span class="t-dim">{(Object.values(d.meta.detect).flat()[0] ?? '').split('/').pop()!.split(':').pop()}</span>{'\n'}</>
+))}    <span class="t-dim">......{' '.repeat(7)}and {demo.length - 3} more</span>
+
+  <span class="t-strong">Ruled out</span>  <span class="t-dim">{skipped.join('  ')}</span>
+
+  {demo.length} layers, ~{(demoCost / 1000).toFixed(1)}k tokens <span class="t-dim">into .claude/skills</span>
+  <span class="t-dim">Write them? [y/N]</span>
+</code></pre>
       </div>
 
       <div class="launch-foot">
-        <span><b>{demo.length}</b> layers</span>
-        <span><b>~{(demoCost / 1000).toFixed(1)}k</b> tokens</span>
-        <span class="quiet">nothing written until you say yes</span>
+        <span>five axes, and a project draws from the ones that apply</span>
       </div>
     </div>
   </section>
@@ -207,22 +200,23 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .launch-head .launch-label + * { margin-bottom: 0.5rem; }
   .launch-body .launch-label { margin-bottom: 0.9rem; }
 
-  .axes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
-  .axis { display: grid; grid-template-columns: 5.5rem 1fr auto; align-items: center; gap: 0.8rem; }
-  .axis-name { font-size: 13px; color: var(--ink); }
-  .axis[data-empty] .axis-name, .axis[data-empty] .axis-say { color: var(--ink-faint); }
-  .axis-cells { display: flex; gap: 3px; }
-  .axis-cells i { width: 100%; max-width: 22px; height: 7px; border-radius: 2px; background: var(--rule); }
-  .axis-cells i[data-on] { background: var(--accent); }
-  .axis[data-empty] .axis-cells i { background: none; border: 1px dashed var(--rule-strong); height: 7px; }
-  .axis-say { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+  .console { border-top: 1px solid var(--rule); background: var(--sunken); }
+  .console-bar {
+    display: flex; align-items: center; gap: 0.4rem; padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
+  .console-bar span { margin-left: 0.5rem; font-size: 11.5px; color: var(--ink-faint); }
+  .console pre { margin: 0; padding: 0.95rem 1.1rem; font-size: 12.5px; line-height: 1.65; overflow-x: auto; }
+  .console code { font-family: var(--mono); white-space: pre; }
+  .t-dim { color: var(--ink-faint); }
+  .t-strong { color: var(--ink); font-weight: 600; }
+  .t-ok { color: var(--term-ok); }
 
   .launch-foot {
-    display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: baseline;
-    padding: 0.9rem 1.3rem; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-soft);
+    padding: 0.75rem 1.3rem; border-top: 1px solid var(--rule);
+    font-size: 12.5px; color: var(--ink-faint);
   }
-  .launch-foot b { color: var(--ink); font-size: 15px; font-weight: 600; }
-  .launch-foot .quiet { color: var(--ink-faint); margin-left: auto; }
 
   .picker { border: 1px solid var(--rule); border-radius: 16px; background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
   .picker-head { display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem; border-bottom: 1px solid var(--rule); }
