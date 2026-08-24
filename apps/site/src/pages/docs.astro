@@ -126,26 +126,3 @@ const groups = (Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((key) => ({
     .doc-body { grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); }
   }
 </style>
-
-<script>
-  // the rail follows the reader: whichever command is highest in view is the marked one
-  const links = new Map<string, HTMLElement>();
-  for (const link of document.querySelectorAll<HTMLElement>('[data-rail]')) {
-    links.set(link.dataset.rail!, link);
-  }
-  const articles = [...document.querySelectorAll<HTMLElement>('.doc')];
-
-  if (articles.length && 'IntersectionObserver' in window) {
-    const seen = new Set<string>();
-    const watcher = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) seen.add(entry.target.id);
-        else seen.delete(entry.target.id);
-      }
-      const first = articles.find((a) => seen.has(a.id))?.id;
-      for (const [name, link] of links) link.toggleAttribute('data-on', name === first);
-    }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
-
-    for (const article of articles) watcher.observe(article);
-  }
-</script>

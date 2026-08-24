@@ -81,22 +81,3 @@ const present = rendered
   .spec-source a { color: var(--ink-faint); text-decoration: none; }
   .spec-source a:hover { color: var(--accent); }
 </style>
-
-<script>
-  const links = new Map<string, HTMLElement>();
-  for (const link of document.querySelectorAll<HTMLElement>('[data-rail]')) links.set(link.dataset.rail!, link);
-  const headings = [...document.querySelectorAll<HTMLElement>('.spec-prose h2[id]')];
-
-  if (headings.length && 'IntersectionObserver' in window) {
-    const seen = new Set<string>();
-    const watcher = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) seen.add(entry.target.id);
-        else seen.delete(entry.target.id);
-      }
-      const first = headings.find((h) => seen.has(h.id))?.id;
-      for (const [id, link] of links) link.toggleAttribute('data-on', id === first);
-    }, { rootMargin: '-8% 0px -75% 0px', threshold: 0 });
-    for (const heading of headings) watcher.observe(heading);
-  }
-</script>

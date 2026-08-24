@@ -55,10 +55,10 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
     </nav>
 
     <div class="docs-main">
-  <header class="ev-head">
+  <header class="docs-head">
     <p class="eyebrow" data-enter style="--i: 0">what was measured</p>
     <h1 data-enter style="--i: 1">Evidence</h1>
-    <p class="ev-lede" data-enter style="--i: 2">
+    <p class="docs-lede" data-enter style="--i: 2">
       A rule earns its place by changing what a model writes. These are the runs behind that claim,
       including the ones that changed nothing.
     </p>
@@ -120,10 +120,6 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
 </Base>
 
 <style is:global>
-  .ev-head { padding: var(--sp-7) 0 var(--sp-5); }
-  .ev-head h1, .ev-lede { max-width: 52ch; }
-  .ev-head h1 { font-size: var(--fs-title); margin: var(--sp-2) 0 var(--sp-3); }
-  .ev-lede { font-size: var(--fs-lead); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 56ch; }
 
   /* the numbers first, since they are the claim */
   .ev-strip {

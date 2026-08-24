@@ -63,7 +63,11 @@
   --fs-h2: 1.75rem;      /* section heading */
   --fs-title: 2rem;      /* page title */
   --fs-h1: clamp(2.3rem, 4.4vw, 3.4rem);  /* the hero, and only the hero */
-  --fs-serif: 1.35rem;   /* the serif sentence under a title */
+  --fs-serif: 1.35rem;   /* prose, and prose only */
+  /* The ladder is set against the serif. Mono carries a taller x-height, 0.55em to the serif's
+     0.512, so a mono word set inside serif prose at the same size reads a size too big. This is
+     that one step: the mono that optically matches --fs-serif. */
+  --fs-serif-mono: 1.25rem;
 
   /* radius: four, and a pill */
   --r-tiny: 4px;
@@ -250,12 +254,27 @@ footer.site a:hover { color: var(--accent); }
   .footer-say { grid-column: 1 / -1; }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 /* ---------- prose ---------- */
 
 .prose { font-family: var(--prose); font-size: var(--fs-serif); font-weight: 420; line-height: 1.7; color: var(--ink); max-width: var(--measure); }
 .prose p { margin: 0 0 1.15em; }
 .prose strong { font-weight: 600; }
-.prose code { background: var(--sunken); padding: 0.1em 0.36em; border-radius: var(--r-tiny); border: 1px solid var(--rule); font-size: 0.86em; }
+/* no em sizing in here. Multiplying against the parent put four sizes on the page that
+   belong to no ladder: inline code at 18.6, code inside a block at 11.6 (0.86 of 13.5, the
+   shrink applied twice), a heading holding code at 27.9. Mono carries a taller x-height than
+   the serif, 0.55em against 0.512, so matching the size reads a touch larger and that is
+   the right side to err on. */
+.prose code { background: var(--sunken); padding: 0.08em 0.3em; border-radius: var(--r-tiny); border: 1px solid var(--rule); font-size: var(--fs-serif-mono); }
+/* markdown only ever reaches h2 and h3 here. h2 was never styled, so it fell to the browser
+   default, 1.5em of the serif, and landed at 32.4px next to an h3 that is a 12.5px label. */
+.prose h2 {
+  font-family: var(--mono); font-weight: 600; font-size: var(--fs-strong);
+  letter-spacing: -0.02em; color: var(--ink); margin: 2.5rem 0 1rem;
+}
 .prose h3 { font-family: var(--mono); font-weight: 600; font-size: var(--fs-meta); text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-soft); margin: 2.75rem 0 1rem; }
 .prose ul, .prose ol { margin: 0 0 1.15em; padding-left: 1.2em; }
 .prose li { margin: 0 0 0.55em; }
@@ -264,8 +283,8 @@ footer.site a:hover { color: var(--accent); }
 .prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-ui); margin: 0 0 1.5em; }
 .prose th, .prose td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--fs-meta); }
-.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: var(--fs-ui); line-height: 1.55; }
-.prose pre code { background: none; border: 0; padding: 0; }
+.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: var(--fs-body); line-height: 1.55; }
+.prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 
 #toast {
   position: fixed; left: 50%; bottom: 2rem; z-index: 40;
@@ -289,12 +308,25 @@ footer.site a:hover { color: var(--accent); }
  */
   .docs { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--sp-7); align-items: start; }
 
-  /* the rail stays put and follows you down the page */
-  .docs-rail { position: sticky; top: 4.5rem; align-self: start; }
-  .rail-inner { display: grid; gap: var(--sp-4); padding: var(--sp-6) 0 var(--sp-5); }
+  /* The rail stays put and follows you down the page. It also has to fit: a registry page
+     lists every family, a contributors page lists every person, and without a ceiling the
+     bottom of a long rail sits below the fold with no way to reach it, because the thing
+     that would scroll it is the page, and the page is what it is pinned against. */
+  .docs-rail { position: sticky; top: 4.5rem; align-self: start; max-height: calc(100vh - 5.5rem); display: flex; }
+  .rail-inner {
+    display: grid; gap: var(--sp-4); align-content: start; padding: var(--sp-6) 0.5rem var(--sp-5) 0;
+    grid-template-columns: minmax(0, 1fr);  /* a grid item defaults to min-width auto, which lets
+                                               one long path widen the whole rail instead of wrapping */
+    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+  }
+  .rail-inner::-webkit-scrollbar { width: 6px; }
+  .rail-inner::-webkit-scrollbar-track { background: transparent; }
+  .rail-inner::-webkit-scrollbar-thumb { background: var(--rule); border-radius: var(--r-pill); }
+  .rail-inner:hover::-webkit-scrollbar-thumb { background: var(--rule-strong); }
   .rail-back { font-size: var(--fs-meta); color: var(--ink-faint); text-decoration: none; }
   .rail-back:hover { color: var(--accent); }
-  .rail-group { display: grid; gap: var(--sp-1); }
+  .rail-group { display: grid; gap: var(--sp-1); min-width: 0; }
   .rail-title {
     margin: 0 0 var(--sp-1); font-size: var(--fs-micro); font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.11em; color: var(--ink-faint);
@@ -308,7 +340,16 @@ footer.site a:hover { color: var(--accent); }
   .rail-group a:hover { color: var(--ink); border-color: var(--rule-strong); }
   .rail-group a[data-on] { color: var(--accent); border-color: var(--accent); }
 
+  /* a rail group that lists facts rather than destinations */
+  .rail-facts { list-style: none; margin: 0; padding: 0; color: var(--ink-soft); font-size: var(--fs-ui); }
+  .rail-facts li { padding: 0.22rem 0 0.22rem 0.7rem; border-left: 2px solid var(--rule); overflow-wrap: anywhere; }
+  .rail-facts.pair { columns: 2; column-gap: var(--sp-3); }
+  .rail-sub { margin: 0 0 0.25rem; color: var(--ink-faint); font-size: var(--fs-micro); }
+
   .docs-main { min-width: 0; padding-bottom: var(--sp-8); }
+
+  /* a rail link lands its target below the masthead rather than under it */
+  .docs-main [id] { scroll-margin-top: 5.5rem; }
   .docs-head { padding: var(--sp-7) 0 var(--sp-6); border-bottom: 1px solid var(--rule); }
   .docs-head h1 { font-size: var(--fs-title); margin: var(--sp-2) 0 var(--sp-3); }
   .docs-lede { font-size: var(--fs-lead); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 56ch; }
@@ -326,8 +367,8 @@ footer.site a:hover { color: var(--accent); }
 
 @media (max-width: 820px) {
   .docs { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
-  .docs-rail { position: static; }
-  .rail-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+  .docs-rail { position: static; max-height: none; display: block; }
+  .rail-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); overflow: visible; padding-right: 0; }
 }
 
 /* a section heading, for any page that has sections. This lived in the home page's scoped
@@ -398,6 +439,6 @@ footer.site a:hover { color: var(--accent); }
 }
 
 @media (max-width: 640px) {
-  .lede { font-size: var(--fs-serif); }
+  .lede { font-size: var(--fs-body); }
   .nav { font-size: var(--fs-meta); gap: var(--sp-3); }
 }

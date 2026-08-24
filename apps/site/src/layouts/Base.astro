@@ -121,6 +121,64 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
       </div>
     </footer>
     <script>
+      /*
+       * The rail follows the reading position, on every page that has one. This used to be
+       * two copies of an IntersectionObserver living in two pages, which left the other five
+       * rails inert, and which marked nothing at all whenever no heading happened to be
+       * inside the observed band. Position beats observation here: read where the sections
+       * are, take the last one that has crossed the reading line, done.
+       */
+      const rail = document.querySelector('.docs-rail');
+      const scroller = rail?.querySelector('.rail-inner');
+      const items = [...(rail?.querySelectorAll('a[data-rail]') ?? [])]
+        .map((link) => ({ link, target: document.getElementById(link.getAttribute('data-rail')) }))
+        .filter((item) => item.target);
+
+      if (items.length) {
+        const LINE = 140; // just below the masthead: where a heading stops being ahead of you
+        let marked = null;
+
+        const follow = () => {
+          let current = items[0];
+          for (const item of items) {
+            if (item.target.getBoundingClientRect().top <= LINE) current = item;
+          }
+          // the last section is often too short to ever reach the line, so the end of the
+          // page hands it the mark rather than leaving it permanently unreachable
+          const bottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+          if (bottom) current = items[items.length - 1];
+
+          if (current.link === marked) return;
+          marked = current.link;
+          for (const item of items) item.link.toggleAttribute('data-on', item.link === marked);
+
+          // when the rail is scrolling itself, the mark has to stay somewhere you can see it
+          if (scroller && scroller.scrollHeight > scroller.clientHeight + 4) {
+            const mark = marked.getBoundingClientRect();
+            const box = scroller.getBoundingClientRect();
+            if (mark.top < box.top + 24 || mark.bottom > box.bottom - 24) {
+              scroller.scrollTo({
+                top: scroller.scrollTop + (mark.top - box.top) - scroller.clientHeight / 3,
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+              });
+            }
+          }
+        };
+
+        let pending = false;
+        const onScroll = () => {
+          if (pending) return;
+          pending = true;
+          requestAnimationFrame(() => { pending = false; follow(); });
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        window.addEventListener('hashchange', onScroll);
+        follow();
+      }
+    </script>
+
+    <script>
       // one observer for the page: anything marked [data-reveal] rises into place once,
       // and the delay is read off the element so a group can stagger
       const targets = document.querySelectorAll('[data-reveal]');

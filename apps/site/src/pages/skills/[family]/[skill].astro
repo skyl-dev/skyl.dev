@@ -33,68 +33,64 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
     <nav class="docs-rail" aria-label={meta.name}>
       <div class="rail-inner">
         <a class="rail-back" href="/skills">← All skills</a>
-        <div>
-          <p class="eyebrow" style="margin-bottom: var(--sp-2);">on this page</p>
-          <ul class="jump">
+
+        <div class="rail-group">
+          <p class="rail-title">On this page</p>
+          <ul>
             {skill.parts.map((part) => (
-              <li><a href={`#${part.heading.toLowerCase()}`}>{part.heading}</a></li>
+              <li>
+                <a href={`#${part.heading.toLowerCase()}`} data-rail={part.heading.toLowerCase()}>{part.heading}</a>
+              </li>
             ))}
-            {skill.references.length > 0 && <li><a href="#references">References</a></li>}
-            {skill.evidence && <li><a href="#evidence">Evidence</a></li>}
+            {skill.references.length > 0 && <li><a href="#references" data-rail="references">References</a></li>}
+            {skill.evidence && <li><a href="#evidence" data-rail="evidence">Evidence</a></li>}
           </ul>
         </div>
+
         {detect.length > 0 && (
-          <div>
-            <p class="eyebrow" style="margin-bottom: 0.7rem;">detected by</p>
+          <div class="rail-group">
+            <p class="rail-title">Detected by</p>
             {detect.map(([key, values]) => (
-              <div style="margin-bottom: 0.8rem;">
-                <p style="margin: 0 0 0.3rem; color: var(--ink-faint); font-size: var(--fs-micro);">{key.replace(/_/g, ' ')}</p>
-                <ul style="margin: 0; padding: 0; list-style: none; color: var(--ink-soft);">
-                  {values.map((v) => <li class="detect-item">{v}</li>)}
-                </ul>
+              <div>
+                <p class="rail-sub">{key.replace(/_/g, ' ')}</p>
+                <ul class="rail-facts">{values.map((v) => <li class="detect-item">{v}</li>)}</ul>
               </div>
             ))}
           </div>
         )}
 
         {neededBy.length > 0 && (
-          <div>
-            <p class="eyebrow" style="margin-bottom: 0.7rem;">required by</p>
-            <ul style="margin: 0; padding: 0; list-style: none;">
-              {neededBy.map((s) => (
-                <li style="margin-bottom: 0.3rem;"><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.name}</a></li>
-              ))}
+          <div class="rail-group">
+            <p class="rail-title">Required by</p>
+            <ul>
+              {neededBy.map((s) => <li><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.name}</a></li>)}
             </ul>
           </div>
         )}
 
         {sameFamily.length > 0 && (
-          <div>
-            <p class="eyebrow" style="margin-bottom: 0.7rem;">composes with</p>
-            <ul style="margin: 0; padding: 0; list-style: none; columns: 2; column-gap: var(--sp-3);">
-              {sameFamily.map((s) => (
-                <li style="margin-bottom: 0.3rem;"><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a></li>
-              ))}
+          <div class="rail-group">
+            <p class="rail-title">Composes with</p>
+            <ul>
+              {sameFamily.map((s) => <li><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a></li>)}
             </ul>
           </div>
         )}
 
-        <div>
-          <p class="eyebrow" style="margin-bottom: 0.7rem;">source</p>
-          <a href={source}>SKILL.md on GitHub</a>
+        <div class="rail-group">
+          <p class="rail-title">Source</p>
+          <ul><li><a href={source}>SKILL.md on GitHub</a></li></ul>
         </div>
       </div>
     </nav>
 
   <article class="docs-main">
-    <header style="padding: var(--sp-7) 0 var(--sp-6); border-bottom: 1px solid var(--rule);">
+    <header class="docs-head">
       <p class="eyebrow"><a href="/skills" style="text-decoration: none;">skills</a> / {meta.family}</p>
-      <h1 style="font-size: var(--fs-title); margin: 0.5rem 0 0.9rem; letter-spacing: -0.03em;">{meta.skill}</h1>
-      <p style="font-family: var(--prose); font-size: var(--fs-serif); line-height: 1.5; color: var(--ink-soft); max-width: 56ch; margin: 0 0 1.5rem;">
-        {meta.description}
-      </p>
+      <h1>{meta.skill}</h1>
+      <p class="docs-lede">{meta.description}</p>
 
-      <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-4) 0 1.5rem;">
         <span class="chip solid">{meta.axis}</span>
         <span class="chip">v{meta.version}</span>
         <span class="chip">{skill.rulesCount.must} must</span>
@@ -117,7 +113,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
         {agentParts.map((part) => (
           <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
             <div style="display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 1.2rem;">
-              <h2 style="font-size: var(--fs-lead);">{part.heading}</h2>
+              <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em;">{part.heading}</h2>
               <span class="chip solid">installed</span>
             </div>
             <div class="prose scroller" set:html={part.html} />
@@ -131,7 +127,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
             </p>
             {humanParts.map((part) => (
               <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
-                <h2 style="font-size: var(--fs-lead); margin-bottom: 1.2rem;">{part.heading}</h2>
+                <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 1.2rem;">{part.heading}</h2>
                 <div class="prose scroller" set:html={part.html} />
               </section>
             ))}
@@ -140,7 +136,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
 
         {skill.references.length > 0 && (
           <div id="references" style="border-top: 1px solid var(--rule); padding-top: 2.5rem; scroll-margin-top: 5rem;">
-            <h2 style="font-size: var(--fs-lead); margin-bottom: 0.5rem;">References</h2>
+            <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 0.5rem;">References</h2>
             <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-bottom: 1.5rem;">
               Depth a rule points at, loaded only when the agent asks for it.
             </p>
@@ -155,7 +151,7 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
 
         {skill.evidence && (
           <div id="evidence" style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
-            <h2 style="font-size: var(--fs-lead); margin-bottom: 1.2rem;">Evidence</h2>
+            <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 1.2rem;">Evidence</h2>
             <div class="prose scroller" set:html={skill.evidence} />
           </div>
         )}
@@ -165,21 +161,9 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
 </Base>
 
 <style is:global>
-  .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
-  .jump a {
-    display: block; text-decoration: none; color: var(--ink-soft); font-size: var(--fs-ui);
-    padding: 0.2rem 0 0.2rem 0.7rem; border-left: 2px solid var(--rule); transition: color 160ms, border-color 160ms;
-  }
-  .jump a:hover { color: var(--accent); border-color: var(--accent); }
-
   /* a coordinate breaks at its own separators or scrolls, never mid-word */
   .detect-item {
-    margin-bottom: 0.15rem; font-size: var(--fs-meta); line-height: 1.5;
+    font-size: var(--fs-meta); line-height: 1.5;
     word-break: normal; overflow-wrap: break-word; hyphens: none;
-  }
-
-  @media (max-width: 900px) {
-    article > div { grid-template-columns: minmax(0, 1fr) !important; gap: 2.5rem !important; }
-    aside { position: static !important; }
   }
 </style>

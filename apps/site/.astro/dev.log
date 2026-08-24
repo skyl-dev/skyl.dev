@@ -123,3 +123,25 @@
 {"message":"/src/styles/base.css","label":"watch","level":"info"}
 {"message":"/src/styles/base.css","label":"watch","level":"info"}
 {"message":"/src/pages/evidence.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
+{"message":"src/pages/spec.astro","label":"watch","level":"info"}
+{"message":"[200] / 13ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"src/pages/docs.astro","label":"watch","level":"info"}
+{"message":"[200] / 11ms","label":null,"level":"info"}
+{"message":"[200] / 3ms","label":null,"level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] / 2ms","label":null,"level":"info"}
+{"message":"src/pages/skills/index.astro","label":"watch","level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] / 3ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/pages/evidence.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"src/pages/install.astro","label":"watch","level":"info"}
+{"message":"[200] / 13ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}

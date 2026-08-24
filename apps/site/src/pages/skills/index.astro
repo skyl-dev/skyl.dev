@@ -31,7 +31,7 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
           <p class="rail-title">Family</p>
           <ul>
             {families.map((family) => (
-              <li><a href={`#${family.name}`}>{family.name} · {family.skills.length}</a></li>
+              <li><a href={`#${family.name}`} data-rail={family.name}>{family.name} · {family.skills.length}</a></li>
             ))}
           </ul>
         </div>
