@@ -11,6 +11,7 @@ const { title, description, section } = Astro.props;
 const path = Astro.url.pathname;
 
 const NAV = [
+  { href: '/how-it-works', label: 'How it works', key: 'how' },
   { href: '/install', label: 'Install', key: 'install' },
   { href: '/skills', label: 'Skills', key: 'skills' },
   { href: '/docs', label: 'Docs', key: 'docs' },
@@ -89,6 +90,7 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
 
         <div class="footer-col">
           <p class="eyebrow">Start</p>
+          <a href="/how-it-works">How it works</a>
           <a href="/install">Install</a>
           <a href="/#pick">Compose a stack</a>
           <a href="/starters">Starters</a>
