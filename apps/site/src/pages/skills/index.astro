@@ -142,7 +142,9 @@ const menu = families.map((family) => ({ ...family, axes: axesOf(family.skills) 
   }
   .pick:hover { color: var(--ink); border-color: var(--rule-strong); }
   .pick[data-on] { color: var(--accent); border-color: var(--accent); }
-  .sub { list-style: none; margin: 0; padding: 0 0 0 0.7rem; display: grid; gap: 1px; }
+  /* `.rail-group ul` in the stylesheet carries an element in its selector, so a bare `.sub`
+     loses to it and the nesting rendered flush with its parent */
+  .rail-group .sub { list-style: none; margin: 0.15rem 0 0.35rem; padding-left: 0.9rem; display: grid; gap: 1px; }
   .pick.thin { font-size: var(--fs-meta); color: var(--ink-faint); padding-left: 0.6rem; }
   .pick.thin:hover, .pick.thin[data-on] { color: var(--accent); }
 </style>
@@ -152,7 +154,9 @@ const menu = families.map((family) => ({ ...family, axes: axesOf(family.skills) 
   // dozen skills a search index would be more code than the thing it indexes.
   const input = document.querySelector<HTMLInputElement>('#filter')!;
   const cards = [...document.querySelectorAll<HTMLElement>('.card[data-name]')];
-  const sections = [...document.querySelectorAll<HTMLElement>('[data-family]')];
+  // scoped to the content: the rail's family buttons carry data-family too, and an unscoped
+  // selector hid the menu, since a button holds no cards and every() of nothing is true
+  const sections = [...document.querySelectorAll<HTMLElement>('.docs-main [data-family]')];
   const picks = [...document.querySelectorAll<HTMLButtonElement>('.pick')];
   const empty = document.querySelector<HTMLElement>('#empty')!;
   const showing = document.querySelector<HTMLElement>('#showing')!;

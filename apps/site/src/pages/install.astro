@@ -223,6 +223,8 @@ const TOOLS = [
   }
   .steps-list p { margin: 0 0 0.6rem; font-size: var(--fs-body); }
   .tool-note { color: var(--ink-soft); font-size: var(--fs-ui); margin: 1.4rem 0 0; max-width: 64ch; }
+  /* the same mark inline code carries everywhere else, so --target does not read as prose here */
+  .tool-note code, .repo code { background: var(--sunken); padding: 0.06em 0.32em; border-radius: var(--r-tiny); color: var(--ink); }
 
   .repo { padding: var(--sp-7) 0 0; display: grid; gap: var(--sp-6); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
   .repo h3 { font-size: var(--fs-h3); margin: 0 0 0.6rem; }
