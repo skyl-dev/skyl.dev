@@ -115,3 +115,11 @@
 {"message":"[200] /how-it-works 7ms","label":null,"level":"info"}
 {"message":"[200] /how-it-works 1ms","label":null,"level":"info"}
 {"message":"[200] /docs 6ms","label":null,"level":"info"}
+{"message":"[200] /starters 5ms","label":null,"level":"info"}
+{"message":"[200] /install 6ms","label":null,"level":"info"}
+{"message":"[200] /how-it-works 1ms","label":null,"level":"info"}
+{"message":"[200] /skills 5ms","label":null,"level":"info"}
+{"message":"[200] / 8ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/pages/evidence.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}

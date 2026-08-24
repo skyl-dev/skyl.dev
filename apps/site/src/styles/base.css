@@ -311,7 +311,7 @@ footer.site a:hover { color: var(--accent); }
   .docs-main { min-width: 0; padding-bottom: var(--sp-8); }
   .docs-head { padding: var(--sp-7) 0 var(--sp-6); border-bottom: 1px solid var(--rule); }
   .docs-head h1 { font-size: var(--fs-title); margin: var(--sp-2) 0 var(--sp-3); }
-  .docs-lede { font-family: var(--prose); font-size: var(--fs-serif); color: var(--ink-soft); margin: 0; max-width: 48ch; }
+  .docs-lede { font-size: var(--fs-lead); line-height: 1.6; color: var(--ink-soft); margin: 0; max-width: 56ch; }
   .docs-install { display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; margin-top: var(--sp-5); }
   .docs-install .command { min-width: 18rem; }
   .docs-install p { margin: 0; font-size: var(--fs-ui); color: var(--ink-faint); }
@@ -386,7 +386,10 @@ footer.site a:hover { color: var(--accent); }
 .command-primary code { font-weight: 600; }
 .command-primary button { border-color: var(--accent-line); color: var(--ink); }
 
-.lede { font-family: var(--prose); font-size: var(--fs-serif); font-weight: 420; line-height: 1.5; color: var(--ink-soft); max-width: 48ch; }
+/* mono, like everything else that is interface rather than reading. A serif sentence under
+   a monospace headline reads as a different document. The serif still owns prose, where the
+   job is reading paragraphs rather than labelling a screen. */
+.lede { font-size: var(--fs-lead); line-height: 1.6; color: var(--ink-soft); max-width: 52ch; }
 
 @media (max-width: 860px) {
   .masthead-inner { gap: var(--sp-3); flex-wrap: wrap; }
