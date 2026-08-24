@@ -81,8 +81,8 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     <div>
       <p class="eyebrow" data-enter style="--i: 0">composable agent skills</p>
       <h1>
-        <span class="mask" style="--i: 1"><span>Agent rules for</span></span>
-        <span class="mask" style="--i: 2"><span>what your project</span></span>
+        <span class="mask" style="--i: 1"><span>Agent rules for </span></span>
+        <span class="mask" style="--i: 2"><span>what your project </span></span>
         <span class="mask" style="--i: 3"><span><span class="gradient-word">actually uses</span>.</span></span>
       </h1>
       <p class="lede" data-enter style="--i: 5">
@@ -344,15 +344,11 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   .result-note { margin: 1.3rem 0 0; font-size: var(--fs-meta); color: var(--ink-faint); max-width: 56ch; line-height: 1.6; }
   .result-note code { color: var(--ink-soft); }
 
-  .band-head { max-width: 46rem; margin-bottom: 2.5rem; }
-  .band-head h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0.7rem 0 1rem; }
-  .band-say { color: var(--ink-soft); font-size: var(--fs-body); margin: 0; max-width: 60ch; }
 
   .axes-band { padding: var(--section) 0 0; }
 
   /* the container holds the graph and nothing else: the heading belongs to the page and
      the readout is text about the graph, not part of the object */
-  .band-head { margin-bottom: var(--sp-5); }
 
   /* the ending: a rule, a statement, and the two ways on. Sized like a section so the page
      closes rather than trailing off into a muted line */
