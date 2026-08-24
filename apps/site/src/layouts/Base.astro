@@ -11,9 +11,10 @@ const { title, description, section } = Astro.props;
 const path = Astro.url.pathname;
 
 const NAV = [
-  { href: '/how-it-works', label: 'How it works', key: 'how' },
-  { href: '/install', label: 'Install', key: 'install' },
+  // what someone came for first, then how to get it, then the explanation
   { href: '/skills', label: 'Skills', key: 'skills' },
+  { href: '/install', label: 'Install', key: 'install' },
+  { href: '/how-it-works', label: 'How it works', key: 'how' },
   { href: '/docs', label: 'Docs', key: 'docs' },
   { href: '/starters', label: 'Starters', key: 'starters' },
   { href: '/evidence', label: 'Evidence', key: 'evidence' },

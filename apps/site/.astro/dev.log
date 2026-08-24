@@ -97,3 +97,5 @@
 {"message":"/src/components/AxisGallery.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
 {"message":"[200] / 8ms","label":null,"level":"info"}
 {"message":"/src/pages/index.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
