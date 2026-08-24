@@ -162,29 +162,23 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
   </section>
 
   <section class="axes-band">
-    <div class="band-head">
-      <p class="eyebrow" data-reveal="0">the model</p>
-      <h2 data-reveal="1">Five axes</h2>
-      <p class="band-say" data-reveal="2">A rule belongs to exactly one, so no two layers restate each other.</p>
+    <div class="band-head" data-reveal="0">
+      <p class="eyebrow">the model</p>
+      <h2>Five axes</h2>
+      <p class="band-say">A rule belongs to exactly one, so no two layers restate each other.</p>
     </div>
 
     <div data-reveal="1"><AxisGallery /></div>
   </section>
 
   <section class="cta">
-    <div class="cta-card">
-      <div>
-        <p class="eyebrow">next</p>
-        <h2>How it works</h2>
-        <p>
-          What a rule is made of, why it is shaped that way, and what the CLI does to your
-          repository before it writes anything.
-        </p>
-      </div>
-      <div class="cta-actions">
-        <a class="button" href="/how-it-works">Read how it works</a>
-        <a class="button ghost" href="/starters">Or take a known shape</a>
-      </div>
+    <div>
+      <h2>Three parts to a rule</h2>
+      <p>An instruction you can check, the failure it prevents, and where it stops applying.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="button" href="/how-it-works">How it works</a>
+      <a class="button ghost" href="/install">Install it</a>
     </div>
   </section>
 
@@ -356,19 +350,27 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   .axes-band { padding: var(--section) 0 0; }
 
-  .cta { padding: var(--section) 0 var(--sp-6); }
-  .cta-card {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-6); align-items: center;
-    border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised);
-    box-shadow: var(--shadow); padding: var(--sp-6);
+  /* the container holds the graph and nothing else: the heading belongs to the page and
+     the readout is text about the graph, not part of the object */
+  .band-head { margin-bottom: var(--sp-5); }
+
+  /* the ending: a rule, a statement, and the two ways on. Sized like a section so the page
+     closes rather than trailing off into a muted line */
+  .cta {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-6);
+    align-items: center; margin-top: var(--section);
+    border-top: 1px solid var(--rule); padding: var(--sp-7) 0 var(--sp-7);
   }
-  .cta-card h2 { font-size: var(--fs-h2); margin: var(--sp-2) 0 var(--sp-3); }
-  .cta-card p { margin: 0; font-size: var(--fs-ui); color: var(--ink-soft); max-width: 52ch; }
-  .cta-actions { display: grid; gap: var(--sp-2); }
+  .cta h2 { font-size: var(--fs-h2); margin: 0 0 var(--sp-2); }
+  .cta p { margin: 0; font-size: var(--fs-lead); color: var(--ink-soft); max-width: 46ch; }
+  .cta-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 
   @media (max-width: 820px) {
-    .cta-card { grid-template-columns: minmax(0, 1fr); }
+    .cta { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); padding: var(--sp-6) 0; }
   }
+
+  /* a line and a link, on the page rather than in a box: another card here would read as a
+     fifth section when the point is that the page is over */
 
   @media (max-width: 980px) {
     .hero { grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); padding: var(--sp-7) 0 var(--sp-6); }

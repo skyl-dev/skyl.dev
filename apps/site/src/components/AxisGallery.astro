@@ -52,7 +52,7 @@ const data = { AXES };
 ---
 
 <div class="axis-map">
-  <svg class="nodes" viewBox="0 0 620 288" role="img" aria-label="skyl and the five axes a project draws from">
+  <div class="axis-frame"><svg class="nodes" viewBox="0 0 620 288" role="img" aria-label="skyl and the five axes a project draws from">
     <g class="edges">
       {PLACED.map((place) => (
         <path
@@ -71,7 +71,7 @@ const data = { AXES };
         <text x={place.x} y={place.y + 4} class="node-text">{place.id}</text>
       </g>
     ))}
-  </svg>
+  </svg></div>
 
   <aside class="readout" data-readout></aside>
 </div>
@@ -124,10 +124,14 @@ const data = { AXES };
 
 <style is:global>
   .axis-map {
-    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--sp-6);
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--sp-5);
     align-items: center; min-width: 0;
   }
-  .nodes { width: 100%; height: auto; }
+  .axis-frame {
+    border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised);
+    box-shadow: var(--shadow); padding: var(--sp-4);
+  }
+  .nodes { width: 100%; height: auto; display: block; }
 
   .edges path { fill: none; stroke: var(--rule); stroke-width: 1.5; transition: stroke 160ms, stroke-width 160ms; }
   .edges path[data-lit] { stroke: var(--accent); stroke-width: 2.5; }
