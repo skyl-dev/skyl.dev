@@ -41,10 +41,13 @@
   --ease-in: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.4, 0, 0.9, 0.4);
 
+  /* One face. There used to be two, and they split by where the text came from rather than
+     by what it is: everything hand-written was mono, everything read out of the registry was
+     serif, so the command reference and the spec were set in different faces while being the
+     same kind of document. A reader cannot see that distinction, only the inconsistency. */
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --prose: Newsreader, ui-serif, Georgia, serif;
 
-  --measure: 68ch;
+  --measure: 74ch;
 
   /*
    * The scales. Before these there were 29 font sizes, 15 radii and 23 gap values on the
@@ -63,11 +66,7 @@
   --fs-h2: 1.75rem;      /* section heading */
   --fs-title: 2rem;      /* page title */
   --fs-h1: clamp(2.3rem, 4.4vw, 3.4rem);  /* the hero, and only the hero */
-  --fs-serif: 1.35rem;   /* prose, and prose only */
-  /* The ladder is set against the serif. Mono carries a taller x-height, 0.55em to the serif's
-     0.512, so a mono word set inside serif prose at the same size reads a size too big. This is
-     that one step: the mono that optically matches --fs-serif. */
-  --fs-serif-mono: 1.25rem;
+  --fs-sub: 1.35rem;     /* a prompt, a panel title: a heading that is not a section */
 
   /* radius: four, and a pill */
   --r-tiny: 4px;
@@ -260,7 +259,7 @@ footer.site a:hover { color: var(--accent); }
 
 /* ---------- prose ---------- */
 
-.prose { font-family: var(--prose); font-size: var(--fs-serif); font-weight: 420; line-height: 1.7; color: var(--ink); max-width: var(--measure); }
+.prose { font-size: var(--fs-lead); font-weight: 420; line-height: 1.75; color: var(--ink); max-width: var(--measure); }
 .prose p { margin: 0 0 1.15em; }
 .prose strong { font-weight: 600; }
 /* no em sizing in here. Multiplying against the parent put four sizes on the page that
@@ -268,7 +267,7 @@ footer.site a:hover { color: var(--accent); }
    shrink applied twice), a heading holding code at 27.9. Mono carries a taller x-height than
    the serif, 0.55em against 0.512, so matching the size reads a touch larger and that is
    the right side to err on. */
-.prose code { background: var(--sunken); padding: 0.08em 0.3em; border-radius: var(--r-tiny); border: 1px solid var(--rule); font-size: var(--fs-serif-mono); }
+.prose code { background: var(--sunken); padding: 0.08em 0.3em; border-radius: var(--r-tiny); border: 1px solid var(--rule); }
 /* markdown only ever reaches h2 and h3 here. h2 was never styled, so it fell to the browser
    default, 1.5em of the serif, and landed at 32.4px next to an h3 that is a 12.5px label. */
 .prose h2 {

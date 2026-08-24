@@ -48,6 +48,24 @@ export interface Reference {
   readonly html: string;
 }
 
+/**
+ * A rule, taken apart.
+ *
+ * `@skyl/core` reads the id and the priority, which is all an installer needs: it writes the
+ * section through whole. A page needs the pieces, because a rule is the unit a reader arrives
+ * for and the unit they link to, and neither works while twenty of them are one block of
+ * markdown. The format is fixed and the linter holds it, so this reads it rather than guesses.
+ */
+export interface RuleDetail {
+  readonly id: string;
+  readonly priority: 'must' | 'should';
+  /** The `###` group it sits under, empty when a skill has too few rules to group. */
+  readonly group: string;
+  readonly statement: string;
+  readonly why: string | undefined;
+  readonly notWhen: string | undefined;
+}
+
 export interface SkillPage {
   readonly meta: Skill;
   /** `## Rules` and the rest, in the order the file writes them. */
@@ -56,6 +74,64 @@ export interface SkillPage {
   /** The published evidence for this skill, if there is any. */
   readonly evidence: string | undefined;
   readonly rulesCount: { readonly must: number; readonly should: number };
+  /** Every rule, in file order, taken apart. */
+  readonly rules: readonly RuleDetail[];
+  /** What the `## Rules` section says before the first rule: scope, priority, when not to apply. */
+  readonly rulesIntro: string;
+  /** The group headings in file order, for a table of contents. */
+  readonly ruleGroups: readonly { readonly name: string; readonly slug: string; readonly count: number }[];
+}
+
+const inline = (md: string): string => marked.parseInline(md, { async: false }) as string;
+
+export const groupSlug = (name: string): string =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const RULE_HEAD = /^- \*\*([A-Z0-9]+-\d+)\*\*\s+`(must|should)`:\s*/;
+
+/** Split the `## Rules` section into its intro, its `###` groups, and one object per bullet. */
+function takeRulesApart(markdown: string): {
+  intro: string;
+  rules: RuleDetail[];
+  groups: { name: string; slug: string; count: number }[];
+} {
+  const chunks = markdown.split(/^### (.+)$/m);
+  const intro = chunks[0]!.trim();
+  const rules: RuleDetail[] = [];
+  const groups: { name: string; slug: string; count: number }[] = [];
+
+  // an ungrouped skill is one chunk; a grouped one alternates heading, body
+  const blocks: { name: string; body: string }[] =
+    chunks.length === 1 ? [{ name: '', body: intro }] : [];
+  for (let i = 1; i < chunks.length; i += 2) {
+    blocks.push({ name: chunks[i]!.trim(), body: chunks[i + 1] ?? '' });
+  }
+
+  for (const block of blocks) {
+    let count = 0;
+    // a bullet runs until the next one starts at the margin
+    for (const bullet of block.body.split(/\n(?=- \*\*[A-Z0-9]+-\d+\*\*)/)) {
+      const head = RULE_HEAD.exec(bullet);
+      if (!head) continue;
+      const rest = bullet.slice(head[0].length).replace(/\s*\n\s*/g, ' ').trim();
+      const why = /\*Why:\*\s*/.exec(rest);
+      const not = /\*Not when:\*\s*/.exec(rest);
+      const cut = Math.min(why?.index ?? rest.length, not?.index ?? rest.length);
+      const whyEnd = not && why && not.index > why.index ? not.index : rest.length;
+      rules.push({
+        id: head[1]!,
+        priority: head[2] as 'must' | 'should',
+        group: block.name,
+        statement: inline(rest.slice(0, cut).trim()),
+        why: why ? inline(rest.slice(why.index + why[0].length, whyEnd).trim()) : undefined,
+        notWhen: not ? inline(rest.slice(not.index + not[0].length).trim()) : undefined,
+      });
+      count += 1;
+    }
+    if (block.name && count) groups.push({ name: block.name, slug: groupSlug(block.name), count });
+  }
+
+  return { intro: render(intro), rules, groups };
 }
 
 let cached: SkillPage[] | undefined;
@@ -78,9 +154,14 @@ export async function loadSkills(): Promise<SkillPage[]> {
       forAgent: forAgent.has(heading),
     }));
 
+    const taken = takeRulesApart(found.get('Rules') ?? '');
+
     pages.push({
       meta,
       parts,
+      rules: taken.rules,
+      rulesIntro: taken.intro,
+      ruleGroups: taken.groups,
       references: await loadReferences(meta),
       evidence: await loadDoc('evidence', meta.family, 'skills', `${meta.skill}.md`),
       rulesCount: {

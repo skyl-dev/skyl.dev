@@ -37,7 +37,7 @@ const present = rendered
         <a class="rail-back" href="/skills">← Skills</a>
         {present.map((doc) => (
           <div class="rail-group">
-            <p class="rail-title"><a href={`#${doc.slug}`} style="text-decoration: none; color: inherit;">{doc.title}</a></p>
+            <p class="rail-title"><a href={`#${doc.slug}`} data-rail={doc.slug} style="text-decoration: none; color: inherit;">{doc.title}</a></p>
             <ul>
               {doc.headings.map((h) => <li><a href={`#${h.id}`} data-rail={h.id}>{h.text}</a></li>)}
             </ul>

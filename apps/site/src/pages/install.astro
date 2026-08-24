@@ -71,22 +71,16 @@ const TOOLS = [
         <div class="rail-group">
           <p class="rail-title">Your tool</p>
           <ul>
-            {TOOLS.map((tool, i) => (
-              <li>
-                <button class="tool-tab" type="button" data-tool={tool.id} data-on={i === 0 ? '' : undefined}>
-                  {tool.name}
-                </button>
-              </li>
+            {TOOLS.map((tool) => (
+              <li><a href={`#${tool.id}`} data-rail={tool.id}>{tool.name}</a></li>
             ))}
           </ul>
         </div>
 
         <div class="rail-group">
-          <p class="rail-title">Then</p>
+          <p class="rail-title">Either way</p>
           <ul>
-            <li><a href="/docs">Command reference</a></li>
-            <li><a href="/starters">Starters</a></li>
-            <li><a href="/spec">The format</a></li>
+            <li><a href="#repo" data-rail="repo">What lands in your repo</a></li>
           </ul>
         </div>
       </div>
@@ -101,43 +95,46 @@ const TOOLS = [
         </p>
       </header>
 
-      <div class="tools">
-    {TOOLS.map((tool, i) => (
-      <section class="tool-panel" data-panel={tool.id} hidden={i !== 0}>
-        <p class="eyebrow" style="margin-bottom: 1.4rem;">{tool.kind}</p>
-        <ol class="steps-list">
-          {tool.steps.map((step) => (
-            <li>
-              <p>{step.say}</p>
-              <Command text={step.run} />
-            </li>
-          ))}
-        </ol>
-        <p class="tool-note">{tool.note}</p>
-        {tool.also && <p class="tool-note">{tool.also}</p>}
-      </section>
-    ))}
-      </div>
+      {/* one section per tool rather than one panel per tab: every tool is on the page, the
+          rail is the table of contents for it, and /install#cursor is a link you can send */}
+      {TOOLS.map((tool) => (
+        <section class="tool" id={tool.id}>
+          <div class="tool-head">
+            <h2>{tool.name}</h2>
+            <span class="chip">{tool.kind}</span>
+          </div>
+          <ol class="steps-list">
+            {tool.steps.map((step) => (
+              <li>
+                <p>{step.say}</p>
+                <Command text={step.run} />
+              </li>
+            ))}
+          </ol>
+          <p class="tool-note">{tool.note}</p>
+          {tool.also && <p class="tool-note">{tool.also}</p>}
+        </section>
+      ))}
 
-      <section style="padding: var(--sp-6) 0 0; display: grid; gap: var(--sp-6); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));">
+      <section id="repo" class="repo">
     <div>
-      <h3 style="font-size: var(--fs-h3); margin-bottom: 0.6rem;">What lands in your repo</h3>
-      <p style="color: var(--ink-soft); font-size: var(--fs-body); margin: 0;">
+      <h3>What lands in your repo</h3>
+      <p>
         One markdown file per skill, containing only the rules, plus <code>skyl.lock</code> recording
         what was written and its content hash. Everything is reviewable in a pull request, and a
         reinstall produces no diff.
       </p>
     </div>
     <div>
-      <h3 style="font-size: var(--fs-h3); margin-bottom: 0.6rem;">What does not</h3>
-      <p style="color: var(--ink-soft); font-size: var(--fs-body); margin: 0;">
+      <h3>What does not</h3>
+      <p>
         The reasoning, the pitfalls, and the evidence behind each rule stay in the registry. They are
         for you, not for the model, and sending them would spend context on text that changes nothing.
       </p>
     </div>
     <div>
-      <h3 style="font-size: var(--fs-h3); margin-bottom: 0.6rem;">Switching tools later</h3>
-      <p style="color: var(--ink-soft); font-size: var(--fs-body); margin: 0;">
+      <h3>Switching tools later</h3>
+      <p>
         Run the same command with a different <code>--target</code>. The skills are the same files in
         a different directory, so nothing is locked to one vendor. {families.length} family, {families[0]?.skills.length ?? 0} skills today.
       </p>
@@ -148,17 +145,12 @@ const TOOLS = [
 </Base>
 
 <style>
-  .tools { margin-top: var(--sp-6); border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised); overflow: hidden; box-shadow: var(--shadow); }
-  /* the tabs are the rail now: same buttons, same script, read as navigation */
-  .tool-tab {
-    display: block; width: 100%; text-align: left; font: inherit; font-size: var(--fs-ui);
-    background: none; border: 0; border-left: 2px solid var(--rule); cursor: pointer;
-    color: var(--ink-soft); padding: 0.22rem 0 0.22rem 0.7rem;
-    transition: color 160ms, border-color 160ms;
+  .tool {
+    margin-top: var(--sp-6); border: 1px solid var(--rule); border-radius: var(--r-lg);
+    background: var(--raised); padding: 1.8rem; box-shadow: var(--shadow);
   }
-  .tool-tab:hover { color: var(--ink); border-color: var(--rule-strong); }
-  .tool-tab[data-on] { color: var(--accent); border-color: var(--accent); }
-  .tool-panel { padding: 1.8rem; }
+  .tool-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: 1.6rem; }
+  .tool-head h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0; }
   .steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); counter-reset: step; }
   .steps-list li { counter-increment: step; position: relative; padding-left: 2.2rem; }
   .steps-list li::before {
@@ -168,15 +160,8 @@ const TOOLS = [
   }
   .steps-list p { margin: 0 0 0.6rem; font-size: var(--fs-body); }
   .tool-note { color: var(--ink-soft); font-size: var(--fs-ui); margin: 1.4rem 0 0; max-width: 64ch; }
-</style>
 
-<script>
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.tool-tab')];
-  const panels = [...document.querySelectorAll<HTMLElement>('.tool-panel')];
-  for (const tab of tabs) {
-    tab.addEventListener('click', () => {
-      for (const other of tabs) other.toggleAttribute('data-on', other === tab);
-      for (const panel of panels) panel.hidden = panel.dataset.panel !== tab.dataset.tool;
-    });
-  }
-</script>
+  .repo { padding: var(--sp-7) 0 0; display: grid; gap: var(--sp-6); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+  .repo h3 { font-size: var(--fs-h3); margin: 0 0 0.6rem; }
+  .repo p { color: var(--ink-soft); font-size: var(--fs-body); margin: 0; }
+</style>

@@ -244,7 +244,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
   .picker { margin-top: 1.5rem; border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }
   .picker-head { display: flex; align-items: center; gap: var(--sp-3); padding: 1.5rem 1.8rem 1.4rem; }
-  .picker-head h2 { font-size: var(--fs-serif); margin-top: 0.35rem; }
+  .picker-head h2 { font-size: var(--fs-sub); margin-top: 0.35rem; }
   .picker-head button { margin-left: auto; }
   .picker-body { display: grid; grid-template-columns: minmax(0, 1fr) 17.5rem; }
   /* sized to the longest step, so answering one does not resize the card under the cursor */
@@ -291,7 +291,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
      always begin on the same line */
   .q-head { height: 4.6rem; margin: 0.9rem 0 0.2rem; }
 
-  .q-prompt { font-size: var(--fs-serif); letter-spacing: -0.02em; margin: 0 0 0.45rem; font-weight: 600; }
+  .q-prompt { font-size: var(--fs-sub); letter-spacing: -0.02em; margin: 0 0 0.45rem; font-weight: 600; }
   .q-help { color: var(--ink-soft); font-size: var(--fs-ui); margin: 0; min-height: 1.4em; }
   .q-options { display: grid; gap: var(--sp-2); }
   /* the one multi-select has seven answers, and stacking them made the card twice the

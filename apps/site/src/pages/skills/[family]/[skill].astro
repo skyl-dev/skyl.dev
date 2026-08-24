@@ -14,20 +14,29 @@ export async function getStaticPaths() {
 const { skill, all } = Astro.props;
 const meta = skill.meta;
 
-const agentParts = skill.parts.filter((p) => p.forAgent);
-const humanParts = skill.parts.filter((p) => !p.forAgent);
+// `Rules` is built from its parsed rules rather than rendered as one block of markdown,
+// so everything else on the page is whatever else the file happens to carry
+const otherParts = skill.parts.filter((p) => p.heading !== 'Rules');
+const installed = new Set(meta.agentSections.map((s) => s.charAt(0).toUpperCase() + s.slice(1)));
 
-// what else composes with this: the layers that need it, and the ones it needs
+// Both of these grow with the registry rather than with the skill, so the page shows a
+// bounded number and says how many it did not show.
+const SHOWN = 8;
 const neededBy = all.filter((s) => s.meta.requires.includes(meta.name));
-const sameFamily = all.filter((s) => s.meta.family === meta.family && s.meta.name !== meta.name);
+const family = all.filter((s) => s.meta.family === meta.family && s.meta.name !== meta.name);
 const detect = Object.entries(meta.detect);
 const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}/${meta.skill}/SKILL.md`;
+
+// grouped the way the file groups them, or one group when a skill has too few rules to bother
+const grouped = skill.ruleGroups.length
+  ? skill.ruleGroups.map((g) => ({ ...g, rules: skill.rules.filter((r) => r.group === g.name) }))
+  : [{ name: 'All rules', slug: 'all-rules', count: skill.rules.length, rules: skill.rules }];
 ---
 
 <Base
   title={meta.name}
   section="skills"
-  description={`${meta.rules.length} rules for ${meta.name}. What each one prevents, where it does not apply, and what was measured.`}
+  description={`${skill.rules.length} rules for ${meta.name}. What each one prevents, where it does not apply, and what was measured.`}
 >
   <div class="docs">
     <nav class="docs-rail" aria-label={meta.name}>
@@ -35,135 +44,284 @@ const source = `https://github.com/skyl-dev/skyl/blob/main/skills/${meta.family}
         <a class="rail-back" href="/skills">← All skills</a>
 
         <div class="rail-group">
-          <p class="rail-title">On this page</p>
+          <p class="rail-title">Rules</p>
           <ul>
-            {skill.parts.map((part) => (
+            {grouped.map((g) => (
+              <li><a href={`#${g.slug}`} data-rail={g.slug}>{g.name} · {g.count}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="rail-group">
+          <p class="rail-title">Reading it</p>
+          <ul>
+            {otherParts.map((part) => (
               <li>
-                <a href={`#${part.heading.toLowerCase()}`} data-rail={part.heading.toLowerCase()}>{part.heading}</a>
+                <a href={`#${part.heading.toLowerCase()}`} data-rail={part.heading.toLowerCase()}>
+                  {part.heading}
+                </a>
               </li>
             ))}
             {skill.references.length > 0 && <li><a href="#references" data-rail="references">References</a></li>}
             {skill.evidence && <li><a href="#evidence" data-rail="evidence">Evidence</a></li>}
+            <li><a href="#around" data-rail="around">Around this skill</a></li>
           </ul>
-        </div>
-
-        {detect.length > 0 && (
-          <div class="rail-group">
-            <p class="rail-title">Detected by</p>
-            {detect.map(([key, values]) => (
-              <div>
-                <p class="rail-sub">{key.replace(/_/g, ' ')}</p>
-                <ul class="rail-facts">{values.map((v) => <li class="detect-item">{v}</li>)}</ul>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {neededBy.length > 0 && (
-          <div class="rail-group">
-            <p class="rail-title">Required by</p>
-            <ul>
-              {neededBy.map((s) => <li><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.name}</a></li>)}
-            </ul>
-          </div>
-        )}
-
-        {sameFamily.length > 0 && (
-          <div class="rail-group">
-            <p class="rail-title">Composes with</p>
-            <ul>
-              {sameFamily.map((s) => <li><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.skill}</a></li>)}
-            </ul>
-          </div>
-        )}
-
-        <div class="rail-group">
-          <p class="rail-title">Source</p>
-          <ul><li><a href={source}>SKILL.md on GitHub</a></li></ul>
         </div>
       </div>
     </nav>
 
-  <article class="docs-main">
-    <header class="docs-head">
-      <p class="eyebrow"><a href="/skills" style="text-decoration: none;">skills</a> / {meta.family}</p>
-      <h1>{meta.skill}</h1>
-      <p class="docs-lede">{meta.description}</p>
+    <article class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow"><a href="/skills">skills</a> / {meta.family}</p>
+        <h1>{meta.skill}</h1>
+        <p class="docs-lede">{meta.description}</p>
 
-      <div style="display: flex; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-4) 0 1.5rem;">
-        <span class="chip solid">{meta.axis}</span>
-        <span class="chip">v{meta.version}</span>
-        <span class="chip">{skill.rulesCount.must} must</span>
-        {skill.rulesCount.should > 0 && <span class="chip">{skill.rulesCount.should} should</span>}
-        <span class="chip">~{tokens(meta.installableWords).toLocaleString()} tokens</span>
-        {meta.retired.length > 0 && <span class="chip">{meta.retired.length} retired</span>}
-      </div>
+        <div class="tags">
+          <span class="chip solid">{meta.axis}</span>
+          <span class="chip">v{meta.version}</span>
+          <span class="chip">{skill.rulesCount.must} must</span>
+          {skill.rulesCount.should > 0 && <span class="chip">{skill.rulesCount.should} should</span>}
+          <span class="chip">~{tokens(meta.installableWords).toLocaleString()} tokens</span>
+          {meta.retired.length > 0 && <span class="chip">{meta.retired.length} retired</span>}
+        </div>
 
-      <Command text={`npx skyl.dev add ${meta.name}`} />
+        <Command text={`npx skyl.dev add ${meta.name}`} />
 
-      {meta.requires.length > 0 && (
-        <p style="margin: 0.9rem 0 0; color: var(--ink-soft); font-size: var(--fs-meta);">
-          Installs {meta.requires.map((r) => <a href={`/skills/${r.replace('/', '/')}`}>{r}</a>)} with it, because a layer
-          that refers to its core reads wrong without it.
-        </p>
-      )}
-    </header>
+        {meta.requires.length > 0 && (
+          <p class="head-note">
+            Installs {meta.requires.map((r) => <a href={`/skills/${r}`}>{r}</a>)} with it, because a layer
+            that refers to its core reads wrong without it.
+          </p>
+        )}
+      </header>
 
-      <div>
-        {agentParts.map((part) => (
-          <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
-            <div style="display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 1.2rem;">
-              <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em;">{part.heading}</h2>
-              <span class="chip solid">installed</span>
+      <section id="rules">
+        <div class="part-head">
+          <h2>Rules</h2>
+          {installed.has('Rules') && <span class="chip solid">installed</span>}
+        </div>
+        {/* the preamble is four paragraphs of scope and priority, which matter and which nobody
+            arriving for a rule wants between them and the rules */}
+        <details class="fold wide">
+          <summary>Scope, priority, and when the whole skill does not apply</summary>
+          <div class="prose scroller" set:html={skill.rulesIntro} />
+        </details>
+
+        {grouped.map((group) => (
+          <>
+            <h3 class="group-rule" id={group.slug}>{group.name}</h3>
+            <div class="rules">
+              {group.rules.map((rule) => (
+                <details class="rule" id={rule.id}>
+                  <summary>
+                    <span class="rule-id">{rule.id}</span>
+                    <span class={`rule-mark ${rule.priority}`}>{rule.priority}</span>
+                    <span class="rule-say" set:html={rule.statement} />
+                  </summary>
+                  <div class="rule-more">
+                    {rule.why && <p><span class="rule-key">Why</span><span set:html={rule.why} /></p>}
+                    {rule.notWhen && <p><span class="rule-key">Not when</span><span set:html={rule.notWhen} /></p>}
+                  </div>
+                  <a class="rule-link" href={`#${rule.id}`} aria-label={`link to ${rule.id}`}>#</a>
+                </details>
+              ))}
             </div>
-            <div class="prose scroller" set:html={part.html} />
-          </section>
+          </>
         ))}
+      </section>
 
-        {humanParts.length > 0 && (
-          <div style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
-            <p class="eyebrow" style="margin-bottom: 2rem;">
-              below this line is for you, and is never sent to a model
+      {otherParts.map((part) => (
+        <section id={part.heading.toLowerCase()} class="part">
+          <div class="part-head">
+            <h2>{part.heading}</h2>
+            {installed.has(part.heading) && <span class="chip solid">installed</span>}
+          </div>
+          <div class="prose scroller" set:html={part.html} />
+        </section>
+      ))}
+
+      {skill.references.length > 0 && (
+        <section id="references" class="part">
+          <div class="part-head"><h2>References</h2></div>
+          <p class="part-say">Depth a rule points at, loaded only when the agent asks for it.</p>
+          {skill.references.map((reference) => (
+            <details class="fold">
+              <summary>{reference.title}</summary>
+              <div class="prose scroller" set:html={reference.html} />
+            </details>
+          ))}
+        </section>
+      )}
+
+      {skill.evidence && (
+        <section id="evidence" class="part">
+          <div class="part-head"><h2>Evidence</h2></div>
+          <div class="prose scroller" set:html={skill.evidence} />
+        </section>
+      )}
+
+      <section id="around" class="part">
+        <div class="part-head"><h2>Around this skill</h2></div>
+
+        <div class="around">
+          {detect.length > 0 && (
+            <div class="around-col">
+              <p class="rail-title">Loads when a project has</p>
+              {detect.map(([key, values]) => (
+                <div class="detect">
+                  <p class="rail-sub">{key.replace(/_/g, ' ')}</p>
+                  <ul class="rail-facts">{values.map((v) => <li class="detect-item">{v}</li>)}</ul>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div class="around-col">
+            <p class="rail-title">Needs</p>
+            {meta.requires.length > 0 ? (
+              <ul class="around-list">
+                {meta.requires.map((r) => <li><a href={`/skills/${r}`}>{r}</a></li>)}
+              </ul>
+            ) : (
+              <p class="part-say">Nothing. It stands on its own.</p>
+            )}
+
+            <p class="rail-title spaced">Needed by</p>
+            {neededBy.length > 0 ? (
+              <ul class="around-list">
+                {neededBy.slice(0, SHOWN).map((s) => (
+                  <li><a href={`/skills/${s.meta.family}/${s.meta.skill}`}>{s.meta.name}</a></li>
+                ))}
+                {neededBy.length > SHOWN && (
+                  <li class="more"><a href={`/skills#${meta.family}`}>and {neededBy.length - SHOWN} more</a></li>
+                )}
+              </ul>
+            ) : (
+              <p class="part-say">Nothing yet.</p>
+            )}
+          </div>
+
+          <div class="around-col">
+            <p class="rail-title">Composes with</p>
+            <p class="part-say">
+              Any skill a project matches, on any axis.{' '}
+              {family.length > 0 ? (
+                <a href={`/skills#${meta.family}`}>{family.length} more in {meta.family}</a>
+              ) : (
+                <a href="/skills">See the registry</a>
+              )}.
             </p>
-            {humanParts.map((part) => (
-              <section id={part.heading.toLowerCase()} style="margin-bottom: 3rem; scroll-margin-top: 5rem;">
-                <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 1.2rem;">{part.heading}</h2>
-                <div class="prose scroller" set:html={part.html} />
-              </section>
-            ))}
-          </div>
-        )}
 
-        {skill.references.length > 0 && (
-          <div id="references" style="border-top: 1px solid var(--rule); padding-top: 2.5rem; scroll-margin-top: 5rem;">
-            <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 0.5rem;">References</h2>
-            <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-bottom: 1.5rem;">
-              Depth a rule points at, loaded only when the agent asks for it.
-            </p>
-            {skill.references.map((reference) => (
-              <details style="border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; background: var(--raised);">
-                <summary style="cursor: pointer; font-size: var(--fs-ui);">{reference.title}</summary>
-                <div class="prose scroller" style="margin-top: 1.2rem;" set:html={reference.html} />
-              </details>
-            ))}
+            <p class="rail-title spaced">Source</p>
+            <ul class="around-list">
+              <li><a href={source}>SKILL.md on GitHub</a></li>
+              <li><a href="/spec">The format it follows</a></li>
+            </ul>
           </div>
-        )}
-
-        {skill.evidence && (
-          <div id="evidence" style="border-top: 1px solid var(--rule); padding-top: 2.5rem;">
-            <h2 style="font-size: var(--fs-h2); letter-spacing: -0.03em; margin-bottom: 1.2rem;">Evidence</h2>
-            <div class="prose scroller" set:html={skill.evidence} />
-          </div>
-        )}
-      </div>
-  </article>
+        </div>
+      </section>
+    </article>
   </div>
 </Base>
 
 <style is:global>
-  /* a coordinate breaks at its own separators or scrolls, never mid-word */
+  .tags { display: flex; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-4) 0 1.5rem; }
+  .head-note { margin: 0.9rem 0 0; color: var(--ink-soft); font-size: var(--fs-meta); }
+
+  .part { padding-top: var(--sp-7); }
+  #rules { padding-top: var(--sp-6); }
+  .part-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+  .part-head h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0; }
+  .part-say { color: var(--ink-faint); font-size: var(--fs-ui); margin: 0 0 var(--sp-4); max-width: 62ch; }
+
+  /*
+   * A rule is the unit someone arrives for, so it is an element rather than a bullet inside a
+   * block of markdown: its own anchor, its own link, its reasoning folded away. Set out in full
+   * the twenty-two rules of android/core ran seven screens, and the page held six ids, none of
+   * them a rule, so the one thing anyone would cite was the one thing that had no address.
+   */
+  .rules { display: grid; gap: 1px; margin-bottom: var(--sp-6); }
+  .rule {
+    position: relative; border: 1px solid transparent; border-radius: var(--r-sm);
+    transition: background 140ms, border-color 140ms;
+  }
+  .rule:hover, .rule[open] { background: var(--raised); border-color: var(--rule); }
+  .rule summary {
+    display: grid; grid-template-columns: 7rem 3.6rem minmax(0, 1fr); align-items: baseline;
+    gap: var(--sp-2); padding: 0.7rem 2rem 0.7rem 0.8rem; cursor: pointer; list-style: none;
+  }
+  .rule summary::-webkit-details-marker { display: none; }
+  .rule-id { font-size: var(--fs-ui); font-weight: 600; color: var(--ink); letter-spacing: 0.02em; }
+  .rule[open] .rule-id, .rule:target .rule-id { color: var(--accent); }
+  .rule-mark {
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-faint); justify-self: start;
+  }
+  .rule-mark.must { color: var(--gold); }
+  .rule-say { font-size: var(--fs-ui); line-height: 1.6; color: var(--ink-soft); }
+  .rule:hover .rule-say, .rule[open] .rule-say { color: var(--ink); }
+  .rule-say code, .rule-more code { background: var(--sunken); padding: 0.05em 0.3em; border-radius: var(--r-tiny); }
+
+  .rule-more {
+    padding: 0 2rem 0.9rem 0.8rem; display: grid; gap: 0.5rem;
+    margin-left: calc(7rem + 3.6rem + var(--sp-2) * 2);
+  }
+  .rule-more p { margin: 0; font-size: var(--fs-ui); line-height: 1.65; color: var(--ink-soft); max-width: 66ch; }
+  .rule-key {
+    display: inline-block; min-width: 5.5rem; color: var(--ink-faint);
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  /* a rule is citable: STATE-1 has a URL, and following one opens it */
+  .rule-link {
+    position: absolute; top: 0.7rem; right: 0.7rem; opacity: 0;
+    color: var(--ink-faint); text-decoration: none; font-size: var(--fs-ui);
+  }
+  .rule:hover .rule-link, .rule-link:focus-visible { opacity: 1; }
+  .rule-link:hover { color: var(--accent); }
+  .rule:target { border-color: var(--accent); }
+
+  .fold {
+    border: 1px solid var(--rule); border-radius: var(--radius); background: var(--raised);
+    padding: 0.9rem 1.1rem; margin-bottom: 0.6rem;
+  }
+  .fold summary { cursor: pointer; font-size: var(--fs-ui); }
+  .fold.wide { margin-bottom: var(--sp-5); }
+  .fold.wide .prose { font-size: var(--fs-ui); }
+  .fold .prose { margin-top: 1.2rem; }
+
+  .around { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-5); }
+  .around-col .rail-title { margin-bottom: var(--sp-2); }
+  .around-col .rail-title.spaced { margin-top: var(--sp-5); }
+  .around-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+  .around-list a {
+    display: block; font-size: var(--fs-ui); color: var(--ink-soft); text-decoration: none;
+    padding: 0.22rem 0 0.22rem 0.7rem; border-left: 2px solid var(--rule);
+    transition: color 160ms, border-color 160ms;
+  }
+  .around-list a:hover { color: var(--accent); border-color: var(--accent); }
+  .around-list .more a { color: var(--ink-faint); }
+  .detect { margin-bottom: var(--sp-3); }
+
+  /* a coordinate breaks at its own separators or wraps, never mid-word */
   .detect-item {
     font-size: var(--fs-meta); line-height: 1.5;
     word-break: normal; overflow-wrap: break-word; hyphens: none;
   }
+
+  @media (max-width: 720px) {
+    .rule summary { grid-template-columns: minmax(0, 1fr); gap: 0.3rem; }
+    .rule-more { margin-left: 0; }
+  }
 </style>
+
+<script>
+  // arriving at a rule's URL opens that rule, otherwise the link lands on a closed row
+  const open = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const rule = id ? document.getElementById(id) : null;
+    if (rule instanceof HTMLDetailsElement) rule.open = true;
+  };
+  open();
+  window.addEventListener('hashchange', open);
+</script>

@@ -43,14 +43,6 @@ const measured = family?.skills.filter((s) => s.evidence) ?? [];
             <li><a href="#matrix" data-rail="matrix">Model matrix</a></li>
           </ul>
         </div>
-        <div class="rail-group">
-          <p class="rail-title">Skills</p>
-          <ul>
-            {measured.map((skill) => (
-              <li><a href={`/skills/${skill.meta.family}/${skill.meta.skill}#evidence`}>{skill.meta.skill}</a></li>
-            ))}
-          </ul>
-        </div>
       </div>
     </nav>
 
