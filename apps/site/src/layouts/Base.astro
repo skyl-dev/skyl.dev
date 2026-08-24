@@ -135,17 +135,30 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
         .filter((item) => item.target);
 
       if (items.length) {
-        const LINE = 140; // just below the masthead: where a heading stops being ahead of you
         let marked = null;
 
+        /*
+         * Mark whichever section owns most of the screen.
+         *
+         * A fixed reading line cannot do this. Set just under the masthead it marks whatever has
+         * scrolled past, so on a page of long sections the rail said Security while the screen
+         * showed Build. Set halfway down it marks too early on a page whose sections are shorter
+         * than the offset, which is most of /docs. There is no one line that fits both, because
+         * the answer depends on how tall the sections are, so this measures instead: each item
+         * owns from its own heading to the next one, clipped to the viewport, and the widest span
+         * wins. The last section is short by definition, so the end of the page hands it the mark.
+         */
         const follow = () => {
+          const view = window.innerHeight;
           let current = items[0];
-          for (const item of items) {
-            if (item.target.getBoundingClientRect().top <= LINE) current = item;
+          let widest = -1;
+          for (let i = 0; i < items.length; i += 1) {
+            const top = items[i].target.getBoundingClientRect().top;
+            const next = items[i + 1]?.target.getBoundingClientRect().top ?? Infinity;
+            const seen = Math.min(view, next) - Math.max(0, top);
+            if (seen > widest) { widest = seen; current = items[i]; }
           }
-          // the last section is often too short to ever reach the line, so the end of the
-          // page hands it the mark rather than leaving it permanently unreachable
-          const bottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+          const bottom = window.scrollY + view >= document.documentElement.scrollHeight - 2;
           if (bottom) current = items[items.length - 1];
 
           if (current.link === marked) return;
