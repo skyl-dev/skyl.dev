@@ -5,6 +5,16 @@ import { AXIS_ORDER, loadFamilies, tokens } from '../../lib/registry.ts';
 const families = await loadFamilies();
 const total = families.reduce((n, f) => n + f.skills.length, 0);
 const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta.rules.length, 0), 0);
+
+// the axes a family actually has, in the canonical order, so a family's menu offers the
+// axes it can offer rather than all five with four of them dead
+const axesOf = (skills: { meta: { axis: string } }[]) =>
+  AXIS_ORDER.filter((axis) => skills.some((s) => s.meta.axis === axis)).map((axis) => ({
+    axis,
+    count: skills.filter((s) => s.meta.axis === axis).length,
+  }));
+
+const menu = families.map((family) => ({ ...family, axes: axesOf(family.skills) }));
 ---
 
 <Base
@@ -20,12 +30,35 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
         <div class="rail-group">
           <p class="rail-title">Family</p>
           <ul>
-            {families.map((family) => (
-              <li><a href={`#${family.name}`} data-rail={family.name}>{family.name} · {family.skills.length}</a></li>
+            <li><button class="pick" type="button" data-pick="all" data-on>all · {total}</button></li>
+            {menu.map((family) => (
+              <li>
+                <button class="pick" type="button" data-pick="family" data-family={family.name}>
+                  {family.name} · {family.skills.length}
+                </button>
+                <ul class="sub">
+                  {family.axes.map((a) => (
+                    <li>
+                      <button class="pick thin" type="button" data-pick="both" data-family={family.name} data-axis={a.axis}>
+                        {a.axis} · {a.count}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </li>
             ))}
           </ul>
         </div>
 
+        <div class="rail-group">
+          <p class="rail-title">Axis</p>
+          <ul>
+            <li><button class="pick" type="button" data-pick="axis" data-axis="" data-on>all</button></li>
+            {AXIS_ORDER.map((axis) => (
+              <li><button class="pick" type="button" data-pick="axis" data-axis={axis}>{axis}</button></li>
+            ))}
+          </ul>
+        </div>
       </div>
     </nav>
 
@@ -43,14 +76,7 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
           autocomplete="off"
         />
 
-        {/* a filter, not a destination, so it sits with the other filter rather than in a rail
-            that is otherwise this page's table of contents */}
-        <div class="axes">
-          <button class="axis-pick" type="button" data-axis="" data-on>all</button>
-          {AXIS_ORDER.map((axis) => (
-            <button class="axis-pick" type="button" data-axis={axis}>{axis}</button>
-          ))}
-        </div>
+        <p id="showing" class="showing"></p>
       </header>
 
   {families.map((family) => (
@@ -104,15 +130,21 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
     background: var(--raised); color: var(--ink);
   }
   #filter:focus { outline: none; border-color: var(--accent); }
-  .axes { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-top: var(--sp-3); }
-  .axis-pick {
-    font: inherit; font-size: var(--fs-micro); letter-spacing: 0.03em; text-transform: uppercase;
-    padding: 0.25rem 0.7rem; border-radius: var(--r-pill); cursor: pointer;
-    background: none; border: 1px solid var(--rule-strong); color: var(--ink-soft);
-    transition: color 140ms, border-color 140ms, background 140ms;
+  .showing { margin: var(--sp-3) 0 0; color: var(--ink-faint); font-size: var(--fs-meta); min-height: 1.2em; }
+
+  /* the rail on this page is a menu rather than a table of contents: the registry is one long
+     grid, and what a reader wants from the side of it is a way to cut it down */
+  .pick {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: var(--fs-ui);
+    background: none; border: 0; border-left: 2px solid var(--rule); cursor: pointer;
+    color: var(--ink-soft); padding: 0.22rem 0 0.22rem 0.7rem;
+    transition: color 160ms, border-color 160ms;
   }
-  .axis-pick:hover { color: var(--ink); border-color: var(--ink-faint); }
-  .axis-pick[data-on] { background: var(--accent); border-color: transparent; color: var(--accent-ink); font-weight: 600; }
+  .pick:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .pick[data-on] { color: var(--accent); border-color: var(--accent); }
+  .sub { list-style: none; margin: 0; padding: 0 0 0 0.7rem; display: grid; gap: 1px; }
+  .pick.thin { font-size: var(--fs-meta); color: var(--ink-faint); padding-left: 0.6rem; }
+  .pick.thin:hover, .pick.thin[data-on] { color: var(--accent); }
 </style>
 
 <script>
@@ -120,33 +152,59 @@ const rules = families.reduce((n, f) => n + f.skills.reduce((m, s) => m + s.meta
   // dozen skills a search index would be more code than the thing it indexes.
   const input = document.querySelector<HTMLInputElement>('#filter')!;
   const cards = [...document.querySelectorAll<HTMLElement>('.card[data-name]')];
-  const families = [...document.querySelectorAll<HTMLElement>('[data-family]')];
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.axis-pick')];
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-family]')];
+  const picks = [...document.querySelectorAll<HTMLButtonElement>('.pick')];
   const empty = document.querySelector<HTMLElement>('#empty')!;
-  let axis: string | null = null;
+  const showing = document.querySelector<HTMLElement>('#showing')!;
+
+  // an empty string on either is "all", which clears that dimension rather than filtering on it
+  let family = '';
+  let axis = '';
 
   function apply() {
     const term = input.value.trim().toLowerCase();
     let shown = 0;
     for (const card of cards) {
       const haystack = `${card.dataset.name} ${card.dataset.axis} ${card.dataset.detect}`.toLowerCase();
-      const hit = (term === '' || haystack.includes(term)) && (axis === null || card.dataset.axis === axis);
+      const hit =
+        (term === '' || haystack.includes(term)) &&
+        (family === '' || card.dataset.name!.split('/')[0] === family) &&
+        (axis === '' || card.dataset.axis === axis);
       card.hidden = !hit;
       if (hit) shown += 1;
     }
-    for (const family of families) {
-      family.hidden = [...family.querySelectorAll<HTMLElement>('.card')].every((c) => c.hidden);
+    for (const section of sections) {
+      section.hidden = [...section.querySelectorAll<HTMLElement>('.card')].every((c) => c.hidden);
     }
     empty.hidden = shown > 0;
+
+    // a filter that hides most of the page has to say so, or it reads as a smaller registry
+    const cut = [family && `family ${family}`, axis && `axis ${axis}`, term && `matching "${term}"`]
+      .filter(Boolean)
+      .join(', ');
+    showing.textContent = cut ? `${shown} of ${cards.length}: ${cut}` : '';
+
+    for (const pick of picks) {
+      const { pick: kind, family: f = '', axis: a = '' } = pick.dataset;
+      const on =
+        kind === 'all' ? family === '' && axis === ''
+        : kind === 'family' ? family === f && axis === ''
+        : kind === 'both' ? family === f && axis === a
+        : /* axis */ axis === a;
+      pick.toggleAttribute('data-on', on);
+    }
   }
 
   input.addEventListener('input', apply);
-  for (const chip of chips) {
-    chip.addEventListener('click', () => {
-      // an empty value is the "all" row, which clears rather than filters
-      axis = chip.dataset.axis === '' ? null : chip.dataset.axis!;
-      for (const c of chips) c.toggleAttribute('data-on', (c.dataset.axis || '') === (axis ?? ''));
+  for (const pick of picks) {
+    pick.addEventListener('click', () => {
+      const { pick: kind, family: f = '', axis: a = '' } = pick.dataset;
+      if (kind === 'all') { family = ''; axis = ''; }
+      else if (kind === 'family') { family = f; axis = ''; }
+      else if (kind === 'both') { family = f; axis = a; }
+      else { axis = a; }   // an axis on its own leaves the family filter where it was
       apply();
     });
   }
+  apply();
 </script>

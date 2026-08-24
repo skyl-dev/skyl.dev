@@ -259,7 +259,16 @@ footer.site a:hover { color: var(--accent); }
 
 /* ---------- prose ---------- */
 
-.prose { font-size: var(--fs-lead); font-weight: 420; line-height: 1.75; color: var(--ink); max-width: var(--measure); }
+/*
+ * The measure belongs to the text, not to the column.
+ *
+ * With it on the container, a code sample and a table were clamped to a comfortable reading
+ * line and then scrolled inside that, silently: the frontmatter example on /spec lost the
+ * right-hand end of four comment lines and gave no sign it had. A sample is read by scanning
+ * columns, not by reading lines, so it gets the whole width and says when there is more.
+ */
+.prose { font-size: var(--fs-lead); font-weight: 420; line-height: 1.75; color: var(--ink); }
+.prose > p, .prose > ul, .prose > ol, .prose > blockquote, .prose > h2, .prose > h3 { max-width: var(--measure); }
 .prose p { margin: 0 0 1.15em; }
 .prose strong { font-weight: 600; }
 /* no em sizing in here. Multiplying against the parent put four sizes on the page that
@@ -267,7 +276,7 @@ footer.site a:hover { color: var(--accent); }
    shrink applied twice), a heading holding code at 27.9. Mono carries a taller x-height than
    the serif, 0.55em against 0.512, so matching the size reads a touch larger and that is
    the right side to err on. */
-.prose code { background: var(--sunken); padding: 0.08em 0.3em; border-radius: var(--r-tiny); border: 1px solid var(--rule); }
+.prose code { background: var(--sunken); padding: 0.06em 0.32em; border-radius: var(--r-tiny); color: var(--ink); }
 /* markdown only ever reaches h2 and h3 here. h2 was never styled, so it fell to the browser
    default, 1.5em of the serif, and landed at 32.4px next to an h3 that is a 12.5px label. */
 .prose h2 {
@@ -282,7 +291,14 @@ footer.site a:hover { color: var(--accent); }
 .prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-ui); margin: 0 0 1.5em; }
 .prose th, .prose td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--fs-meta); }
-.prose pre { background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; font-size: var(--fs-body); line-height: 1.55; }
+.prose pre {
+  background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 1rem; overflow-x: auto; font-size: var(--fs-body); line-height: 1.55;
+  scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent;
+}
+.prose pre::-webkit-scrollbar { height: 8px; }
+.prose pre::-webkit-scrollbar-track { background: transparent; }
+.prose pre::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: var(--r-pill); }
 .prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 
 #toast {
@@ -305,7 +321,7 @@ footer.site a:hover { color: var(--accent); }
  * in a page, because a page-scoped global block is only bundled into that page and the
  * second page to use it silently gets no layout at all.
  */
-  .docs { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--sp-7); align-items: start; }
+  .docs { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
 
   /* The rail stays put and follows you down the page. It also has to fit: a registry page
      lists every family, a contributors page lists every person, and without a ceiling the

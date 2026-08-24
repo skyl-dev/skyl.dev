@@ -4,57 +4,84 @@ import Command from '../components/Command.astro';
 import { loadFamilies } from '../lib/registry.ts';
 
 const families = await loadFamilies();
+const total = families.reduce((n, f) => n + f.skills.length, 0);
 
 /**
- * One tool per tab, with the shortest honest path for each.
+ * The CLI first, then one section per tool.
  *
- * Claude Code has a real plugin marketplace, so there it is two lines and no terminal.
- * The rest read rules from a directory, so there it is one command that writes that
- * directory. Presenting a deeplink where none exists would be a nicer page and a worse
- * first five minutes.
+ * Everything below runs through the same command, so it is worth meeting once rather than
+ * five times in five slightly different forms. Claude Code has a real plugin marketplace,
+ * so there it is two lines and no terminal. The rest read rules from a directory, and the
+ * only thing that changes between them is which directory. Presenting a deeplink where
+ * none exists would be a nicer page and a worse first five minutes.
  */
 const TOOLS = [
   {
     id: 'claude',
     name: 'Claude Code',
     kind: 'Plugin marketplace',
+    writes: '.claude/skills/',
     steps: [
       { say: 'Add the marketplace, once per machine.', run: '/plugin marketplace add skyl-dev/skyl' },
       { say: 'Install the family you need.', run: '/plugin install skyl-android@skyl' },
     ],
     note: 'Runs inside Claude Code, no terminal. Updates arrive with /plugin marketplace update.',
-    also: 'The CLI works here too, and gives you the lockfile and per-project selection: npx skyl.dev scan',
+    also: 'The CLI works here too, and gives you the lockfile and per-project selection.',
   },
   {
     id: 'cursor',
     name: 'Cursor',
     kind: 'Rules directory',
+    writes: '.cursor/rules/',
     steps: [
       { say: 'Let it read the project and propose.', run: 'npx skyl.dev scan --target cursor' },
       { say: 'Or name the layers yourself.', run: 'npx skyl.dev add android/core kotlin compose --target cursor' },
     ],
-    note: 'Writes .cursor/rules/*.mdc with the frontmatter Cursor expects, so each rule stays scoped instead of always-on.',
+    note: 'Writes .mdc files with the frontmatter Cursor expects, so each rule stays scoped instead of always-on.',
   },
   {
     id: 'codex',
-    name: 'Codex and AGENTS.md',
+    name: 'Codex',
+    kind: 'Reads AGENTS.md',
+    writes: '.agents/skills/',
+    steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target agents' }],
+    note: 'Codex picks up the AGENTS.md convention, so it takes the same target as anything else that reads it. Nothing here is Codex-specific.',
+  },
+  {
+    id: 'agents',
+    name: 'AGENTS.md',
     kind: 'Open convention',
+    writes: '.agents/skills/',
     steps: [{ say: 'Write the shared convention.', run: 'npx skyl.dev scan --target agents' }],
-    note: 'Writes .agents/skills/. Any tool that reads the AGENTS.md convention picks these up, which is the vendor-neutral path.',
+    note: 'The vendor-neutral path. Any tool that reads AGENTS.md picks these up, and nothing in the files names a vendor.',
   },
   {
     id: 'windsurf',
     name: 'Windsurf',
     kind: 'Rules directory',
+    writes: '.windsurf/rules/',
     steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target windsurf' }],
-    note: 'Writes .windsurf/rules/.',
+    note: 'Writes plain markdown, one file per skill.',
   },
   {
     id: 'continue',
     name: 'Continue',
     kind: 'Rules directory',
+    writes: '.continue/rules/',
     steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target continue' }],
-    note: 'Writes .continue/rules/.',
+    note: 'Writes plain markdown, one file per skill.',
+  },
+  {
+    id: 'others',
+    name: 'Everything else',
+    kind: 'Any tool that reads markdown',
+    writes: '.agents/skills/',
+    steps: [{ say: 'Write the neutral directory, then point your tool at it.', run: 'npx skyl.dev add android/core --target agents' }],
+    note:
+      'A skill is a markdown file with a heading and a list of rules. There is nothing in it that ' +
+      'needs a particular tool, so a tool this page has never heard of reads the same files: write ' +
+      'them once and configure it to load that directory.',
+    also: 'If your tool wants its own directory or frontmatter, that is a target, and a target is about twenty lines. Open an issue on the CLI repo.',
   },
 ];
 ---
@@ -62,12 +89,20 @@ const TOOLS = [
 <Base
   title="install"
   section="install"
-  description="Install skyl skills into Claude Code, Cursor, Codex, Windsurf or Continue. One command, or two clicks."
+  description="Install skyl skills into Claude Code, Cursor, Codex, Windsurf, Continue, or anything that reads markdown."
 >
   <div class="docs">
-    <nav class="docs-rail" aria-label="tools">
+    <nav class="docs-rail" aria-label="install">
       <div class="rail-inner">
         <a class="rail-back" href="/skills">← Skills</a>
+
+        <div class="rail-group">
+          <p class="rail-title">Start</p>
+          <ul>
+            <li><a href="#cli" data-rail="cli">The CLI</a></li>
+          </ul>
+        </div>
+
         <div class="rail-group">
           <p class="rail-title">Your tool</p>
           <ul>
@@ -91,17 +126,43 @@ const TOOLS = [
         <p class="eyebrow">getting started</p>
         <h1>Install</h1>
         <p class="docs-lede">
-          Skills are plain markdown, so every tool that reads a rules directory can use them. Pick yours.
+          Skills are plain markdown, so every tool that reads a rules directory can use them. One
+          command writes them, and the only thing that changes per tool is where.
         </p>
       </header>
 
-      {/* one section per tool rather than one panel per tab: every tool is on the page, the
-          rail is the table of contents for it, and /install#cursor is a link you can send */}
+      <section class="tool" id="cli">
+        <div class="tool-head">
+          <h2>The CLI</h2>
+          <span class="chip">npm</span>
+        </div>
+        <ol class="steps-list">
+          <li>
+            <p>Run it without installing anything. This is the whole of it.</p>
+            <Command text="npx skyl.dev scan" />
+          </li>
+          <li>
+            <p>Or keep it around, if you will run it in more than one project.</p>
+            <Command text="npm i -g skyl.dev" />
+          </li>
+          <li>
+            <p>Name the layers yourself when you already know them.</p>
+            <Command text="skyl add android/core kotlin compose" />
+          </li>
+        </ol>
+        <p class="tool-note">
+          <code>scan</code> reads your build files, proposes the {total} skills that match, and writes
+          nothing until you say so. Every command takes <code>--target</code> to pick the tool, and
+          the full reference is on <a href="/docs">the docs page</a>.
+        </p>
+      </section>
+
       {TOOLS.map((tool) => (
         <section class="tool" id={tool.id}>
           <div class="tool-head">
             <h2>{tool.name}</h2>
             <span class="chip">{tool.kind}</span>
+            <span class="writes">writes <code>{tool.writes}</code></span>
           </div>
           <ol class="steps-list">
             {tool.steps.map((step) => (
@@ -136,7 +197,7 @@ const TOOLS = [
       <h3>Switching tools later</h3>
       <p>
         Run the same command with a different <code>--target</code>. The skills are the same files in
-        a different directory, so nothing is locked to one vendor. {families.length} family, {families[0]?.skills.length ?? 0} skills today.
+        a different directory, so nothing is locked to one vendor. {families.length} family, {total} skills today.
       </p>
     </div>
   </section>
@@ -149,8 +210,10 @@ const TOOLS = [
     margin-top: var(--sp-6); border: 1px solid var(--rule); border-radius: var(--r-lg);
     background: var(--raised); padding: 1.8rem; box-shadow: var(--shadow);
   }
-  .tool-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: 1.6rem; }
+  .tool-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: 1.6rem; flex-wrap: wrap; }
   .tool-head h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0; }
+  .writes { margin-left: auto; color: var(--ink-faint); font-size: var(--fs-meta); }
+  .writes code { color: var(--ink-soft); }
   .steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); counter-reset: step; }
   .steps-list li { counter-increment: step; position: relative; padding-left: 2.2rem; }
   .steps-list li::before {

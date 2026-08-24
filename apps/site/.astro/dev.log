@@ -5,3 +5,24 @@
 {"message":" astro  v7.1.6 ready in 631 ms\n┃ Local    http://localhost:4321/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
 {"message":"watching for file changes...","label":null,"level":"info"}
 {"message":"\n update  ▶ New version of Astro available: 7.2.4\n  Run pnpm dlx @astrojs/upgrade to update\n","label":"SKIP_FORMAT","level":"warn"}
+{"message":"[200] /docs 17ms","label":null,"level":"info"}
+{"message":"[200] /install 59ms","label":null,"level":"info"}
+{"message":"[200] /skills 7ms","label":null,"level":"info"}
+{"message":"[200] /install 4ms","label":null,"level":"info"}
+{"message":"[200] /how-it-works 7ms","label":null,"level":"info"}
+{"message":"[200] /starters 5ms","label":null,"level":"info"}
+{"message":"[200] /evidence 10ms","label":null,"level":"info"}
+{"message":"[200] /spec 14ms","label":null,"level":"info"}
+{"message":"src/pages/skills/index.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 7ms","label":null,"level":"info"}
+{"message":"src/pages/skills/index.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 6ms","label":null,"level":"info"}
+{"message":"/src/pages/install.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"[200] /spec 10ms","label":null,"level":"info"}
+{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
+{"message":"[200] /spec 6ms","label":null,"level":"info"}
+{"message":"[200] /spec 3ms","label":null,"level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/pages/spec.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}
+{"message":"/src/styles/base.css","label":"watch","level":"info"}
+{"message":"/src/pages/spec.astro?astro&type=style&index=0&lang.css","label":"watch","level":"info"}

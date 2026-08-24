@@ -45,6 +45,14 @@ const STARTERS = [
   },
 ];
 
+const slug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+// a starter belongs to whichever families its picks come from, which is how it gets filtered
+// alongside the registry rather than being a separate idea of what a family is
+const familiesOf = (picks: string[]) => [...new Set(picks.map((p) => p.split('/')[0]!))].sort();
+const FAMILIES = [...new Set(STARTERS.flatMap((s) => familiesOf(s.picks)))].sort();
+const countIn = (family: string) => STARTERS.filter((s) => familiesOf(s.picks).includes(family)).length;
+
 function summarise(picks: string[]) {
   const chosen = picks.map((p) => byName.get(p)).filter(Boolean);
   return {
@@ -67,10 +75,24 @@ const command = (picks: string[]) =>
       <div class="rail-inner">
         <a class="rail-back" href="/#pick">← Compose your own</a>
         <div class="rail-group">
+          <p class="rail-title">Family</p>
+          <ul>
+            <li><button class="pick" type="button" data-family="" data-on>all · {STARTERS.length}</button></li>
+            {FAMILIES.map((family) => (
+              <li>
+                <button class="pick" type="button" data-family={family}>{family} · {countIn(family)}</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="rail-group">
           <p class="rail-title">Shapes</p>
           <ul>
             {STARTERS.map((starter) => (
-              <li><a href={`#${starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} data-rail={starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}>{starter.title}</a></li>
+              <li data-shape={slug(starter.title)}>
+                <a href={`#${slug(starter.title)}`} data-rail={slug(starter.title)}>{starter.title}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -91,7 +113,11 @@ const command = (picks: string[]) =>
     {STARTERS.map((starter) => {
       const stat = summarise(starter.picks);
       return (
-        <article id={starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')} style="scroll-margin-top: 5rem; border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;">
+        <article
+          id={slug(starter.title)}
+          data-families={familiesOf(starter.picks).join(' ')}
+          style="scroll-margin-top: 5rem; border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;"
+        >
           <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
             <h2 style="font-size: var(--fs-h3);">{starter.title}</h2>
             <span class="chip">{starter.picks.length} skills</span>
@@ -106,9 +132,42 @@ const command = (picks: string[]) =>
   </div>
 
   <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-top: 2rem;">
-    One family so far. A preset for a stack whose skills do not exist yet would be a list of things
-      you cannot install, so there is not one.
+    {FAMILIES.length === 1 ? 'One family so far.' : `${FAMILIES.length} families.`} A preset for a stack
+      whose skills do not exist yet would be a list of things you cannot install, so there is not one.
       </p>
     </div>
   </div>
 </Base>
+
+<style is:global>
+  .pick {
+    display: block; width: 100%; text-align: left; font: inherit; font-size: var(--fs-ui);
+    background: none; border: 0; border-left: 2px solid var(--rule); cursor: pointer;
+    color: var(--ink-soft); padding: 0.22rem 0 0.22rem 0.7rem;
+    transition: color 160ms, border-color 160ms;
+  }
+  .pick:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .pick[data-on] { color: var(--accent); border-color: var(--accent); }
+</style>
+
+<script>
+  // the shapes list is the table of contents and the family menu cuts it down, so both have
+  // to move together: a rail entry pointing at a hidden card is a link to nowhere
+  const picks = [...document.querySelectorAll<HTMLButtonElement>('.pick')];
+  const cards = [...document.querySelectorAll<HTMLElement>('article[data-families]')];
+  const entries = [...document.querySelectorAll<HTMLElement>('[data-shape]')];
+
+  function apply(family: string) {
+    for (const card of cards) {
+      const shown = family === '' || card.dataset.families!.split(' ').includes(family);
+      card.hidden = !shown;
+      const entry = entries.find((e) => e.dataset.shape === card.id);
+      if (entry) entry.hidden = !shown;
+    }
+    for (const pick of picks) pick.toggleAttribute('data-on', (pick.dataset.family ?? '') === family);
+  }
+
+  for (const pick of picks) {
+    pick.addEventListener('click', () => apply(pick.dataset.family ?? ''));
+  }
+</script>
