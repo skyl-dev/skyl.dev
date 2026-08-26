@@ -131,7 +131,11 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
           <p class="eyebrow">Project</p>
           <a href="/about">About</a>
           <a href="/contact">Contact</a>
-          <a href="https://github.com/skyl-dev/skyl.dev/releases">Releases</a>
+          {/* the CLI's releases, said as such. The registry has no releases and should not:
+              each skill carries its own version and they move independently, so there is no
+              honest answer to what version the registry is at. A bare "Releases" on a registry
+              site reads as the registry's. */}
+          <a href="https://github.com/skyl-dev/skyl.dev/releases">CLI releases</a>
           <a href="https://github.com/skyl-dev/skyl.dev/blob/main/LICENSE">MIT licence</a>
         </div>
 
