@@ -8,7 +8,16 @@ interface Props {
   section?: string;
 }
 const { title, description, section } = Astro.props;
-const path = Astro.url.pathname;
+/*
+ * The canonical URL, without the `.html` the build format puts in the path.
+ *
+ * `build.format: 'file'` means a page is written as `skills.html`, and Astro.url.pathname is
+ * therefore `/skills.html`. Declaring that as canonical named a URL that answers 308 and
+ * redirects to `/skills`, on every page: a canonical pointing at a redirect is worse than no
+ * canonical, because it is a confident wrong answer about which URL is the real one.
+ */
+const path = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html$/, '') || '/';
+const canonical = new URL(path, Astro.site);
 
 const NAV = [
   // what someone came for first, then how to get it, then the explanation
@@ -30,7 +39,8 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{full}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={full} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

@@ -1,0 +1,7 @@
+# Everything here is public and meant to be found: the skills, the format they are written
+# in, and the evidence behind each rule. Nothing is gated and nothing is generated per
+# visitor, so there is nothing a crawler can reach that a reader cannot.
+User-agent: *
+Allow: /
+
+Sitemap: https://skyl.dev/sitemap.xml
