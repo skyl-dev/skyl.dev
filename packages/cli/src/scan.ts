@@ -11,10 +11,16 @@ import type { ProjectSignals } from '@skyl/core';
  * why `scan` proposes and never installs on its own.
  */
 
-const SKIP = new Set(['node_modules', 'build', '.git', '.gradle', '.idea', 'dist', 'out', '.kotlin']);
+const SKIP = new Set([
+  'node_modules', 'build', '.git', '.gradle', '.idea', 'dist', 'out', '.kotlin',
+  // a build output full of copied package.json files reads as a hundred dependencies the
+  // project does not declare
+  '.next', '.nuxt', '.svelte-kit', '.output', '.turbo', 'coverage', 'vendor',
+]);
 const MAX_DEPTH = 6;
 const BUILD_FILES = ['build.gradle.kts', 'build.gradle', 'settings.gradle.kts', 'settings.gradle'];
 const CATALOGS = ['libs.versions.toml'];
+const MANIFESTS = ['package.json'];
 
 async function walk(root: string, depth = 0, acc: string[] = []): Promise<string[]> {
   if (depth > MAX_DEPTH) return acc;
@@ -52,6 +58,7 @@ export async function scanProject(root: string): Promise<ProjectSignals> {
   const manifestElements = new Set<string>();
   const manifestAttributes = new Set<string>();
   const properties = new Set<string>();
+  const packages = new Set<string>();
 
   for (const f of files) {
     const name = f.split(sep).pop()!;
@@ -59,7 +66,8 @@ export async function scanProject(root: string): Promise<ProjectSignals> {
     const isCatalog = CATALOGS.includes(name);
     const isManifest = name === 'AndroidManifest.xml';
     const isProps = name === 'gradle.properties';
-    if (!isBuild && !isCatalog && !isManifest && !isProps) continue;
+    const isPackage = MANIFESTS.includes(name);
+    if (!isBuild && !isCatalog && !isManifest && !isProps && !isPackage) continue;
 
     let text: string;
     try { text = await readFile(f, 'utf8'); } catch { continue; }
@@ -75,6 +83,33 @@ export async function scanProject(root: string): Promise<ProjectSignals> {
       for (const m of text.matchAll(/<([a-zA-Z-]+)[\s>]/g)) manifestElements.add(m[1]!);
       for (const m of text.matchAll(/\s(android:[\w]+)\s*=/g)) manifestAttributes.add(m[1]!);
     }
+    /*
+     * package.json, for anything with an npm dependency graph.
+     *
+     * Parsed rather than pattern-matched, because a regex over this file cannot tell a
+     * dependency from a script that mentions one, and the file is JSON so there is no
+     * reason to guess. A malformed one is skipped rather than failing the scan: `scan`
+     * runs on projects that do not currently build, which is half its value.
+     *
+     * `dependencies` and `devDependencies` both count. A tool in devDependencies is a tool
+     * the project uses, and the coordinate strategy compares names exactly, so `@types/react`
+     * does not drag in `react`.
+     *
+     * `peerDependencies` deliberately does not: it is what a library asks of its consumer,
+     * not what this project uses.
+     */
+    if (isPackage) {
+      let json: unknown;
+      try { json = JSON.parse(text); } catch { continue; }
+      if (typeof json !== 'object' || json === null) continue;
+      const manifest = json as Record<string, unknown>;
+      for (const field of ['dependencies', 'devDependencies']) {
+        const block = manifest[field];
+        if (typeof block !== 'object' || block === null) continue;
+        for (const dep of Object.keys(block)) packages.add(dep);
+      }
+    }
+
     if (isProps) {
       for (const line of text.split('\n')) {
         const eq = line.indexOf('=');
@@ -90,5 +125,6 @@ export async function scanProject(root: string): Promise<ProjectSignals> {
     manifest_element: [...manifestElements],
     manifest_attribute: [...manifestAttributes],
     gradle_property: [...properties],
+    npm_dependency: [...packages],
   };
 }

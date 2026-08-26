@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { matches } from '@skyl/core';
 import { scanProject } from '../src/scan.ts';
 import { run } from '../src/cli.ts';
 
@@ -38,6 +39,64 @@ test('the scanner reads dependencies, plugins and manifest facts without buildin
   assert.ok(s['gradle_plugin']?.includes('org.jetbrains.kotlin.android'));
   assert.ok(s['manifest_element']?.includes('uses-permission'));
   assert.ok(s['file']?.some((f) => f.endsWith('Main.kt')));
+});
+
+async function webProject(): Promise<string> {
+  const root = await mkdtemp(join(tmpdir(), 'skyl-web-'));
+  await mkdir(join(root, 'node_modules/react'), { recursive: true });
+  await mkdir(join(root, 'packages/ui'), { recursive: true });
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    name: 'shop',
+    dependencies: { react: '^19.0.0', next: '15.1.0', '@tanstack/react-query': '^5.0.0' },
+    devDependencies: { typescript: '^5.7.2', vitest: '^2.0.0' },
+    peerDependencies: { 'some-host': '*' },
+    scripts: { build: 'next build' },
+  }));
+  // a workspace member, which is the shape that makes unioning a real decision
+  await writeFile(join(root, 'packages/ui/package.json'), JSON.stringify({
+    name: '@shop/ui', dependencies: { svelte: '^5.0.0' },
+  }));
+  // build output and installed packages both carry package.json files that are not the
+  // project's declarations
+  await writeFile(join(root, 'node_modules/react/package.json'), JSON.stringify({
+    name: 'react', dependencies: { 'loose-envify': '^1.1.0' },
+  }));
+  return root;
+}
+
+test('the scanner reads npm dependencies out of package.json', async () => {
+  const root = await webProject();
+  const s = await scanProject(root);
+  const found = s['npm_dependency'] ?? [];
+  for (const want of ['react', 'next', '@tanstack/react-query', 'typescript', 'vitest']) {
+    assert.ok(found.includes(want), `${want} should be detected`);
+  }
+});
+
+test('a workspace member contributes, node_modules and peer dependencies do not', async () => {
+  const root = await webProject();
+  const found = (await scanProject(root))['npm_dependency'] ?? [];
+  assert.ok(found.includes('svelte'), 'a workspace member declares for the repository');
+  assert.ok(!found.includes('loose-envify'), 'node_modules is not the project');
+  assert.ok(!found.includes('some-host'), 'a peer dependency is what a library asks of its consumer');
+});
+
+test('a malformed package.json is skipped rather than failing the scan', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'skyl-bad-'));
+  await writeFile(join(root, 'package.json'), '{ "dependencies": { "react": ');
+  const s = await scanProject(root);
+  assert.deepEqual(s['npm_dependency'], [], 'no dependencies, and no throw');
+});
+
+test('an npm name is matched exactly, so a scoped type package is not its runtime', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'skyl-types-'));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    devDependencies: { '@types/react': '^19.0.0' },
+  }));
+  const found = (await scanProject(root))['npm_dependency'] ?? [];
+  assert.deepEqual(found, ['@types/react']);
+  assert.ok(!matches('npm_dependency', 'react', '@types/react'), '@types/react is not react');
+  assert.ok(matches('npm_dependency', 'react', 'react'));
 });
 
 test('a test-only dependency does not drag in the library it tests', async () => {

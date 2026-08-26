@@ -17,8 +17,21 @@ export async function scan(opts: ScanOptions): Promise<number> {
   const matched = detect(skills, signals);
 
   if (matched.length === 0) {
+    // --json means JSON on every path. Printing prose here made the empty result the one
+    // shape a script could not parse, which is the result it will hit most often while the
+    // registry covers one family.
+    if (opts.json) {
+      out(JSON.stringify({ detected: [], install: [], families: [...new Set(skills.map((s) => s.family))] }, null, 2));
+      return 0;
+    }
+    // read from the registry rather than written down, because the sentence naming one
+    // family was going to outlive the registry having one
+    const families = [...new Set(skills.map((s) => s.family))].sort();
+    const covers = families.length === 1
+      ? `Skyl covers ${families[0]} so far. If that is what this is`
+      : `Skyl covers ${families.slice(0, -1).join(', ')} and ${families.at(-1)}. If this is one of those`;
     out(`${yellow('Nothing detected.')} No skill in the registry matches this project.`);
-    out(dim('  Skyl currently covers Android. If this is an Android project, please open an issue.'));
+    out(dim(`  ${covers}, please open an issue.`));
     return 0;
   }
 
