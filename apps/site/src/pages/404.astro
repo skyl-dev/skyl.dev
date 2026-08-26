@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadFamilies, loadSkills } from '../lib/registry.ts';
+
+/**
+ * The page for a URL that is not here.
+ *
+ * Worth building rather than leaving to the host's default, because most of the ways to
+ * arrive at one are a near miss: a skill that was renamed, a family someone guessed at, a
+ * rule id typed from memory. The registry knows what does exist, so the page says so
+ * instead of stopping at the word "not found".
+ */
+const skills = await loadSkills();
+const families = await loadFamilies();
+---
+
+<Base
+  title="not found"
+  description="That page is not here. What the registry does hold, and where to look for it."
+>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="not found">
+      <div class="rail-inner">
+        <a class="rail-back" href="/">← Home</a>
+        <div class="rail-group">
+          <p class="rail-title">Try</p>
+          <ul>
+            <li><a href="/skills">All {skills.length} skills</a></li>
+            <li><a href="/install">Install</a></li>
+            <li><a href="/docs">Commands</a></li>
+            <li><a href="/spec">The format</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">404</p>
+        <h1>That page is not here</h1>
+        <p class="docs-lede">
+          A skill URL is <code>/skills/family/name</code>. If you were after one that has moved,
+          the registry below is the whole of it.
+        </p>
+      </header>
+
+      <section class="lost">
+        {families.map((family) => (
+          <div class="lost-family">
+            <p class="group-rule"><span>{family.name} · {family.skills.length}</span></p>
+            <ul class="lost-list">
+              {family.skills.map((skill) => (
+                <li><a href={`/skills/${skill.meta.family}/${skill.meta.skill}`}>{skill.meta.skill}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+
+      <p class="lost-say">
+        Still nothing? The pages are generated from
+        <a href="https://github.com/skyl-dev/skyl">the registry</a>, so a link that is broken here
+        is worth <a href="https://github.com/skyl-dev/skyl.dev/issues">an issue</a>.
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  .lost { margin-top: var(--sp-6); }
+  .lost-family { margin-bottom: var(--sp-5); }
+  .lost-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: var(--sp-1);
+  }
+  .lost-list a {
+    display: block; font-size: var(--fs-ui); color: var(--ink-soft); text-decoration: none;
+    padding: 0.22rem 0 0.22rem 0.7rem; border-left: 2px solid var(--rule);
+    transition: color 160ms, border-color 160ms;
+  }
+  .lost-list a:hover { color: var(--accent); border-color: var(--accent); }
+  .lost-say { color: var(--ink-faint); font-size: var(--fs-ui); margin-top: var(--sp-6); max-width: 60ch; }
+</style>

@@ -100,29 +100,43 @@ its build info said the output was current.
 
 ## Deploying the site
 
-Cloudflare Pages, connected to this repository. The one thing that is not obvious: the site
-renders a sibling checkout of the registry, and a Pages build only ever has this repository, so
-the build command fetches one and points `SKYL_REGISTRY` at it.
+A Cloudflare Worker serving static assets, configured in `wrangler.jsonc`.
+
+A Worker rather than Pages for one reason that cannot be undone afterwards: a Pages project
+is either direct upload or Git connected, and Cloudflare's own documentation says the first
+cannot become the second. Deploying Pages from a terminal would rule out ever deploying it from
+a push. Workers Builds attaches to a Worker that already exists, so the two are not exclusive.
+
+From a terminal:
+
+```
+pnpm build                       @skyl/core, which the site imports through its package exports
+pnpm --filter @skyl/site build   the pages
+npx wrangler deploy              the assets in apps/site/dist
+```
+
+From a push, once the repository is connected under the Worker's Builds settings:
 
 ```
 build command      git clone --depth 1 https://github.com/skyl-dev/skyl.git .registry \
                      && pnpm install --frozen-lockfile \
                      && pnpm build \
                      && pnpm --filter @skyl/site build
-output directory   apps/site/dist
-root directory     /
+deploy command     npx wrangler deploy
 environment        SKYL_REGISTRY = /opt/buildhome/repo/.registry
 ```
 
-`pnpm build` before the site build is not optional: the site imports `@skyl/core` through its
-package exports, which point at `dist`.
+The one part that is not obvious: the site renders a sibling checkout of the registry, and a
+build started from this repository only ever has this repository. `SKYL_REGISTRY` exists for
+exactly that, so the build fetches the registry itself. It is cloned rather than submoduled so
+that publishing a skill stays one commit in one repository.
 
-Node comes from `.node-version`. The registry is cloned rather than submoduled so that publishing
-a skill stays one commit in one repository.
+Node comes from `.node-version`, because the default build image is older than Astro wants and
+the failure that produces names a syntax error rather than a version.
 
-A push here redeploys. A push to the registry does not, because Pages only watches this
-repository, so the registry repo calls a deploy hook instead. The site is a rendering of the
-registry and has to move when it does.
+A push here redeploys. A push to the registry does not, because a build watches this repository
+only, so the registry repo calls a deploy hook. The site is a rendering of the registry and has
+to move when it does.
 
 ## Status
 
