@@ -1,0 +1,245 @@
+---
+import Base from '../layouts/Base.astro';
+import { evidenceFacts, loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
+
+/**
+ * What this is and who is accountable for it.
+ *
+ * Distinct from /how-it-works, which is the mechanism, and from /evidence, which is the
+ * proof. This is the project: what problem it answers, what it refuses to do, what it
+ * costs, and who to blame. Every number on it is read out of the registry, so the page
+ * cannot claim a scale the registry does not have.
+ */
+const skills = await loadSkills();
+const families = await loadFamilies();
+const facts = await evidenceFacts(families[0]?.name ?? 'android');
+
+const rules = skills.reduce((n, s) => n + s.meta.rules.length, 0);
+const everything = tokens(skills.reduce((n, s) => n + s.meta.installableWords, 0));
+const authors = [...new Set(skills.flatMap((s) => s.meta.authors))];
+
+const CLAIMS = [
+  {
+    q: 'What it is',
+    a: `A registry of rules for AI coding agents, split along five axes so a project loads the
+        intersection that applies to it. ${skills.length} skills and ${rules} rules today, all of
+        them Android, which is one family of an intended many.`,
+  },
+  {
+    q: 'What problem it answers',
+    a: `Most published agent skills are one large file covering a whole domain, so most of what
+        they contain is irrelevant to any given project and is paid for in context on every
+        request. Loading all ${skills.length} of these costs about ${everything.toLocaleString()}
+        tokens. A real project loads four or five of them.`,
+  },
+  {
+    q: 'What makes a rule admissible',
+    a: `That a model gets it wrong without being told. Not that it is true: most published skill
+        content is true. Every rule here was put in front of a model that had not been told it,
+        and kept only if that model got it wrong.`,
+  },
+  {
+    q: 'What that costs',
+    a: `17 rules have been removed because a control arm already did the right thing unprompted.
+        Retiring rules is the load-bearing part: a rule a model already follows spends context and
+        buys nothing, and as models improve, more of them expire.`,
+  },
+];
+---
+
+<Base
+  title="about"
+  section="about"
+  description="What Skyl is, what it refuses to do, what it costs, and who is accountable for it."
+>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="about">
+      <div class="rail-inner">
+        <a class="rail-back" href="/">← Home</a>
+        <div class="rail-group">
+          <p class="rail-title">On this page</p>
+          <ul>
+            <li><a href="#what" data-rail="what">What it is</a></li>
+            <li><a href="#bar" data-rail="bar">The bar</a></li>
+            <li><a href="#refuses" data-rail="refuses">What it will not do</a></li>
+            <li><a href="#costs" data-rail="costs">What it costs you</a></li>
+            <li><a href="#who" data-rail="who">Who made it</a></li>
+            <li><a href="#state" data-rail="state">Where it is</a></li>
+          </ul>
+        </div>
+        <div class="rail-group">
+          <p class="rail-title">Facts</p>
+          <ul class="rail-facts">
+            <li>{skills.length} skills, {rules} rules</li>
+            <li>{facts['evals'] ?? '26'} evals, {facts['recorded runs'] ?? '490'} runs</li>
+            <li>17 rules retired</li>
+            <li>MIT licensed</li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">the project</p>
+        <h1>About Skyl</h1>
+        <p class="docs-lede">
+          <strong>skyl</strong>, like <em>skill</em>. A composable registry of rules for AI coding
+          agents, where every rule had to earn its place by measurement rather than by sounding
+          right.
+        </p>
+      </header>
+
+      <section id="what" class="ab">
+        <h2>What it is</h2>
+        {CLAIMS.map((c) => (
+          <div class="ab-pair">
+            <p class="ab-q">{c.q}</p>
+            <p class="ab-a">{c.a}</p>
+          </div>
+        ))}
+        <p class="ab-more">
+          The mechanism is on <a href="/how-it-works">how it works</a>, the format on{' '}
+          <a href="/spec">the spec</a>, and what was actually run on <a href="/evidence">evidence</a>.
+        </p>
+      </section>
+
+      <section id="bar" class="ab">
+        <h2>The bar</h2>
+        <p>
+          A rule ships only if it passes four tests, in order. Three of them are ways of saying no.
+        </p>
+        <ol class="ab-tests">
+          <li><strong>Does the model get this wrong unprompted?</strong> If it already does the right
+            thing, the rule displaces one that would have worked.</li>
+          <li><strong>Does a linter or the compiler already catch it?</strong> Then it is not the
+            agent's problem.</li>
+          <li><strong>Would 900 of 1000 projects hit it?</strong> Interesting is not the bar.</li>
+          <li><strong>Is it checkable at every token, or an action deferred to later?</strong>{' '}
+            Deferred actions are not rules, which is why there are no checklists here.</li>
+        </ol>
+        <p class="ab-finding">
+          <strong>The finding that shapes everything:</strong> corpus support is an{' '}
+          <em>anti-signal</em>. The more repositories that document a practice, the more likely a
+          model already follows it, because the corpus and the training data are the same material.
+          Rules drawn from what everyone writes down measure nothing. Every confirmed result here
+          came from a control arm or a primary source, never from how often a practice appears in
+          public code.
+        </p>
+      </section>
+
+      <section id="refuses" class="ab">
+        <h2>What it will not do</h2>
+        <ul class="ab-nots">
+          <li><strong>Install anything without asking.</strong> Every command prints what it would
+            write first. <code>--yes</code> exists for scripts that already know.</li>
+          <li><strong>Ship a rule nobody can check.</strong> An instruction a reader cannot hold
+            against a file and answer yes or no is not admitted.</li>
+          <li><strong>Ship a rule with no boundary.</strong> Every rule says where it stops
+            applying. Their absence is what turns a rules file into a nitpick generator.</li>
+          <li><strong>Keep a rule because it was expensive to write.</strong> A control arm that
+            already does the right thing retires it, and 17 have gone that way.</li>
+          <li><strong>Send the reasoning to your model.</strong> The why, the pitfalls and the
+            evidence stay in the registry for you to read. Only the rules are installed.</li>
+        </ul>
+      </section>
+
+      <section id="costs" class="ab">
+        <h2>What it costs you</h2>
+        <p>
+          Nothing, and there is no account. Both repositories are MIT licensed and the CLI is on
+          npm.
+        </p>
+        <ul class="ab-nots">
+          <li><strong>No telemetry.</strong> The CLI makes exactly one network request, to{' '}
+            <code>skyl.dev/registry.json</code>, and only when you pass <code>--refresh</code> or
+            have no bundled copy. There is no analytics anywhere in it.</li>
+          <li><strong>No account, no key.</strong> Nothing here authenticates you, so there is
+            nothing to sign up for and nothing to leak.</li>
+          <li><strong>This site runs no analytics.</strong> It loads a webfont from Google Fonts,
+            which is the only third party a page here talks to. Everything else is served from this
+            domain.</li>
+          <li><strong>Context, which is the real price.</strong> Each skill states its token cost
+            before you install it, and <code>skyl list</code> tells you what you are carrying.</li>
+        </ul>
+      </section>
+
+      <section id="who" class="ab">
+        <h2>Who made it</h2>
+        <p>
+          {authors.length === 1
+            ? `One person, ${authors[0]}, who is named on every skill file and accountable for it.`
+            : `${authors.length} people, each named on the skills they wrote.`}
+          Skills carry their author in the file, and <a href="/contributors">contributors</a> lists
+          who wrote what.
+        </p>
+        <p>
+          The most useful thing you can do here is <strong>prove a rule wrong</strong>. Every rule is
+          a falsifiable claim that a model fails without it. If you have a control run where the
+          model already does the right thing, that rule should go, and 17 have gone exactly that
+          way. <a href="/contact">How to send one</a>.
+        </p>
+      </section>
+
+      <section id="state" class="ab">
+        <h2>Where it is</h2>
+        <p>
+          <strong>Pre-alpha.</strong> One family is published and measured. The spec is being written
+          from it rather than ahead of it, so it describes what exists rather than what is planned.
+        </p>
+        <p>
+          Skill content is versioned and the CLI records a hash of what it wrote, so an upgrade is a
+          diff you can read rather than a surprise. What is not stable is the shape of the registry
+          itself: axes, family naming, and how a service layer composes are all still moving.
+        </p>
+        <div class="ab-links">
+          <a class="card" href="https://github.com/skyl-dev/skyl">
+            <strong>Registry</strong>
+            <span>The skills, the spec and the evidence.</span>
+          </a>
+          <a class="card" href="https://github.com/skyl-dev/skyl.dev">
+            <strong>Site and CLI</strong>
+            <span>This site, and the command that installs from it.</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  .ab { margin-top: var(--sp-7); }
+  .ab h2 { font-size: var(--fs-h2); letter-spacing: -0.03em; margin: 0 0 var(--sp-4); }
+  .ab p { color: var(--ink-soft); font-size: var(--fs-body); line-height: 1.7; max-width: var(--measure); }
+  .ab strong { color: var(--ink); font-weight: 600; }
+
+  /* a question and its answer, rather than a heading and a paragraph: the questions are the
+     ones people actually arrive with, and a reader scanning them should be able to stop */
+  .ab-pair { border-left: 2px solid var(--rule); padding-left: var(--sp-4); margin: 0 0 var(--sp-5); }
+  .ab-q {
+    font-size: var(--fs-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.11em;
+    color: var(--ink-faint); margin: 0 0 var(--sp-2);
+  }
+  .ab-a { margin: 0; }
+
+  .ab-tests { margin: 0 0 var(--sp-5); padding-left: 1.3em; max-width: var(--measure); }
+  .ab-tests li { color: var(--ink-soft); font-size: var(--fs-body); line-height: 1.7; margin-bottom: var(--sp-3); }
+  .ab-tests li::marker { color: var(--accent); font-weight: 600; }
+
+  .ab-finding {
+    background: var(--sunken); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: var(--sp-4); max-width: var(--measure);
+  }
+
+  .ab-nots { list-style: none; margin: var(--sp-4) 0 0; padding: 0; max-width: var(--measure); }
+  .ab-nots li {
+    color: var(--ink-soft); font-size: var(--fs-body); line-height: 1.7;
+    padding: 0 0 var(--sp-3) var(--sp-4); border-left: 2px solid var(--rule); margin-bottom: var(--sp-3);
+  }
+  .ab-nots code { background: var(--sunken); padding: 0.06em 0.32em; border-radius: var(--r-tiny); color: var(--ink); }
+
+  .ab-more { color: var(--ink-faint) !important; font-size: var(--fs-ui) !important; }
+  .ab-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--sp-3); margin-top: var(--sp-5); }
+  .ab-links .card strong { display: block; margin-bottom: var(--sp-1); }
+  .ab-links .card span { color: var(--ink-faint); font-size: var(--fs-ui); }
+</style>

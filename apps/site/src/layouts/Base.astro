@@ -28,6 +28,7 @@ const NAV = [
   { href: '/starters', label: 'Starters', key: 'starters' },
   { href: '/evidence', label: 'Evidence', key: 'evidence' },
   { href: '/spec', label: 'Spec', key: 'spec' },
+  { href: '/about', label: 'About', key: 'about' },
 ];
 const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · skyl`;
 ---
@@ -44,7 +45,16 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
     <meta property="og:title" content={full} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:site_name" content="skyl" />
+    {/* one image for the whole site rather than one per page: a card is read at a glance and
+        what it has to say is which site this is. It is rendered from the same tokens the site
+        uses, so it cannot drift into looking like a different product. */}
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="skyl. Agent rules for what your project actually uses." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL('/og.png', Astro.site)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -60,6 +70,7 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
         document.documentElement.setAttribute('data-motion', '');
       }
     </script>
+    <a class="skip" href="#main">Skip to content</a>
     <header class="masthead">
       <div class="shell masthead-inner">
         <a class="wordmark" href="/">
@@ -82,7 +93,7 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
       </div>
     </header>
 
-    <main class="shell">
+    <main class="shell" id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -114,6 +125,14 @@ const full = title === 'skyl' ? 'skyl, composable agent skills' : `${title} · s
           <a href="/spec">Format and axes</a>
           <a href="/evidence">Evidence</a>
           <a href="/contributors">Contributors</a>
+        </div>
+
+        <div class="footer-col">
+          <p class="eyebrow">Project</p>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
+          <a href="https://github.com/skyl-dev/skyl.dev/releases">Releases</a>
+          <a href="https://github.com/skyl-dev/skyl.dev/blob/main/LICENSE">MIT licence</a>
         </div>
 
         <div class="footer-col">

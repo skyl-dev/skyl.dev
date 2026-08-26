@@ -187,6 +187,37 @@ body {
 a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 a:hover { text-decoration-color: var(--accent-line); }
 
+/*
+ * One focus ring, on everything that takes focus.
+ *
+ * There were none. The browser default is not nothing, but it is a different shape and colour
+ * on every element here and it disappears entirely against the panels, which are the darkest
+ * surfaces on the page. `:focus-visible` rather than `:focus`, so a mouse click on a button
+ * does not leave a ring behind it.
+ */
+:where(a, button, summary, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--r-tiny);
+}
+/* the page container takes focus when the skip link is used, and a ring around the whole
+   viewport says nothing useful */
+main:focus-visible { outline: none; }
+
+/*
+ * Ten links sit before the content on every page, and a keyboard reader meets all of them
+ * again on the next one. Off-screen until focused, rather than hidden: display:none and
+ * visibility:hidden both take it out of the tab order, which is the one thing it is for.
+ */
+.skip {
+  position: absolute; left: var(--sp-4); top: var(--sp-4); z-index: 50;
+  transform: translateY(-200%);
+  background: var(--accent); color: var(--accent-ink);
+  font-size: var(--fs-ui); font-weight: 600; text-decoration: none;
+  padding: 0.6rem 1rem; border-radius: var(--r-sm);
+}
+.skip:focus-visible { transform: translateY(0); }
+
 h1, h2, h3, h4 { font-weight: 600; line-height: 1.18; letter-spacing: -0.015em; margin: 0; }
 
 hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
@@ -235,7 +266,7 @@ code { font-family: var(--mono); }
 footer.site { border-top: 1px solid var(--rule); margin-top: var(--sp-6); color: var(--ink-soft); font-size: var(--fs-ui); }
 .footer-inner {
   padding-top: 3rem; padding-bottom: 2.5rem;
-  display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); gap: var(--sp-6);
+  display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr)); gap: var(--sp-5);
 }
 .footer-say p { margin: 1rem 0 0; color: var(--ink-faint); font-size: var(--fs-ui); max-width: 34ch; line-height: 1.55; }
 .footer-col { display: grid; gap: var(--sp-2); align-content: start; }
@@ -460,6 +491,46 @@ footer.site a:hover { color: var(--accent); }
   border-radius: var(--r-xs); padding: 0.25rem 0.55rem; cursor: pointer;
 }
 .command button:hover { color: var(--ink); border-color: var(--accent-line); }
+
+/*
+ * A terminal, wherever one is shown.
+ *
+ * Two pages render one and the styles were on the home page, so /how-it-works printed its
+ * transcript as unstyled markup: five classes with no rule anywhere in what that page loads.
+ * It looked close enough to right that nobody caught it, which is what makes this failure
+ * worth a comment rather than a quiet move.
+ */
+.console { border-top: 1px solid var(--rule); background: var(--sunken); }
+.console-bar {
+  display: flex; align-items: center; gap: var(--sp-1); padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+.console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
+.console-bar span { margin-left: 0.5rem; font-size: var(--fs-micro); color: var(--ink-faint); }
+.console pre { margin: 0; padding: 0.95rem 1.1rem; font-size: var(--fs-meta); line-height: 1.65; overflow-x: auto; }
+.console code { font-family: var(--mono); white-space: pre; }
+.t-dim { color: var(--ink-faint); }
+.t-strong { color: var(--ink); font-weight: 600; }
+.t-ok { color: var(--term-ok); }
+
+/*
+ * The primary action, wherever one is.
+ *
+ * This lived in the home page's scoped block, which Astro bundles per page, so /contact used
+ * `.button` and rendered plain underlined text. The same thing already happened once to the
+ * section headings when they moved to /how-it-works. A class used by more than one page
+ * belongs here; a class used by one belongs to that page.
+ */
+.button {
+  display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none;
+  background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: var(--fs-body);
+  padding: 0.7rem 1.2rem; border-radius: var(--r-sm); border: 1px solid transparent; cursor: pointer;
+  font-family: var(--mono);
+}
+.button:hover { filter: brightness(1.04); }
+.button.ghost { background: none; color: var(--ink); border-color: var(--rule-strong); }
+.button.ghost:hover { border-color: var(--accent-line); filter: none; }
+.button.small { font-size: var(--fs-meta); padding: 0.45rem 0.8rem; }
 
 /* the one command someone actually has to run first */
 .command-primary {

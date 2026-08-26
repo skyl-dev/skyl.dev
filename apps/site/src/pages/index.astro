@@ -187,16 +187,6 @@ const consoleLines = [
   .hero-cta { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin: 2.6rem 0 2rem; }
   .hero-note { color: var(--ink-faint); font-size: var(--fs-ui); margin: 0; }
 
-  .button {
-    display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none;
-    background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: var(--fs-body);
-    padding: 0.7rem 1.2rem; border-radius: var(--r-sm); border: 1px solid transparent; cursor: pointer;
-    font-family: var(--mono);
-  }
-  .button:hover { filter: brightness(1.04); }
-  .button.ghost { background: none; color: var(--ink); border-color: var(--rule-strong); }
-  .button.ghost:hover { border-color: var(--accent-line); filter: none; }
-  .button.small { font-size: var(--fs-meta); padding: 0.45rem 0.8rem; }
 
   /* one card holding the whole idea: the command, then which axes a project actually
      draws from. A transcript said the same thing in far more words and named a family in a
@@ -214,18 +204,6 @@ const consoleLines = [
   .launch-head .launch-label + * { margin-bottom: 0.5rem; }
   .launch-body .launch-label { margin-bottom: 0.9rem; }
 
-  .console { border-top: 1px solid var(--rule); background: var(--sunken); }
-  .console-bar {
-    display: flex; align-items: center; gap: var(--sp-1); padding: 0.55rem 0.9rem;
-    border-bottom: 1px solid var(--rule);
-  }
-  .console-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
-  .console-bar span { margin-left: 0.5rem; font-size: var(--fs-micro); color: var(--ink-faint); }
-  .console pre { margin: 0; padding: 0.95rem 1.1rem; font-size: var(--fs-meta); line-height: 1.65; overflow-x: auto; }
-  .console code { font-family: var(--mono); white-space: pre; }
-  .t-dim { color: var(--ink-faint); }
-  .t-strong { color: var(--ink); font-weight: 600; }
-  .t-ok { color: var(--term-ok); }
 
 
   .picker { margin-top: 1.5rem; border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--raised); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 5rem; }

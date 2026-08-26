@@ -19,6 +19,8 @@ const STATIC = [
   { path: '/starters', priority: '0.7' },
   { path: '/evidence', priority: '0.7' },
   { path: '/spec', priority: '0.6' },
+  { path: '/about', priority: '0.6' },
+  { path: '/contact', priority: '0.5' },
   { path: '/contributors', priority: '0.4' },
 ];
 

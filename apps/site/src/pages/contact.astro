@@ -1,0 +1,159 @@
+---
+import Base from '../layouts/Base.astro';
+
+/**
+ * Where to send a thing, by what kind of thing it is.
+ *
+ * A contact page that says "open an issue" is a page that made you go and find out which of
+ * two repositories, and which of four templates. Every route below is a real destination
+ * that exists: three templates in the registry, plain issues on the CLI, and one address
+ * for the thing that should not be filed in public.
+ *
+ * There is no form. A form here would collect what a GitHub issue collects, and put it
+ * somewhere nobody else can read or search.
+ */
+const REGISTRY = 'https://github.com/skyl-dev/skyl';
+const SITE = 'https://github.com/skyl-dev/skyl.dev';
+
+const ROUTES = [
+  {
+    id: 'wrong',
+    lead: 'A rule is wrong, or the model already does it',
+    say: `The most valuable thing you can send. Every rule here is a falsifiable claim that a model
+          fails without it, so a control run where the model already does the right thing retires
+          the rule. 17 have gone exactly that way.`,
+    bring: ['The task you gave it', 'The model and the harness', 'The output, with no skill loaded'],
+    href: `${REGISTRY}/issues/new?template=challenge-a-rule.yml`,
+    cta: 'Challenge a rule',
+  },
+  {
+    id: 'reversal',
+    lead: 'A rule was right and has stopped being right',
+    say: `A rule cites platform behaviour, and platforms change. This is different from a rule that
+          was never right, and it is triaged differently: the rule is not wrong so much as expired.`,
+    bring: ['The rule id', 'What changed, and where that is documented', 'The version it changed in'],
+    href: `${REGISTRY}/issues/new?template=report-a-reversal.yml`,
+    cta: 'Report a reversal',
+  },
+  {
+    id: 'missing',
+    lead: 'Something is not covered',
+    say: `A concern no existing skill owns. Worth reading the four admission tests first, because
+          three of them are ways of saying no and most proposals fail on the first one.`,
+    bring: ['The concern, and which axis it belongs to', 'Why an existing skill does not own it', 'A failure a model actually produces'],
+    href: `${REGISTRY}/issues/new?template=propose-a-skill.yml`,
+    cta: 'Propose a skill',
+  },
+  {
+    id: 'broken',
+    lead: 'The CLI or this site is broken',
+    say: `Anything that is the tooling rather than the content: a command that fails, a page that
+          renders wrong, a skill that installs into the wrong place.`,
+    bring: ['What you ran, and what it printed', 'skyl --version, and your node version', 'Your operating system and agent tool'],
+    href: `${SITE}/issues/new`,
+    cta: 'Open an issue',
+  },
+];
+---
+
+<Base
+  title="contact"
+  section="contact"
+  description="Where to send a wrong rule, a missing skill, a broken command, or a security report."
+>
+  <div class="docs">
+    <nav class="docs-rail" aria-label="contact">
+      <div class="rail-inner">
+        <a class="rail-back" href="/about">← About</a>
+        <div class="rail-group">
+          <p class="rail-title">By what it is</p>
+          <ul>
+            {ROUTES.map((r) => <li><a href={`#${r.id}`} data-rail={r.id}>{r.cta}</a></li>)}
+            <li><a href="#security" data-rail="security">Security</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="docs-main">
+      <header class="docs-head">
+        <p class="eyebrow">get in touch</p>
+        <h1>Contact</h1>
+        <p class="docs-lede">
+          Everything here happens in public, on GitHub, so that an answer is readable by the next
+          person with the same question. There is one exception, at the bottom.
+        </p>
+      </header>
+
+      {ROUTES.map((route) => (
+        <section id={route.id} class="ct">
+          <h2>{route.lead}</h2>
+          <p>{route.say}</p>
+          <p class="ct-bring">What to include</p>
+          <ul class="ct-list">{route.bring.map((b) => <li>{b}</li>)}</ul>
+          <a class="button small" href={route.href}>{route.cta} →</a>
+        </section>
+      ))}
+
+      <section id="security" class="ct ct-security">
+        <h2>Something unsafe</h2>
+        <p>
+          Two different things go here, and neither belongs in a public issue while it is still
+          true.
+        </p>
+        <ul class="ct-list">
+          <li>
+            <strong>A rule that causes a defect.</strong> Not a rule that is merely wrong: one that,
+            followed as written, produces code that loses data or leaks a credential. That is
+            shipping in whoever installed it, so it is fixed before it is described.
+          </li>
+          <li>
+            <strong>A vulnerability in the CLI.</strong> It runs in your repository and writes files
+            into it, so it is worth reporting privately.
+          </li>
+        </ul>
+        <p>
+          Use GitHub's private reporting on whichever repository it affects:
+          <a href={`${REGISTRY}/security/advisories/new`}>the registry</a> or{' '}
+          <a href={`${SITE}/security/advisories/new`}>the CLI and site</a>. It reaches the
+          maintainer without becoming public, and it gives you an advisory to be credited on.
+        </p>
+      </section>
+
+      <section class="ct ct-note">
+        <p>
+          <strong>No form, and no mailing list.</strong> A form here would collect what an issue
+          collects and put it where nobody else can read it or search it. If none of the routes
+          above fit, a{' '}
+          <a href={`${REGISTRY}/issues/new`}>plain issue</a> is fine; blank issues are enabled on
+          purpose.
+        </p>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  .ct { margin-top: var(--sp-7); padding-bottom: var(--sp-5); border-bottom: 1px solid var(--rule); }
+  .ct:last-of-type { border-bottom: 0; }
+  .ct h2 { font-size: var(--fs-sub); letter-spacing: -0.02em; margin: 0 0 var(--sp-3); }
+  .ct p { color: var(--ink-soft); font-size: var(--fs-body); line-height: 1.7; max-width: var(--measure); }
+  .ct strong { color: var(--ink); font-weight: 600; }
+
+  .ct-bring {
+    font-size: var(--fs-micro) !important; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.11em; color: var(--ink-faint) !important; margin: var(--sp-4) 0 var(--sp-2) !important;
+  }
+  .ct-list { list-style: none; margin: 0 0 var(--sp-4); padding: 0; max-width: var(--measure); }
+  .ct-list li {
+    color: var(--ink-soft); font-size: var(--fs-ui); line-height: 1.65;
+    padding: 0.2rem 0 0.2rem var(--sp-3); border-left: 2px solid var(--rule); margin-bottom: 2px;
+  }
+
+  /* the one route that is not a public issue reads differently on purpose */
+  .ct-security { border-left: 2px solid var(--gold); padding-left: var(--sp-4); }
+  .ct-security .ct-list li { font-size: var(--fs-body); padding-bottom: var(--sp-2); }
+
+  .ct-note { color: var(--ink-faint); }
+  .ct-note p { font-size: var(--fs-ui); }
+</style>
