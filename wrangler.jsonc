@@ -25,4 +25,12 @@
     // /registry.json if it ever failed to build.
     "not_found_handling": "404-page"
   }
+
+  // The custom domain, once the first deploy is confirmed on the workers.dev URL.
+  // Uncommenting this and deploying again creates the domain and its DNS record, since
+  // skyl.dev is already a zone on Cloudflare. It is separate from the first deploy on
+  // purpose: a deploy that both uploads a site for the first time and edits DNS has two
+  // ways to fail and one error message.
+  //
+  // "routes": [{ "pattern": "skyl.dev", "custom_domain": true }]
 }
