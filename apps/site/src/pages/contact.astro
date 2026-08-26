@@ -125,7 +125,16 @@ const ROUTES = [
       <section id="anything" class="ct">
         <h2>Anything else</h2>
         <p>
-          <a class="ct-mail" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+          {/*
+            Cloudflare's Scrape Shield rewrites a mailto into /cdn-cgi/l/email-protection and a
+            span that JavaScript decodes. It works, and without JavaScript the reader sees the
+            literal words "[email protected]" and a dead link. This address is a role address on
+            the domain, published deliberately, so the obfuscation is protecting something that
+            was never private at the cost of a page that looks broken to some readers.
+            email_off is Cloudflare's documented opt-out, and it is a comment, so it costs
+            nothing anywhere else.
+          */}
+          <Fragment set:html={`<!--email_off--><a class="ct-mail" href="mailto:${EMAIL}">${EMAIL}</a><!--/email_off-->`} />
         </p>
         <p>
           For what does not fit above: a question, something you are building on this, or a
