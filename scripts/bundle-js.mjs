@@ -8,6 +8,11 @@
  * that was never published. Compiling it in removes the question: the published package has
  * no runtime dependencies, and the site keeps importing the same source through the
  * workspace.
+ *
+ * It writes `dist/skyl.js`, not `dist/bin.js`. `tsc -b` owns `dist/bin.js`, and while both
+ * wrote there the file on disk was whichever tool ran last: a `pnpm build` after a pack
+ * left a bundle tsc would never refresh, because its build info said the output was
+ * current. Every local run then executed release-old code and reported a pass.
  */
 import { build } from 'esbuild';
 import { dirname, join } from 'node:path';
@@ -19,7 +24,7 @@ const cli = join(here, '..', 'packages', 'cli');
 
 const result = await build({
   entryPoints: [join(cli, 'src', 'bin.ts')],
-  outfile: join(cli, 'dist', 'bin.js'),
+  outfile: join(cli, 'dist', 'skyl.js'),
   bundle: true,
   platform: 'node',
   format: 'esm',
@@ -32,7 +37,7 @@ const result = await build({
   metafile: true,
 });
 
-const out = join(cli, 'dist', 'bin.js');
+const out = join(cli, 'dist', 'skyl.js');
 const text = await readFile(out, 'utf8');
 if (!text.startsWith('#!')) {
   throw new Error('the shebang did not survive bundling, and the binary will not run');
@@ -41,4 +46,4 @@ if (/from ['"]@skyl\/core['"]/.test(text)) {
   throw new Error('@skyl/core is still imported rather than compiled in');
 }
 const { size } = await stat(out);
-console.log(`bundled -> dist/bin.js, ${(size / 1024).toFixed(0)} KB`);
+console.log(`bundled -> dist/skyl.js, ${(size / 1024).toFixed(0)} KB`);

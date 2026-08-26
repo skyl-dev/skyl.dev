@@ -1,14 +1,14 @@
 {
   "name": "skyl.dev",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Install curated AI agent skills for what your project actually uses",
   "type": "module",
   "license": "MIT",
   "bin": {
-    "skyl": "dist/bin.js"
+    "skyl": "dist/skyl.js"
   },
   "files": [
-    "dist/bin.js",
+    "dist/skyl.js",
     "bundle.json",
     "README.md"
   ],
