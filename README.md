@@ -98,6 +98,32 @@ published binary. They wrote to the same path once, and the file on disk was whi
 last: a `pnpm build` after a pack left a release-old bundle that `tsc` would never refresh, because
 its build info said the output was current.
 
+## Deploying the site
+
+Cloudflare Pages, connected to this repository. The one thing that is not obvious: the site
+renders a sibling checkout of the registry, and a Pages build only ever has this repository, so
+the build command fetches one and points `SKYL_REGISTRY` at it.
+
+```
+build command      git clone --depth 1 https://github.com/skyl-dev/skyl.git .registry \
+                     && pnpm install --frozen-lockfile \
+                     && pnpm build \
+                     && pnpm --filter @skyl/site build
+output directory   apps/site/dist
+root directory     /
+environment        SKYL_REGISTRY = /opt/buildhome/repo/.registry
+```
+
+`pnpm build` before the site build is not optional: the site imports `@skyl/core` through its
+package exports, which point at `dist`.
+
+Node comes from `.node-version`. The registry is cloned rather than submoduled so that publishing
+a skill stays one commit in one repository.
+
+A push here redeploys. A push to the registry does not, because Pages only watches this
+repository, so the registry repo calls a deploy hook instead. The site is a rendering of the
+registry and has to move when it does.
+
 ## Status
 
 Pre-alpha, and published. The CLI is on npm as [`skyl.dev`](https://www.npmjs.com/package/skyl.dev),
