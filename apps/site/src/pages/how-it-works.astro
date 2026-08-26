@@ -1,10 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
-import Command from '../components/Command.astro';
 import RuleAnatomy from '../components/RuleAnatomy.astro';
-import { loadSkills, tokens } from '../lib/registry.ts';
+import { loadSkills } from '../lib/registry.ts';
+import { loadStarters, summarise } from '../lib/starters.ts';
 
 const skills = await loadSkills();
+const STARTERS = await loadStarters();
 
 const BEHAVIOUR = [
   { act: 'It proposes', say: 'scan prints what it matched, what it ruled out, and the token cost. It writes nothing.' },
@@ -97,21 +98,13 @@ const BEHAVIOUR = [
       <h2 data-reveal="1">Or take a known shape</h2>
     </div>
     <div class="quick-grid">
-      {[
-        { title: 'A new app', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'] },
-        { title: 'A legacy codebase', picks: ['android/core', 'android/java', 'android/xml', 'android/mvvm'] },
-        { title: 'An app with a backend', picks: ['android/core', 'android/kotlin', 'android/networking', 'android/db', 'android/security'] },
-        { title: 'Media heavy', picks: ['android/core', 'android/kotlin', 'android/compose', 'android/images', 'android/permissions'] },
-        { title: 'Adding tests', picks: ['android/core', 'android/kotlin', 'android/testing', 'android/di'] },
-        { title: 'Everything', picks: skills.map((s) => s.meta.name) },
-      ].map((starter, i) => {
-        const list = starter.picks.map((n) => skills.find((s) => s.meta.name === n)!).filter(Boolean);
-        const cost = tokens(list.reduce((n, s) => n + s.meta.installableWords, 0));
+      {STARTERS.map((starter, i) => {
+        const stat = summarise(starter, skills);
         return (
-          <a class="quick-card" href="/starters" data-reveal={String(i + 1)}>
+          <a class="quick-card" href={`/starters#${starter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} data-reveal={String(i + 1)}>
             <strong>{starter.title}</strong>
-            <p>{list.map((s) => s.meta.skill).join(' · ')}</p>
-            <span><b>{list.length}</b> layers · <b>~{cost.toLocaleString()}</b> tokens</span>
+            <p>{stat.skills.map((s) => s.meta.skill).join(' · ')}</p>
+            <span><b>{stat.skills.length}</b> layers · <b>~{stat.tokens.toLocaleString()}</b> tokens</span>
           </a>
         );
       })}

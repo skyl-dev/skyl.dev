@@ -1,68 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import Command from '../components/Command.astro';
-import { loadSkills, tokens } from '../lib/registry.ts';
+import { loadSkills } from '../lib/registry.ts';
+import { command, loadStarters, qualified, summarise } from '../lib/starters.ts';
 
 const skills = await loadSkills();
-const byName = new Map(skills.map((s) => [s.meta.name, s]));
-
-/**
- * Presets for situations, not for stacks.
- *
- * Only Android exists so far, and inventing a Next.js or FastAPI preset would describe
- * skills nobody can install. These are the shapes an Android project actually arrives in.
- */
-const STARTERS = [
-  {
-    title: 'A new Android app',
-    when: 'Kotlin and Compose, started this year, nothing legacy in it yet.',
-    picks: ['android/core', 'android/kotlin', 'android/compose', 'android/mvvm'],
-  },
-  {
-    title: 'A legacy codebase',
-    when: 'Java, XML layouts, Fragments. The rules that matter here are different ones, not fewer.',
-    picks: ['android/core', 'android/java', 'android/xml', 'android/mvvm'],
-  },
-  {
-    title: 'An app with a backend',
-    when: 'It talks to a server, caches what it fetches, and holds a token it must not leak.',
-    picks: ['android/core', 'android/kotlin', 'android/networking', 'android/db', 'android/security'],
-  },
-  {
-    title: 'A media-heavy app',
-    when: 'Feeds, avatars, uploads. Where images are the product rather than decoration.',
-    picks: ['android/core', 'android/kotlin', 'android/compose', 'android/images', 'android/permissions'],
-  },
-  {
-    title: 'A team adding tests',
-    when: 'The code exists and the suite does not, or it exists and nobody trusts it.',
-    picks: ['android/core', 'android/kotlin', 'android/testing', 'android/di'],
-  },
-  {
-    title: 'Everything',
-    when: 'The whole family, for a project that genuinely spans it. Read the cost before you do this.',
-    picks: skills.map((s) => s.meta.name),
-  },
-];
+const STARTERS = await loadStarters();
 
 const slug = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-// a starter belongs to whichever families its picks come from, which is how it gets filtered
-// alongside the registry rather than being a separate idea of what a family is
-const familiesOf = (picks: string[]) => [...new Set(picks.map((p) => p.split('/')[0]!))].sort();
-const FAMILIES = [...new Set(STARTERS.flatMap((s) => familiesOf(s.picks)))].sort();
-const countIn = (family: string) => STARTERS.filter((s) => familiesOf(s.picks).includes(family)).length;
-
-function summarise(picks: string[]) {
-  const chosen = picks.map((p) => byName.get(p)).filter(Boolean);
-  return {
-    rules: chosen.reduce((n, s) => n + s!.meta.rules.length, 0),
-    tokens: tokens(chosen.reduce((n, s) => n + s!.meta.installableWords, 0)),
-  };
-}
-
-const command = (picks: string[]) =>
-  `npx skyl.dev add ${picks.map((p, i) => (i === 0 ? p : p.split('/')[1])).join(' ')}`;
+const FAMILIES = [...new Set(STARTERS.map((s) => s.family))].sort();
+const countIn = (family: string) => STARTERS.filter((s) => s.family === family).length;
 ---
 
 <Base
@@ -111,29 +59,30 @@ const command = (picks: string[]) =>
 
   <div style="display: grid; gap: var(--sp-3);">
     {STARTERS.map((starter) => {
-      const stat = summarise(starter.picks);
+      const stat = summarise(starter, skills);
       return (
         <article
           id={slug(starter.title)}
-          data-families={familiesOf(starter.picks).join(' ')}
+          data-families={starter.family}
           style="scroll-margin-top: 5rem; border: 1px solid var(--rule); border-radius: var(--r-md); background: var(--raised); padding: 1.4rem 1.5rem;"
         >
           <div style="display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;">
             <h2 style="font-size: var(--fs-h3);">{starter.title}</h2>
-            <span class="chip">{starter.picks.length} skills</span>
+            <span class="chip">{stat.skills.length} skills</span>
             <span class="chip">{stat.rules} rules</span>
             <span class="chip">~{stat.tokens.toLocaleString()} tokens</span>
           </div>
           <p style="color: var(--ink-soft); font-size: var(--fs-meta); margin: 0.6rem 0 1.1rem; max-width: 60ch;">{starter.when}</p>
-          <Command text={command(starter.picks)} />
+          <Command text={command(qualified(starter))} />
         </article>
       );
     })}
   </div>
 
   <p style="color: var(--ink-faint); font-size: var(--fs-meta); margin-top: 2rem;">
-    {FAMILIES.length === 1 ? 'One family so far.' : `${FAMILIES.length} families.`} A preset for a stack
-      whose skills do not exist yet would be a list of things you cannot install, so there is not one.
+    {FAMILIES.length === 1 ? 'One family so far.' : `${FAMILIES.length} families, each with its own presets.`}
+      A preset for a stack whose skills do not exist yet would be a list of things you cannot install,
+      so there is not one.
       </p>
     </div>
   </div>

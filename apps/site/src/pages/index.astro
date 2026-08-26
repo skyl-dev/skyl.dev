@@ -1,13 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
 import Command from '../components/Command.astro';
-import { evidenceFacts, loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
-import { QUESTIONS, START } from '../lib/wizard.ts';
+import { loadFamilies, loadSkills, tokens } from '../lib/registry.ts';
+import { resolveQuestions, START } from '../lib/wizard.ts';
 import AxisGallery from '../components/AxisGallery.astro';
-import RuleAnatomy from '../components/RuleAnatomy.astro';
 
 const skills = await loadSkills();
 const families = await loadFamilies();
+
+// The family the home page illustrates with: the one with the most skills, which is also
+// the one a first visitor is most likely to be here for. Named once, because a terminal
+// showing one family's manifest beside another family's package.json is not a project.
+const lead = families[0]?.name ?? 'android';
+
+// Checked against the registry rather than trusted: the flow is hand-written, and the
+// facts it states about what is published are not allowed to be.
+const QUESTIONS = resolveQuestions(skills);
 
 const model = skills.map((s) => ({
   name: s.meta.name,
@@ -19,7 +27,6 @@ const model = skills.map((s) => ({
   rules: s.meta.rules.length,
 }));
 
-const totalRules = skills.reduce((n, s) => n + s.meta.rules.length, 0);
 const everything = tokens(skills.reduce((n, s) => n + s.meta.installableWords, 0));
 
 // the terminal is generated from the registry, so it cannot drift from what scan prints
@@ -27,50 +34,40 @@ const everything = tokens(skills.reduce((n, s) => n + s.meta.installableWords, 0
 // genuinely empty today. An axis reading "not this project" where most projects do have one
 // looks like a gap rather than a choice.
 const demo = skills.filter((s) =>
-  ['core', 'kotlin', 'compose', 'db', 'di', 'networking'].includes(s.meta.skill));
-
-// the five axes, and how much of each a typical project actually takes. This is the whole
-// idea in one picture, and it says it without naming a family
-const AXES = ['core', 'language', 'framework', 'service', 'topic'] as const;
-const facts = await evidenceFacts(families[0]?.name ?? 'android');
-
-// a tree, because that is what resolution actually is: a project, the axes it draws from,
-// and what each axis covers. Leaves are concerns rather than skill names, so the shape
-// holds for any project rather than describing one family
-const AXIS_SAYS = [
-  {
-    id: 'core', holds: 'the platform you ship on', like: 'Android, iOS, the browser',
-    covers: ['lifecycle and process death', 'work that leaves the main thread', 'who owns which data', 'what the system can reclaim'],
-  },
-  {
-    id: 'language', holds: 'the language you write', like: 'Kotlin, Swift, TypeScript',
-    covers: ['scope and cancellation', 'nullability and equality', 'what reads fine and behaves badly'],
-  },
-  {
-    id: 'framework', holds: 'what draws the screen', like: 'Compose, SwiftUI, React',
-    covers: ['effects and state', 'lists and identity', 'rendering that repeats'],
-  },
-  {
-    id: 'service', holds: 'a third party you depend on', like: 'Stripe, Firebase, Supabase',
-    covers: ['retries and idempotency', 'quotas and truncation'], empty: true,
-  },
-  {
-    id: 'topic', holds: 'a concern that cuts across', like: 'data, media, tests',
-    covers: ['storage and network', 'permissions and secrets', 'images and media', 'tests and the seams they need'],
-  },
-];
-
-const BEHAVIOUR = [
-  { act: 'It proposes', say: 'scan prints what it matched, what it ruled out, and the token cost. It writes nothing.' },
-  { act: 'You confirm', say: 'nothing lands until you say so. --yes exists, for scripts that already know.' },
-  { act: 'It is recorded', say: 'skyl.lock holds a hash of every file, so a reinstall is no diff and a pull request shows exactly what moved.' },
-  { act: 'It is reversible', say: 'remove takes layers back out, and refuses to orphan one that another still needs.' },
-];
+  s.meta.family === lead && ['core', 'kotlin', 'compose', 'db', 'di', 'networking'].includes(s.meta.skill));
 
 const chosen = new Set(demo.map((s) => s.meta.name));
 const skipped = skills.filter((s) => !chosen.has(s.meta.name)).slice(0, 3).map((s) => s.meta.skill);
-void AXES;
 const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
+
+/*
+ * The terminal, built as text rather than as markup.
+ *
+ * It was written as JSX inside a <pre>, which Astro compiles and its own checker cannot
+ * parse: every expression after the first was reported as a syntax error, and everything
+ * declared below it in this file came back as unused. That made `astro check` useless on
+ * the one page it most needed to be useful on. A terminal is generated output anyway, so
+ * a string is the honest shape for it.
+ */
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const tone = (cls: string, text: string) => `<span class="${cls}">${esc(text)}</span>`;
+
+const consoleLines = [
+  `${tone('t-dim', '$')} skyl scan`,
+  '',
+  `  ${tone('t-strong', 'Detected')}`,
+  ...demo.slice(0, 3).map((d) => {
+    const on = (Object.values(d.meta.detect).flat()[0] ?? '').split('/').pop()!.split(':').pop() ?? '';
+    return `    ${tone('t-ok', d.meta.skill.padEnd(13))}${tone('t-dim', on)}`;
+  }),
+  `    ${tone('t-dim', `......       and ${demo.length - 3} more`)}`,
+  '',
+  `  ${tone('t-strong', 'Ruled out')}  ${tone('t-dim', skipped.join('  '))}`,
+  '',
+  `  ${esc(`${demo.length} layers, ~${(demoCost / 1000).toFixed(1)}k tokens`)}`,
+  `  ${tone('t-dim', 'Write them? [y/N]')}`,
+].join('\n');
 ---
 
 <Base
@@ -108,18 +105,7 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
 
       <div class="console">
         <div class="console-bar"><i></i><i></i><i></i><span>~/your-project</span></div>
-        <pre><code><span class="t-dim">$</span> skyl scan
-
-  <span class="t-strong">Detected</span>
-{demo.slice(0, 3).map((d) => (
-  <>{'    '}<span class="t-ok">{d.meta.skill.padEnd(13)}</span><span class="t-dim">{(Object.values(d.meta.detect).flat()[0] ?? '').split('/').pop()!.split(':').pop()}</span>{'\n'}</>
-))}    <span class="t-dim">......{' '.repeat(7)}and {demo.length - 3} more</span>
-
-  <span class="t-strong">Ruled out</span>  <span class="t-dim">{skipped.join('  ')}</span>
-
-  {demo.length} layers, ~{(demoCost / 1000).toFixed(1)}k tokens
-  <span class="t-dim">Write them? [y/N]</span>
-</code></pre>
+        <pre><code set:html={consoleLines} /></pre>
       </div>
 
     </div>
@@ -536,7 +522,18 @@ const demoCost = tokens(demo.reduce((n, s) => n + s.meta.installableWords, 0));
     }
 
     if (current === null) {
-      const args = all.map((n, i) => (i === 0 ? n : n.split('/')[1]));
+      // A bare name resolves inside the family last named, so it is only safe while the
+      // command stays in one family: across two it is either an ambiguity error or a silent
+      // install of the wrong skill. Same rule as `command()` in src/lib/starters.ts, written
+      // out again because define:vars makes this script inline and nothing can be imported
+      // into it.
+      let named = '';
+      const args = all.map((n) => {
+        const at = n.indexOf('/');
+        if (n.slice(0, at) === named) return n.slice(at + 1);
+        named = n.slice(0, at);
+        return n;
+      });
       const command = `npx skyl.dev add ${args.join(' ')}`;
       stage.innerHTML = `
         ${trailMarkup()}
