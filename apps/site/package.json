@@ -17,7 +17,5 @@
     "marked": "^18.0.10",
     "typescript": "^5.7.2"
   },
-  "pnpm": {
-    "//": "cookie is declared only to win module resolution against a stray ~/node_modules on the author machine, which shadows astro copy with a CommonJS one. Safe to drop once that is gone."
-  }
+  "//": "cookie is declared only to win module resolution against a stray ~/node_modules on the author machine, which shadows astro copy with a CommonJS one. Safe to drop once that is gone."
 }
