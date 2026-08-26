@@ -100,43 +100,21 @@ its build info said the output was current.
 
 ## Deploying the site
 
-A Cloudflare Worker serving static assets, configured in `wrangler.jsonc`.
+Cloudflare Pages, connected to this repository, building on every push to `main`. The settings and
+the reasoning are in [DEPLOY.md](./DEPLOY.md).
 
-A Worker rather than Pages for one reason that cannot be undone afterwards: a Pages project
-is either direct upload or Git connected, and Cloudflare's own documentation says the first
-cannot become the second. Deploying Pages from a terminal would rule out ever deploying it from
-a push. Workers Builds attaches to a Worker that already exists, so the two are not exclusive.
+The part worth knowing before reading anything else: two repositories are involved and Pages clones
+one. The site is a rendering of the registry, which lives in `skyl-dev/skyl`, so the build command
+fetches it and points `SKYL_REGISTRY` at it. A build without that step fails on `no registry found`.
 
-From a terminal:
+Locally there is nothing to configure, because a development checkout already has `skyl` beside
+`skyl.dev`:
 
 ```
+pnpm install
 pnpm build                       @skyl/core, which the site imports through its package exports
-pnpm --filter @skyl/site build   the pages
-npx wrangler deploy              the assets in apps/site/dist
+pnpm --filter @skyl/site build   the pages, into apps/site/dist
 ```
-
-From a push, once the repository is connected under the Worker's Builds settings:
-
-```
-build command      git clone --depth 1 https://github.com/skyl-dev/skyl.git .registry \
-                     && pnpm install --frozen-lockfile \
-                     && pnpm build \
-                     && pnpm --filter @skyl/site build
-deploy command     npx wrangler deploy
-environment        SKYL_REGISTRY = /opt/buildhome/repo/.registry
-```
-
-The one part that is not obvious: the site renders a sibling checkout of the registry, and a
-build started from this repository only ever has this repository. `SKYL_REGISTRY` exists for
-exactly that, so the build fetches the registry itself. It is cloned rather than submoduled so
-that publishing a skill stays one commit in one repository.
-
-Node comes from `.node-version`, because the default build image is older than Astro wants and
-the failure that produces names a syntax error rather than a version.
-
-A push here redeploys. A push to the registry does not, because a build watches this repository
-only, so the registry repo calls a deploy hook. The site is a rendering of the registry and has
-to move when it does.
 
 ## Status
 
