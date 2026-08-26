@@ -492,6 +492,13 @@ footer.site a:hover { color: var(--accent); }
 }
 .command button:hover { color: var(--ink); border-color: var(--accent-line); }
 
+/* an address is the thing on the page, so it is set as one rather than as body copy */
+.ct-mail {
+  font-size: var(--fs-sub); font-weight: 600; color: var(--accent);
+  text-decoration: none; overflow-wrap: anywhere;
+}
+.ct-mail:hover { text-decoration: underline; text-decoration-color: var(--accent-line); }
+
 /*
  * A terminal, wherever one is shown.
  *

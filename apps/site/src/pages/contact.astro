@@ -14,6 +14,7 @@ import Base from '../layouts/Base.astro';
  */
 const REGISTRY = 'https://github.com/skyl-dev/skyl';
 const SITE = 'https://github.com/skyl-dev/skyl.dev';
+const EMAIL = 'ping@skyl.dev';
 
 const ROUTES = [
   {
@@ -70,6 +71,7 @@ const ROUTES = [
           <ul>
             {ROUTES.map((r) => <li><a href={`#${r.id}`} data-rail={r.id}>{r.cta}</a></li>)}
             <li><a href="#security" data-rail="security">Security</a></li>
+            <li><a href="#anything" data-rail="anything">Anything else</a></li>
           </ul>
         </div>
       </div>
@@ -80,8 +82,8 @@ const ROUTES = [
         <p class="eyebrow">get in touch</p>
         <h1>Contact</h1>
         <p class="docs-lede">
-          Everything here happens in public, on GitHub, so that an answer is readable by the next
-          person with the same question. There is one exception, at the bottom.
+          Most of this happens in public, on GitHub, so that an answer is readable by the next
+          person with the same question. Two things do not, and they are at the bottom.
         </p>
       </header>
 
@@ -120,13 +122,26 @@ const ROUTES = [
         </p>
       </section>
 
+      <section id="anything" class="ct">
+        <h2>Anything else</h2>
+        <p>
+          <a class="ct-mail" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+        </p>
+        <p>
+          For what does not fit above: a question, something you are building on this, or a
+          conversation that is not an issue yet. It reaches the maintainer.
+        </p>
+        <p>
+          If it <em>is</em> an issue, please open one instead. Not to deflect: an issue is
+          searchable and an inbox is not, so the next person with your question finds the answer
+          rather than asking it again. Blank issues are enabled for exactly that reason.
+        </p>
+      </section>
+
       <section class="ct ct-note">
         <p>
           <strong>No form, and no mailing list.</strong> A form here would collect what an issue
-          collects and put it where nobody else can read it or search it. If none of the routes
-          above fit, a{' '}
-          <a href={`${REGISTRY}/issues/new`}>plain issue</a> is fine; blank issues are enabled on
-          purpose.
+          collects and put it somewhere nobody else can read or search.
         </p>
       </section>
     </div>
