@@ -1,8 +1,0 @@
-{"message":"connected.","label":"vite","level":"info"}
-{"message":"Generated 0ms","label":"types","level":"info"}
-{"message":"connected.","label":"vite","level":"info"}
-{"message":"Re-optimizing dependencies because vite config has changed","label":"vite","level":"info"}
-{"message":" astro  v7.1.6 ready in 580 ms\n┃ Local    http://localhost:4321/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
-{"message":"watching for file changes...","label":null,"level":"info"}
-{"message":"\n update  ▶ New version of Astro available: 7.2.5\n  Run pnpm dlx @astrojs/upgrade to update\n","label":"SKIP_FORMAT","level":"warn"}
-{"message":"[200] /skills 54ms","label":null,"level":"info"}

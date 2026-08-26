@@ -10,10 +10,21 @@ import { loadSkills } from '../lib/registry.ts';
  */
 export const GET: APIRoute = async () => {
   const skills = await loadSkills();
+  const withReferences = skills.filter((s) => s.meta.references.length > 0);
   const body = {
     version: 1,
     skills: Object.fromEntries(
       skills.map((s) => [s.meta.name, s.meta.raw]).sort(([a], [b]) => String(a).localeCompare(String(b))),
+    ),
+    // a second map rather than a field on each skill, so a CLI written before references
+    // existed still reads this file and a CLI written after it still reads an old one
+    references: Object.fromEntries(
+      withReferences
+        .map((s) => [
+          s.meta.name,
+          Object.fromEntries(s.meta.references.map((r) => [r.file, r.body])),
+        ])
+        .sort(([a], [b]) => String(a).localeCompare(String(b))),
     ),
   };
   return new Response(JSON.stringify(body), {

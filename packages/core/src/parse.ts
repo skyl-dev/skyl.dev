@@ -1,5 +1,5 @@
 import { SkillFormatError } from './errors.ts';
-import { AXES, type Axis, type DetectBlock, type Rule, type Skill } from './types.ts';
+import { AXES, type Axis, type DetectBlock, type Rule, type Skill, type SkillReference } from './types.ts';
 
 /**
  * The frontmatter shapes this format uses: scalars, inline arrays, and one level of
@@ -122,7 +122,7 @@ function list(fm: Record<string, FrontmatterValue>, key: string): string[] {
 }
 
 /** Parse one SKILL.md into the shape everything else in this package consumes. */
-export function parseSkill(text: string): Skill {
+export function parseSkill(text: string, references: readonly SkillReference[] = []): Skill {
   const fm = parseFrontmatter(text);
   const md = body(text);
 
@@ -183,5 +183,6 @@ export function parseSkill(text: string): Skill {
     installable,
     installableWords: installable.split(/\s+/).filter(Boolean).length,
     raw: text,
+    references,
   };
 }

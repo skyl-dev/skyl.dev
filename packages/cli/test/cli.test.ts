@@ -56,12 +56,60 @@ test('add installs, writes a lockfile, and installs only the agent sections', as
   assert.ok(installed.includes('android-core'), 'requires must be pulled in');
 
   const text = await readFile(join(root, '.claude/skills/android-compose/SKILL.md'), 'utf8');
-  assert.ok(text.startsWith('## Rules'));
+  // the frontmatter is what makes the file a skill rather than a file: without `name` and
+  // `description` Claude Code passes the directory over and the install looks like it worked
+  assert.match(text, /^---\nname: android-compose\ndescription: "[^\n]+"\n---\n\n## Rules/);
   assert.ok(!text.includes('## Provenance'), 'human-only sections must not be installed');
 
   const lock = JSON.parse(await readFile(join(root, 'skyl.lock'), 'utf8'));
   assert.equal(lock.skills['android/compose'].reason, 'requested');
   assert.equal(lock.skills['android/core'].reason, 'required');
+});
+
+test('every target writes the frontmatter its tool reads', async () => {
+  const wanted: Record<string, RegExp> = {
+    claude: /^---\nname: android-core\ndescription: "/,
+    cursor: /^---\ndescription: "[^\n]+"\nalwaysApply: false\n---/,
+    windsurf: /^---\ntrigger: model_decision\ndescription: "/,
+    continue: /^---\nname: android\/core\ndescription: "[^\n]+"\nalwaysApply: false\n---/,
+    agents: /^---\nname: android-core\ndescription: "/,
+  };
+  const at: Record<string, string> = {
+    claude: '.claude/skills/android-core/SKILL.md',
+    cursor: '.cursor/rules/android-core.mdc',
+    windsurf: '.windsurf/rules/android-core.md',
+    continue: '.continue/rules/android-core.md',
+    agents: '.agents/skills/android-core/SKILL.md',
+  };
+  for (const [target, pattern] of Object.entries(wanted)) {
+    const root = await project();
+    const code = await quiet(() =>
+      run(['add', 'android/core', '-C', root, '--dir', REGISTRY, '--target', target, '--yes']));
+    assert.equal(code, 0, target);
+    assert.match(await readFile(join(root, at[target]!), 'utf8'), pattern, target);
+  }
+});
+
+test('a rule that points at a reference is installed with the file it points at', async () => {
+  const root = await project();
+  await quiet(() => run(['add', 'android/core', '-C', root, '--dir', REGISTRY, '--yes']));
+
+  const skill = await readFile(join(root, '.claude/skills/android-core/SKILL.md'), 'utf8');
+  const pointed = [...skill.matchAll(/references\/([a-z0-9-]+\.md)/g)].map((m) => m[1]!);
+  assert.ok(pointed.length > 0, 'android/core points at references, or this test proves nothing');
+
+  const there = await readdir(join(root, '.claude/skills/android-core/references'));
+  for (const file of pointed) {
+    assert.ok(there.includes(file), `${file} is pointed at and was not installed`);
+  }
+});
+
+test('a flat target drops references rather than writing a pointer to nothing', async () => {
+  const root = await project();
+  await quiet(() =>
+    run(['add', 'android/core', '-C', root, '--dir', REGISTRY, '--target', 'cursor', '--yes']));
+  const written = await readdir(join(root, '.cursor/rules'));
+  assert.deepEqual(written, ['android-core.mdc'], 'a rules directory takes rules, not references');
 });
 
 test('add refuses an unknown skill rather than writing something', async () => {
@@ -99,7 +147,7 @@ test('the published package declares no runtime dependencies', async () => {
   const core = JSON.parse(await readFile(new URL('../../core/package.json', import.meta.url), 'utf8')) as
     { version: string };
 
-  // core is compiled into dist/bin.js. Declaring it instead put a workspace package on the
+  // core is compiled into dist/skyl.js. Declaring it instead put a workspace package on the
   // npm page as a dependency that resolves to nothing, and broke `npm audit signatures`
   // for anyone who ran it.
   assert.equal(cli.dependencies, undefined);

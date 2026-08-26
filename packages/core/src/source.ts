@@ -1,6 +1,6 @@
 import { SourceError } from './errors.ts';
 import { parseSkill } from './parse.ts';
-import type { Skill } from './types.ts';
+import type { Skill, SkillReference } from './types.ts';
 
 /**
  * Where skill content comes from.
@@ -34,13 +34,26 @@ export function directorySource(root: string, label = 'directory'): Source {
         throw new SourceError(`cannot read ${root}`, String(cause));
       }
 
+      /** `references/*.md` beside a SKILL.md, in file order so a build is reproducible. */
+      const referencesIn = async (skillDir: string): Promise<SkillReference[]> => {
+        const dir = join(skillDir, 'references');
+        const names = await readdir(dir).catch(() => [] as string[]);
+        const out: SkillReference[] = [];
+        for (const file of names.filter((f) => f.endsWith('.md')).sort()) {
+          out.push({ file, body: await readFile(join(dir, file), 'utf8') });
+        }
+        return out;
+      };
+
       for (const family of families) {
         const dir = join(root, family);
         const entries = (await readdir(dir, { withFileTypes: true })).filter((e) => e.isDirectory());
         for (const entry of entries) {
-          const file = join(dir, entry.name, 'SKILL.md');
+          const skillDir = join(dir, entry.name);
+          const file = join(skillDir, 'SKILL.md');
           try {
-            out.push(parseSkill(await readFile(file, 'utf8')));
+            const text = await readFile(file, 'utf8');
+            out.push(parseSkill(text, await referencesIn(skillDir)));
           } catch (cause) {
             if ((cause as NodeJS.ErrnoException).code === 'ENOENT') continue;
             throw new SourceError(`cannot parse ${file}`, (cause as Error).message);
@@ -52,10 +65,18 @@ export function directorySource(root: string, label = 'directory'): Source {
   };
 }
 
-/** A JSON bundle: `{ "skills": { "android/core": "<raw SKILL.md>" } }`. */
+/**
+ * A JSON bundle: `{ "skills": { "android/core": "<raw SKILL.md>" } }`.
+ *
+ * `references` is a second, optional map because it arrived later: a bundle written
+ * without it still parses here, and a CLI written before it still reads a bundle that has
+ * it. Putting the files inside the skill value instead would have made the two shapes
+ * incompatible in both directions.
+ */
 export interface Bundle {
   readonly version?: string;
   readonly skills: Record<string, string>;
+  readonly references?: Record<string, Record<string, string>>;
 }
 
 export function bundleSource(load: () => Promise<Bundle>, label: string): Source {
@@ -64,8 +85,11 @@ export function bundleSource(load: () => Promise<Bundle>, label: string): Source
     async load() {
       const bundle = await load();
       return Object.entries(bundle.skills).map(([name, raw]) => {
+        const refs = Object.entries(bundle.references?.[name] ?? {})
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([file, body]) => ({ file, body }));
         try {
-          return parseSkill(raw);
+          return parseSkill(raw, refs);
         } catch (cause) {
           throw new SourceError(`cannot parse \`${name}\` from ${label}`, (cause as Error).message);
         }

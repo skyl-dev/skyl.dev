@@ -26,13 +26,26 @@ const skillsDir = resolve(flag('skills', join(here, '..', '..', 'skyl', 'skills'
 const outFile = resolve(flag('out', join(here, '..', 'packages', 'cli', 'bundle.json')));
 
 const skills = {};
+const references = {};
 for (const family of (await readdir(skillsDir, { withFileTypes: true })).filter((e) => e.isDirectory())) {
   for (const entry of (await readdir(join(skillsDir, family.name), { withFileTypes: true })).filter((e) => e.isDirectory())) {
-    const file = join(skillsDir, family.name, entry.name, 'SKILL.md');
+    const dir = join(skillsDir, family.name, entry.name);
+    const name = `${family.name}/${entry.name}`;
     try {
-      skills[`${family.name}/${entry.name}`] = await readFile(file, 'utf8');
+      skills[name] = await readFile(join(dir, 'SKILL.md'), 'utf8');
     } catch (cause) {
       if (cause.code !== 'ENOENT') throw cause;
+      continue;
+    }
+    // the rules say `see references/x.md`, so the bundle has to carry them or an offline
+    // install writes a pointer to a file that is not there
+    const files = (await readdir(join(dir, 'references')).catch(() => []))
+      .filter((f) => f.endsWith('.md'))
+      .sort();
+    if (files.length === 0) continue;
+    references[name] = {};
+    for (const file of files) {
+      references[name][file] = await readFile(join(dir, 'references', file), 'utf8');
     }
   }
 }
@@ -45,10 +58,17 @@ if (names.length === 0) {
 
 // Keys sorted and no timestamp, so the file changes only when a skill does. A bundle
 // that differs on every build makes the diff in a release PR unreadable.
-const bundle = { version: 1, skills: Object.fromEntries(names.map((n) => [n, skills[n]])) };
+const bundle = {
+  version: 1,
+  skills: Object.fromEntries(names.map((n) => [n, skills[n]])),
+  references: Object.fromEntries(Object.keys(references).sort().map((n) => [n, references[n]])),
+};
 
 await mkdir(dirname(outFile), { recursive: true });
 await writeFile(outFile, `${JSON.stringify(bundle, null, 0)}\n`, 'utf8');
 
 const bytes = (await readFile(outFile)).length;
-console.log(`${names.length} skills, ${(bytes / 1024).toFixed(0)} KB -> ${outFile}`);
+const refCount = Object.values(references).reduce((n, r) => n + Object.keys(r).length, 0);
+console.log(
+  `${names.length} skills, ${refCount} reference files, ${(bytes / 1024).toFixed(0)} KB -> ${outFile}`,
+);

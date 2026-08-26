@@ -37,6 +37,16 @@ export interface SkillMeta {
   readonly authors: readonly string[];
 }
 
+/**
+ * A file under a skill's `references/` directory: depth a rule points at rather than
+ * carries, so the rule stays short and the detail is there when the agent goes for it.
+ */
+export interface SkillReference {
+  /** File name as it appears in `references/`, such as `money.md`. */
+  readonly file: string;
+  readonly body: string;
+}
+
 export interface Skill extends SkillMeta {
   readonly rules: readonly Rule[];
   /** Only the sections named by `agentSections`, which is what gets installed. */
@@ -45,6 +55,15 @@ export interface Skill extends SkillMeta {
   readonly installableWords: number;
   /** The whole file, for a reader who wants the reasoning as well. */
   readonly raw: string;
+  /**
+   * The files this skill's rules point at, where the source could supply them.
+   *
+   * Empty is a real answer and not an error: a bundle written before references existed
+   * has none, and most skills have none. What is not acceptable is installing a rule that
+   * says `see references/money.md` into a directory with no such file, which is what
+   * happened for every skill until this field existed.
+   */
+  readonly references: readonly SkillReference[];
 }
 
 /** What a scanner found in a project, keyed the same way as a `DetectBlock`. */

@@ -12,7 +12,7 @@ export {
   httpBundleSource,
   firstAvailable,
 } from './source.ts';
-export { TARGETS, DEFAULT_TARGET, targetById, type Target } from './targets.ts';
+export { TARGETS, DEFAULT_TARGET, targetById, takesReferences, type Target } from './targets.ts';
 export {
   LOCKFILE_NAME, hashContent, emptyLockfile, parseLockfile, formatLockfile, entryFor, drift,
   type Lockfile, type LockEntry, type DriftKind,
