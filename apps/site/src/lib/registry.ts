@@ -40,7 +40,18 @@ export const REGISTRY_ROOT = findRegistry();
 
 marked.use({ gfm: true, breaks: false });
 
-const render = (md: string): string => marked.parse(md, { async: false });
+/**
+ * A table scrolls inside itself, not inside the prose around it.
+ *
+ * The pages that carry registry markdown put `.scroller` on the whole prose block, so a
+ * table wider than the column dragged every paragraph sideways with it. Wrapping happens
+ * here rather than in each page because the markdown arrives from the registry and no page
+ * knows in advance whether it contains a table.
+ */
+const wrapTables = (html: string): string =>
+  html.replace(/<table>/g, '<div class="table-scroll"><table>').replace(/<\/table>/g, '</table></div>');
+
+const render = (md: string): string => wrapTables(marked.parse(md, { async: false }));
 
 export interface Reference {
   readonly slug: string;

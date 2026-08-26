@@ -1,0 +1,12 @@
+{
+  "//": "astro check runs with no config otherwise, and reports every `.ts` import in the site as an error. The imports are correct: the same extension-carrying style the packages use, which is what Node's type stripping and `rewriteRelativeImportExtensions` both want.",
+  "extends": ["astro/tsconfigs/strict", "../../tsconfig.base.json"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["astro/client"]
+  },
+  "include": [".astro/types.d.ts", "src/**/*"],
+  "exclude": ["dist"]
+}

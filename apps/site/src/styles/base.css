@@ -288,7 +288,17 @@ footer.site a:hover { color: var(--accent); }
 .prose li { margin: 0 0 0.55em; }
 .prose li::marker { color: var(--ink-faint); }
 .prose blockquote { margin: 0 0 1.15em; padding-left: 1rem; border-left: 2px solid var(--accent); color: var(--ink-soft); }
-.prose table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-ui); margin: 0 0 1.5em; }
+/* the table scrolls, the prose does not go with it */
+.table-scroll {
+  overflow-x: auto; margin: 0 0 1.5em;
+  scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent;
+}
+.table-scroll::-webkit-scrollbar { height: 8px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: var(--r-pill); }
+/* min-width rather than width: inside a scroller, 100% is the visible box, which shrinks the
+   columns instead of letting them run */
+.prose table { min-width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: var(--fs-ui); margin: 0; }
 .prose th, .prose td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .prose th { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--fs-meta); }
 .prose pre {
@@ -383,7 +393,25 @@ footer.site a:hover { color: var(--accent); }
 @media (max-width: 820px) {
   .docs { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); }
   .docs-rail { position: static; max-height: none; display: block; }
-  .rail-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); overflow: visible; padding-right: 0; }
+  .rail-inner {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    overflow: visible; padding: var(--sp-4) 0 var(--sp-2);
+  }
+
+  /* the fold the script builds. One line closed, whatever the registry grows to. */
+  .rail-fold { border-bottom: 1px solid var(--rule); margin-top: var(--sp-3); }
+  /* the fold already puts a rule above the title, so the page head does not need the
+     full desktop run-up as well */
+  .docs-head { padding-top: var(--sp-5); }
+  .rail-fold > summary {
+    list-style: none; cursor: pointer; padding: var(--sp-3) 0;
+    font-size: var(--fs-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.11em;
+    color: var(--ink-faint); display: flex; align-items: center; gap: var(--sp-2);
+  }
+  .rail-fold > summary::-webkit-details-marker { display: none; }
+  .rail-fold > summary::after { content: "+"; margin-left: auto; font-size: var(--fs-ui); }
+  .rail-fold[open] > summary::after { content: "\2212"; }
+  .rail-fold > summary:hover { color: var(--ink); }
 }
 
 /* a section heading, for any page that has sections. This lived in the home page's scoped

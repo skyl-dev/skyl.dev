@@ -26,6 +26,7 @@ const TOOLS = [
       { say: 'Install the family you need.', run: '/plugin install skyl-android@skyl' },
     ],
     note: 'Runs inside Claude Code, no terminal. Updates arrive with /plugin marketplace update.',
+    caveat: 'The CLI writes a directory per skill: SKILL.md with the name and description Claude Code reads, and references/ beside it.',
     also: 'The CLI works here too, and gives you the lockfile and per-project selection.',
   },
   {
@@ -38,6 +39,7 @@ const TOOLS = [
       { say: 'Or name the layers yourself.', run: 'npx skyl.dev add android/core kotlin compose --target cursor' },
     ],
     note: 'Writes .mdc files with the frontmatter Cursor expects, so each rule stays scoped instead of always-on.',
+    caveat: 'One file per skill, so the reference files a rule points at stay behind. add says which ones, and they are on this site under each skill.',
   },
   {
     id: 'codex',
@@ -46,6 +48,7 @@ const TOOLS = [
     writes: '.agents/skills/',
     steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target agents' }],
     note: 'Codex picks up the AGENTS.md convention, so it takes the same target as anything else that reads it. Nothing here is Codex-specific.',
+    caveat: 'A directory per skill holding SKILL.md, with the reference files beside it.',
   },
   {
     id: 'agents',
@@ -54,6 +57,7 @@ const TOOLS = [
     writes: '.agents/skills/',
     steps: [{ say: 'Write the shared convention.', run: 'npx skyl.dev scan --target agents' }],
     note: 'The vendor-neutral path. Any tool that reads AGENTS.md picks these up, and nothing in the files names a vendor.',
+    caveat: 'A directory per skill holding SKILL.md with name and description, and references/ beside it.',
   },
   {
     id: 'windsurf',
@@ -61,7 +65,11 @@ const TOOLS = [
     kind: 'Rules directory',
     writes: '.windsurf/rules/',
     steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target windsurf' }],
-    note: 'Writes plain markdown, one file per skill.',
+    note: 'Writes plain markdown with the trigger field Windsurf reads, so each skill applies when its description fits rather than always.',
+    caveat:
+      'Windsurf reads 6,000 characters of a rule and 12,000 across all of them, and truncates the rest ' +
+      'silently. Most skills here are past the first number, so add prints the sizes and you choose what ' +
+      'to install. References stay behind for the same reason Cursor\'s do.',
   },
   {
     id: 'continue',
@@ -69,7 +77,8 @@ const TOOLS = [
     kind: 'Rules directory',
     writes: '.continue/rules/',
     steps: [{ say: 'Read the project and propose.', run: 'npx skyl.dev scan --target continue' }],
-    note: 'Writes plain markdown, one file per skill.',
+    note: 'Writes plain markdown with name, description and alwaysApply: false, so a rule is offered rather than always on.',
+    caveat: 'One file per skill, so reference files stay behind.',
   },
   {
     id: 'others',
@@ -173,6 +182,7 @@ const TOOLS = [
             ))}
           </ol>
           <p class="tool-note">{tool.note}</p>
+          {tool.caveat && <p class="tool-note tool-caveat">{tool.caveat}</p>}
           {tool.also && <p class="tool-note">{tool.also}</p>}
         </section>
       ))}
@@ -181,7 +191,8 @@ const TOOLS = [
     <div>
       <h3>What lands in your repo</h3>
       <p>
-        One markdown file per skill, containing only the rules, plus <code>skyl.lock</code> recording
+        One markdown file per skill, containing only the rules, with the reference files its rules
+        point at beside it where the tool takes a directory. Plus <code>skyl.lock</code>, recording
         what was written and its content hash. Everything is reviewable in a pull request, and a
         reinstall produces no diff.
       </p>
@@ -197,7 +208,7 @@ const TOOLS = [
       <h3>Switching tools later</h3>
       <p>
         Run the same command with a different <code>--target</code>. The skills are the same files in
-        a different directory, so nothing is locked to one vendor. {families.length} family, {total} skills today.
+        a different directory, so nothing is locked to one vendor. {families.length} {families.length === 1 ? 'family' : 'families'}, {total} skills today.
       </p>
     </div>
   </section>
@@ -223,6 +234,12 @@ const TOOLS = [
   }
   .steps-list p { margin: 0 0 0.6rem; font-size: var(--fs-body); }
   .tool-note { color: var(--ink-soft); font-size: var(--fs-ui); margin: 1.4rem 0 0; max-width: 64ch; }
+  /* what the tool cannot do, rather than what it does. Marked, because someone scanning for
+     the command should still see it, and it is the sentence that saves the support message. */
+  .tool-caveat {
+    color: var(--ink-faint); border-left: 2px solid var(--rule-strong);
+    padding-left: var(--sp-3); margin-top: var(--sp-3);
+  }
   /* the same mark inline code carries everywhere else, so --target does not read as prose here */
   .tool-note code, .repo code { background: var(--sunken); padding: 0.06em 0.32em; border-radius: var(--r-tiny); color: var(--ink); }
 

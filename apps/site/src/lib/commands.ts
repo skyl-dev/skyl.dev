@@ -57,6 +57,9 @@ export const COMMANDS: readonly CommandDoc[] = [
       'Resolves requires and orders dependencies first, because sections are concatenated in the order written and a layer that refers to its core reads wrong if it lands first.',
       'Bare names work once a family has been named, so `add android/core kotlin compose` resolves inside android. An ambiguous bare name is an error rather than a guess: silently picking one of two families installs the wrong thing and looks like it worked.',
       'Only the sections named by agent_sections are written. The reasoning, the pitfalls and the evidence stay in the registry for a human to read and never reach the model.',
+      'Each file carries the frontmatter its tool reads to decide whether the rule applies. Without it the file is written, listed and never loaded, which looks exactly like a working install.',
+      'Where the tool gives a skill its own directory, `claude` and `agents`, the `references/` files its rules point at are installed beside it. Where it takes one file per skill they cannot be, so `add` names the ones that stayed behind rather than leaving a rule pointing at nothing.',
+      'It also says when a target will not read everything it was given: Windsurf reads 6,000 characters of a rule and 12,000 across all of them, and truncates the rest silently.',
     ],
     flags: [
       { flag: '--target <name>', says: 'claude, cursor, windsurf, continue or agents' },
