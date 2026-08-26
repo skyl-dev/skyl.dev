@@ -19,7 +19,12 @@ export function err(line: string): void { process.stderr.write(`${line}\n`); }
  * tokenizer, and a precise-looking number nobody can reproduce is worse than a rough one.
  */
 export function tokens(words: number): string {
-  return `~${(Math.round((words * 4) / 300) * 100).toLocaleString()} tokens`;
+  // rounded to the hundred, because the estimate is not worth more than that. Anything
+  // with words in it gets at least one hundred rather than zero: `audit` on a short
+  // CLAUDE.md printed "33 words, ~0 tokens", which is the one reading that is certainly
+  // wrong.
+  const n = Math.round((words * 4) / 300) * 100;
+  return `~${(words > 0 ? Math.max(n, 100) : 0).toLocaleString()} tokens`;
 }
 
 export async function confirm(question: string, assumeYes: boolean): Promise<boolean> {

@@ -32,3 +32,10 @@ jobs:
       # same spec, and a disagreement between them should fail rather than pass quietly
       - run: pnpm lint:registry
         working-directory: skyl.dev
+      # The site is a rendering of the registry, so a registry change can break it without
+      # touching a line of site source. It also refuses to build rather than shipping a page
+      # that claims something the registry does not say, which is only a safeguard if it runs.
+      - run: pnpm check
+        working-directory: skyl.dev/apps/site
+      - run: pnpm build
+        working-directory: skyl.dev/apps/site

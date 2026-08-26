@@ -49,6 +49,20 @@ export async function lint(opts: LintOptions): Promise<number> {
     return 1;
   }
 
+  /*
+   * An install directory is not a registry, and saying so beats reporting the difference
+   * as a spec violation on every file. What arrives in `.claude/skills` is a flattened
+   * name and the agent sections only, by design, so linting it against the authoring spec
+   * produces one error per skill and none of them are actionable.
+   */
+  const written = await Promise.all(files.map((f) => readFile(f, 'utf8')));
+  if (written.length > 0 && written.every((text) => /^---\nname: [^/\n]+\n/.test(text))) {
+    err(`${yellow('That is an install directory, not a registry.')}`);
+    err(dim('  Installed skills carry a flattened name and only the sections an agent is given.'));
+    err(dim('  Lint the registry they came from: skyl lint <checkout>/skills'));
+    return 1;
+  }
+
   let errors = 0;
   let warnings = 0;
   const parsed: Skill[] = [];
