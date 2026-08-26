@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 
 /**
- * Static output, deployed to Cloudflare Pages. See DEPLOY.md.
+ * Static output, deployed to Cloudflare Pages.
  *
  * There is no server and there should not be: the whole site is a rendering of a git
  * repository, so anything dynamic would be a cache of something already static. That is

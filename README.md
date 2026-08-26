@@ -98,23 +98,31 @@ published binary. They wrote to the same path once, and the file on disk was whi
 last: a `pnpm build` after a pack left a release-old bundle that `tsc` would never refresh, because
 its build info said the output was current.
 
-## Deploying the site
+## Building the site
 
-Cloudflare Pages, connected to this repository, building on every push to `main`. The settings and
-the reasoning are in [DEPLOY.md](./DEPLOY.md).
-
-The part worth knowing before reading anything else: two repositories are involved and Pages clones
-one. The site is a rendering of the registry, which lives in `skyl-dev/skyl`, so the build command
-fetches it and points `SKYL_REGISTRY` at it. A build without that step fails on `no registry found`.
-
-Locally there is nothing to configure, because a development checkout already has `skyl` beside
-`skyl.dev`:
+The site is a rendering of the registry, so building it needs both repositories. A development
+checkout has them side by side and needs no configuration:
 
 ```
 pnpm install
 pnpm build                       @skyl/core, which the site imports through its package exports
 pnpm --filter @skyl/site build   the pages, into apps/site/dist
 ```
+
+`pnpm build` first is not optional. The site imports `@skyl/core` through its package exports,
+which point at `dist`, so skipping it produces a module-not-found that reads like a missing
+dependency.
+
+Where the registry is not a sibling, which is any build that clones one repository, fetch it and
+say where it went:
+
+```
+git clone --depth 1 https://github.com/skyl-dev/skyl.git .registry
+export SKYL_REGISTRY="$PWD/.registry"
+```
+
+Without one or the other the build stops and says so, rather than rendering a site with no skills
+in it.
 
 ## Status
 
